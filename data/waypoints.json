@@ -1,0 +1,8 @@
+[
+  { "name": "Roma", "lat": 41.9028, "lon": 12.4964, "alt": 0 },
+  { "name": "Milano", "lat": 45.4642, "lon": 9.19, "alt": 0 },
+  { "name": "Firenze", "lat": 43.7696, "lon": 11.2558, "alt": 0 },
+  { "name": "Napoli", "lat": 40.8518, "lon": 14.2681, "alt": 0 },
+  { "name": "Venezia", "lat": 45.4408, "lon": 12.3155, "alt": 0 },
+  { "name": "Palermo", "lat": 38.1157, "lon": 13.3615, "alt": 0 }
+]
