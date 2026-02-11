@@ -24,7 +24,7 @@ async function loadWaypoints() {
       position,
       point: {
         pixelSize: 10,
-        color: Cesium.Color.RED,
+        color: Cesium.Color.BLACK,
         outlineColor: Cesium.Color.WHITE,
         outlineWidth: 2,
       },
@@ -43,7 +43,7 @@ async function loadWaypoints() {
     polyline: {
       positions,
       width: 3,
-      material: Cesium.Color.CYAN,
+      material: Cesium.Color.WHITE,
       clampToGround: true,
     },
   });
@@ -52,3 +52,32 @@ async function loadWaypoints() {
 }
 
 loadWaypoints();
+
+const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+handler.setInputAction((click) => {
+  const cartesian = viewer.camera.pickEllipsoid(click.position, viewer.scene.globe.ellipsoid);
+  if (cartesian) {
+    const carto = Cesium.Cartographic.fromCartesian(cartesian);
+    const lat = Cesium.Math.toDegrees(carto.latitude);
+    const lon = Cesium.Math.toDegrees(carto.longitude);
+    console.log(`lat: ${lat.toFixed(6)}, lon: ${lon.toFixed(6)}`);
+
+    viewer.entities.add({
+      position: cartesian,
+      point: {
+        pixelSize: 10,
+        color: Cesium.Color.RED,
+        outlineColor: Cesium.Color.WHITE,
+        outlineWidth: 2,
+      },
+      label: {
+        text: `${lat.toFixed(4)}, ${lon.toFixed(4)}`,
+        font: "12px sans-serif",
+        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        outlineWidth: 2,
+        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        pixelOffset: new Cesium.Cartesian2(0, -15),
+      },
+    });
+  }
+}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
