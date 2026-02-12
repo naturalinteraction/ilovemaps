@@ -3,7 +3,8 @@ import "cesium/Build/Cesium/Widgets/widgets.css";
 
 // Token Cesium Ion (registrarsi su cesium.com/ion per ottenerne uno)
 // Il globo funziona anche senza token, ma senza terrain 3D
-// Cesium.Ion.defaultAccessToken = "IL_TUO_TOKEN";
+// Per vedere il terrain 3D occorre anche selezionare Cesium 3D Terrain nell'interfaccia grafica
+Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4NjI4NDI4Mi1jM2I2LTRiYzgtOTcwMy1mYWY1OTFjYmZiMzEiLCJpZCI6Mzg5OTAwLCJpYXQiOjE3NzA4ODE0ODd9.mPlDG2N5Kct-2CMb5olZ4eZeI5kzJOq3UNOOKPlCI-Y";
 
 const viewer = new Cesium.Viewer("cesiumContainer", {
   terrain: undefined,
@@ -55,7 +56,7 @@ loadWaypoints();
 
 const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
 handler.setInputAction((click) => {
-  const cartesian = viewer.camera.pickEllipsoid(click.position, viewer.scene.globe.ellipsoid);
+  const cartesian = viewer.scene.pickPosition(click.position);
   if (cartesian) {
     const carto = Cesium.Cartographic.fromCartesian(cartesian);
     const lat = Cesium.Math.toDegrees(carto.latitude);
@@ -63,12 +64,13 @@ handler.setInputAction((click) => {
     console.log(`lat: ${lat.toFixed(6)}, lon: ${lon.toFixed(6)}`);
 
     viewer.entities.add({
-      position: cartesian,
+      position: Cesium.Cartesian3.fromDegrees(lon, lat),
       point: {
         pixelSize: 10,
         color: Cesium.Color.RED,
         outlineColor: Cesium.Color.WHITE,
         outlineWidth: 2,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
       },
       label: {
         text: `${lat.toFixed(4)}, ${lon.toFixed(4)}`,
