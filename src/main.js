@@ -123,3 +123,18 @@ handler.setInputAction((click) => {
     });
   }
 }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "c" || event.key === "C") {
+    const cartographic = Cesium.Cartographic.fromCartesian(viewer.camera.position);
+    const cameraData = {
+      lat: Cesium.Math.toDegrees(cartographic.latitude),
+      lon: Cesium.Math.toDegrees(cartographic.longitude),
+      height: cartographic.height,
+      heading: Cesium.Math.toDegrees(viewer.camera.heading),
+      pitch: Cesium.Math.toDegrees(viewer.camera.pitch),
+      roll: Cesium.Math.toDegrees(viewer.camera.roll),
+    };
+    console.log("Camera view saved:", cameraData);
+  }
+});
