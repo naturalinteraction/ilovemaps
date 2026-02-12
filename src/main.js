@@ -7,7 +7,9 @@ import "cesium/Build/Cesium/Widgets/widgets.css";
 Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4NjI4NDI4Mi1jM2I2LTRiYzgtOTcwMy1mYWY1OTFjYmZiMzEiLCJpZCI6Mzg5OTAwLCJpYXQiOjE3NzA4ODE0ODd9.mPlDG2N5Kct-2CMb5olZ4eZeI5kzJOq3UNOOKPlCI-Y";
 
 const viewer = new Cesium.Viewer("cesiumContainer", {
-  terrain: undefined,
+  terrain: Cesium.Terrain.fromWorldTerrain({
+    requestWaterMask: true,
+  }),
 });
 
 async function loadWaypoints() {
@@ -64,7 +66,7 @@ handler.setInputAction((click) => {
     console.log(`lat: ${lat.toFixed(6)}, lon: ${lon.toFixed(6)}`);
 
     viewer.entities.add({
-      position: Cesium.Cartesian3.fromDegrees(lon, lat),
+      position: cartesian,
       point: {
         pixelSize: 10,
         color: Cesium.Color.RED,
@@ -78,7 +80,9 @@ handler.setInputAction((click) => {
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         outlineWidth: 2,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-        pixelOffset: new Cesium.Cartesian2(0, -15),
+        pixelOffset: new Cesium.Cartesian2(0, -0),
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
     });
   }
