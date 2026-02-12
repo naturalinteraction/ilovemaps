@@ -19,8 +19,13 @@ async function loadWaypoints() {
   const positions = [];
 
   for (const wp of waypoints) {
-    const position = Cesium.Cartesian3.fromDegrees(wp.lon, wp.lat, wp.alt);
+    const position = Cesium.Cartesian3.fromDegrees(wp.lon, wp.lat, wp.alt + 50);
+    const position_ground = Cesium.Cartesian3.fromDegrees(wp.lon, wp.lat, wp.alt + 0);
     positions.push(position);
+
+    const pin_positions = [];
+    pin_positions.push(position);
+    pin_positions.push(position_ground);
 
     viewer.entities.add({
       name: wp.name,
@@ -39,6 +44,14 @@ async function loadWaypoints() {
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
         pixelOffset: new Cesium.Cartesian2(0, -15),
       },
+      polyline: {
+        positions: Cesium.Cartesian3.fromDegreesArrayHeights([
+          wp.lon, wp.lat, wp.alt + 50, // Long, Lat, Height in meters
+          wp.lon, wp.lat, wp.alt - 500
+        ]),
+        width: 1,
+        material: Cesium.Color.WHITE,
+      },
     });
   }
 
@@ -51,10 +64,34 @@ async function loadWaypoints() {
     },
   });
 
-  viewer.zoomTo(viewer.entities);
+  // viewer.zoomTo(viewer.entities);
 }
 
 loadWaypoints();
+
+async function loadCameraView() {
+  try {
+    const response = await fetch("/data/camera.json");
+    if (!response.ok) return;
+    const cameraData = await response.json();
+    viewer.camera.setView({
+      destination: Cesium.Cartesian3.fromDegrees(
+        cameraData.lon,
+        cameraData.lat,
+        cameraData.height
+      ),
+      orientation: {
+        heading: Cesium.Math.toRadians(cameraData.heading),
+        pitch: Cesium.Math.toRadians(cameraData.pitch),
+        roll: Cesium.Math.toRadians(cameraData.roll),
+      },
+    });
+  } catch (e) {
+    // camera.json not found, use default view
+  }
+}
+
+loadCameraView();
 
 const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
 handler.setInputAction((click) => {
@@ -63,8 +100,7 @@ handler.setInputAction((click) => {
     const carto = Cesium.Cartographic.fromCartesian(cartesian);
     const lat = Cesium.Math.toDegrees(carto.latitude);
     const lon = Cesium.Math.toDegrees(carto.longitude);
-    console.log(`lat: ${lat.toFixed(6)}, lon: ${lon.toFixed(6)}`);
-
+    console.log(`lat: ${lat.toFixed(6)}, lon: ${lon.toFixed(6)}, height: ${carto.height.toFixed(6)}`);
     viewer.entities.add({
       position: cartesian,
       point: {
