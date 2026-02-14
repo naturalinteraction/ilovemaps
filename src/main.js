@@ -68,6 +68,8 @@ async function loadWaypoints() {
       },
     }));
   }
+
+  currentRouteLetter = routes.length < 26 ? String.fromCharCode(65 + routes.length) : "?";
 }
 
 loadWaypoints();
@@ -96,6 +98,8 @@ async function loadCameraView() {
 
 loadCameraView();
 
+let currentRouteLetter = "?";
+
 const clickedGroundPositions = [];
 const clickedEntities = [];
 const clickedWaypointData = [];
@@ -118,6 +122,26 @@ handler.setInputAction((click) => {
     console.log(`lat: ${lat.toFixed(6)}, lon: ${lon.toFixed(6)}, height: ${carto.height.toFixed(6)}`);
     const elevatedPosition = Cesium.Cartesian3.fromDegrees(lon, lat, carto.height + 50);
     clickedGroundPositions.push(Cesium.Cartesian3.fromDegrees(lon, lat));
+
+    // Compute cumulative distance, D+ and D-
+    let totalDist = 0;
+    let dPlus = 0;
+    let dMinus = 0;
+    const allPts = [...clickedWaypointData, { lat, lon, alt: carto.height }];
+    for (let i = 1; i < allPts.length; i++) {
+      const a = allPts[i - 1], b = allPts[i];
+      totalDist += Cesium.Cartesian3.distance(
+        Cesium.Cartesian3.fromDegrees(a.lon, a.lat, a.alt),
+        Cesium.Cartesian3.fromDegrees(b.lon, b.lat, b.alt),
+      );
+      const dh = b.alt - a.alt;
+      if (dh > 0) dPlus += dh; else dMinus += dh;
+    }
+    const wpNum = clickedWaypointData.length + 1;
+    const labelText = wpNum === 1
+      ? `${currentRouteLetter}${wpNum}`
+      : `${currentRouteLetter}${wpNum} (${Math.round(totalDist)}m +${Math.round(dPlus)} -${Math.round(Math.abs(dMinus))})`;
+
     const entity = viewer.entities.add({
       position: elevatedPosition,
       point: {
@@ -127,7 +151,7 @@ handler.setInputAction((click) => {
         outlineWidth: 2,
       },
       label: {
-        text: `${lat.toFixed(4)}, ${lon.toFixed(4)}`,
+        text: labelText,
         font: "12px sans-serif",
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         outlineWidth: 2,
