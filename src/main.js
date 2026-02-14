@@ -265,23 +265,64 @@ function showGridBounds(bounds, color) {
   }));
 }
 
-async function runAStar(terrainProvider, bounds, stepMeters, startLatLon, endLatLon) {
+function distToPath(lat, lon, path, latScale, lonScale) {
+  let minD = Infinity;
+  const px = lat * latScale, py = lon * lonScale;
+  for (let i = 0; i < path.length - 1; i++) {
+    const ax = path[i].lat * latScale, ay = path[i].lon * lonScale;
+    const bx = path[i + 1].lat * latScale, by = path[i + 1].lon * lonScale;
+    const dx = bx - ax, dy = by - ay;
+    const lenSq = dx * dx + dy * dy;
+    let t = lenSq === 0 ? 0 : Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / lenSq));
+    const cx = ax + t * dx, cy = ay + t * dy;
+    const d = Math.sqrt((px - cx) ** 2 + (py - cy) ** 2);
+    if (d < minD) minD = d;
+  }
+  return minD;
+}
+
+async function runAStar(terrainProvider, bounds, stepMeters, startLatLon, endLatLon, corridor) {
   const { minLat, maxLat, minLon, maxLon } = bounds;
   const stepLat = stepMeters / 111320;
   const midLat = (minLat + maxLat) / 2;
-  const stepLon = stepMeters / (111320 * Math.cos(midLat * Math.PI / 180));
+  const cosLat = Math.cos(midLat * Math.PI / 180);
+  const stepLon = stepMeters / (111320 * cosLat);
 
   const rows = Math.ceil((maxLat - minLat) / stepLat) + 1;
   const cols = Math.ceil((maxLon - minLon) / stepLon) + 1;
-  console.log(`Grid: ${rows}x${cols} = ${rows * cols} points (${stepMeters}m)`);
 
+  // Build mask: which cells are within corridor
+  const latScale = 111320;
+  const lonScale = 111320 * cosLat;
+  const inCorridor = [];
+  let sampledCount = 0;
+  for (let r = 0; r < rows; r++) {
+    inCorridor[r] = [];
+    for (let c = 0; c < cols; c++) {
+      if (corridor) {
+        const lat = minLat + r * stepLat;
+        const lon = minLon + c * stepLon;
+        inCorridor[r][c] = distToPath(lat, lon, corridor.path, latScale, lonScale) <= corridor.radius;
+      } else {
+        inCorridor[r][c] = true;
+      }
+      if (inCorridor[r][c]) sampledCount++;
+    }
+  }
+  console.log(`Grid: ${rows}x${cols}, sampling ${sampledCount} points (${stepMeters}m)`);
+
+  // Only sample terrain for cells in corridor
   const cartographics = [];
+  const cartToCell = []; // maps cartographics index -> [r, c]
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      cartographics.push(Cesium.Cartographic.fromDegrees(
-        minLon + c * stepLon,
-        minLat + r * stepLat,
-      ));
+      if (inCorridor[r][c]) {
+        cartographics.push(Cesium.Cartographic.fromDegrees(
+          minLon + c * stepLon,
+          minLat + r * stepLat,
+        ));
+        cartToCell.push([r, c]);
+      }
     }
   }
 
@@ -290,11 +331,12 @@ async function runAStar(terrainProvider, bounds, stepMeters, startLatLon, endLat
 
   const grid = [];
   for (let r = 0; r < rows; r++) {
-    grid[r] = [];
-    for (let c = 0; c < cols; c++) {
-      const h = sampled[r * cols + c].height;
-      grid[r][c] = h !== undefined ? h : null;
-    }
+    grid[r] = new Array(cols).fill(null);
+  }
+  for (let i = 0; i < sampled.length; i++) {
+    const [r, c] = cartToCell[i];
+    const h = sampled[i].height;
+    grid[r][c] = h !== undefined ? h : null;
   }
 
   const clamp = (v, max) => Math.max(0, Math.min(max - 1, v));
@@ -440,10 +482,10 @@ async function planPath(start, end) {
 
   console.log("=== Pass 1: coarse (100m) ===");
   const coarseBounds = {
-    minLat: Math.min(start.lat, end.lat) - span * 1.3,
-    maxLat: Math.max(start.lat, end.lat) + span * 1.3,
-    minLon: Math.min(start.lon, end.lon) - span * 1.3,
-    maxLon: Math.max(start.lon, end.lon) + span * 1.3,
+    minLat: Math.min(start.lat, end.lat) - span * 1,
+    maxLat: Math.max(start.lat, end.lat) + span * 1,
+    minLon: Math.min(start.lon, end.lon) - span * 1,
+    maxLon: Math.max(start.lon, end.lon) + span * 1,
   };
   showGridBounds(coarseBounds, Cesium.Color.YELLOW);
   // showGridPoints(coarseBounds, 100, Cesium.Color.YELLOW);
@@ -454,7 +496,12 @@ async function planPath(start, end) {
     return;
   }
 
-  // Pass 2: fine 10m grid, tight corridor around coarse path
+  // Pass 2: fine 10m grid, corridor around coarse path
+  const corridorRadius = 300; // meters
+  const midLat = (start.lat + end.lat) / 2;
+  const cosLat = Math.cos(midLat * Math.PI / 180);
+  const bufferDeg = corridorRadius / 111320;
+  const bufferDegLon = corridorRadius / (111320 * cosLat);
   let fMinLat = Infinity, fMaxLat = -Infinity, fMinLon = Infinity, fMaxLon = -Infinity;
   for (const p of coarsePath) {
     if (p.lat < fMinLat) fMinLat = p.lat;
@@ -462,18 +509,18 @@ async function planPath(start, end) {
     if (p.lon < fMinLon) fMinLon = p.lon;
     if (p.lon > fMaxLon) fMaxLon = p.lon;
   }
-  const buffer = 0.005; // ~500m
 
   console.log("=== Pass 2: fine (10m) ===");
   const fineBounds = {
-    minLat: fMinLat - buffer,
-    maxLat: fMaxLat + buffer,
-    minLon: fMinLon - buffer,
-    maxLon: fMaxLon + buffer,
+    minLat: fMinLat - bufferDeg,
+    maxLat: fMaxLat + bufferDeg,
+    minLon: fMinLon - bufferDegLon,
+    maxLon: fMaxLon + bufferDegLon,
   };
   showGridBounds(fineBounds, Cesium.Color.CYAN);
   // showGridPoints(fineBounds, 10, Cesium.Color.CYAN);
-  const finePath = await runAStar(viewer.terrainProvider, fineBounds, 10, start, end);
+  const finePath = await runAStar(viewer.terrainProvider, fineBounds, 10, start, end,
+    { path: coarsePath, radius: corridorRadius });
 
   let resultPath = finePath || coarsePath;
 
