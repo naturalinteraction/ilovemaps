@@ -45,7 +45,7 @@ async function loadWaypoints() {
         },
         label: {
           text: wp.name,
-          font: "14px sans-serif",
+          font: "18px sans-serif",
           style: Cesium.LabelStyle.FILL_AND_OUTLINE,
           outlineWidth: 2,
           verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
@@ -195,7 +195,7 @@ handler.setInputAction((click) => {
     },
     label: {
       text: labelText,
-      font: "12px sans-serif",
+      font: "18px sans-serif",
       style: Cesium.LabelStyle.FILL_AND_OUTLINE,
       outlineWidth: 2,
       verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
