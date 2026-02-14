@@ -110,6 +110,8 @@ let inspectedOriginalLabel = null;
 const clickedGroundPositions = [];
 const clickedEntities = [];
 const clickedWaypointData = [];
+let pathEntity = null;
+
 const clickedPathEntity = viewer.entities.add({
   polyline: {
     positions: new Cesium.CallbackProperty(() => clickedGroundPositions, false),
@@ -214,11 +216,281 @@ handler.setInputAction((click) => {
   clickedWaypointData.push({ lat, lon, alt: carto.height });
 }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
+function removePath() {
+  if (pathEntity) {
+    viewer.entities.remove(pathEntity);
+    pathEntity = null;
+  }
+}
+
+async function runAStar(terrainProvider, bounds, stepMeters, startLatLon, endLatLon) {
+  const { minLat, maxLat, minLon, maxLon } = bounds;
+  const stepLat = stepMeters / 111320;
+  const midLat = (minLat + maxLat) / 2;
+  const stepLon = stepMeters / (111320 * Math.cos(midLat * Math.PI / 180));
+
+  const rows = Math.ceil((maxLat - minLat) / stepLat) + 1;
+  const cols = Math.ceil((maxLon - minLon) / stepLon) + 1;
+  console.log(`Grid: ${rows}x${cols} = ${rows * cols} points (${stepMeters}m)`);
+
+  const cartographics = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      cartographics.push(Cesium.Cartographic.fromDegrees(
+        minLon + c * stepLon,
+        minLat + r * stepLat,
+      ));
+    }
+  }
+
+  console.log("Sampling terrain...");
+  const sampled = await Cesium.sampleTerrainMostDetailed(terrainProvider, cartographics);
+
+  const grid = [];
+  for (let r = 0; r < rows; r++) {
+    grid[r] = [];
+    for (let c = 0; c < cols; c++) {
+      const h = sampled[r * cols + c].height;
+      grid[r][c] = h !== undefined ? h : null;
+    }
+  }
+
+  const clamp = (v, max) => Math.max(0, Math.min(max - 1, v));
+  const sr = clamp(Math.round((startLatLon.lat - minLat) / stepLat), rows);
+  const sc = clamp(Math.round((startLatLon.lon - minLon) / stepLon), cols);
+  const er = clamp(Math.round((endLatLon.lat - minLat) / stepLat), rows);
+  const ec = clamp(Math.round((endLatLon.lon - minLon) / stepLon), cols);
+
+  console.log(`A* from [${sr},${sc}] to [${er},${ec}]...`);
+
+  const cellKey = (r, c) => r * cols + c;
+  const latDist = stepLat * 111320;
+  const lonDist = stepLon * 111320 * Math.cos(midLat * Math.PI / 180);
+  const diagDist = Math.sqrt(latDist * latDist + lonDist * lonDist);
+  const maxSpeed = 6 * 1000 / 3600;
+
+  const neighbors = [
+    [-1, 0, latDist], [1, 0, latDist],
+    [0, -1, lonDist], [0, 1, lonDist],
+    [-1, -1, diagDist], [-1, 1, diagDist],
+    [1, -1, diagDist], [1, 1, diagDist],
+  ];
+
+  function heuristic(r, c) {
+    const dr = (r - er) * latDist;
+    const dc = (c - ec) * lonDist;
+    return Math.sqrt(dr * dr + dc * dc) / maxSpeed;
+  }
+
+  function toblerCost(dh, dist) {
+    const slope = dh / dist;
+    const speed = 6 * Math.exp(-3.5 * Math.abs(slope + 0.05));
+    let cost = dist / (speed * 1000 / 3600);
+    if (dh > 0) cost += dh * 10;
+    return cost;
+  }
+
+  const pq = [];
+  function pqPush(item) {
+    pq.push(item);
+    let i = pq.length - 1;
+    while (i > 0) {
+      const p = (i - 1) >> 1;
+      if (pq[p].f <= pq[i].f) break;
+      [pq[p], pq[i]] = [pq[i], pq[p]];
+      i = p;
+    }
+  }
+  function pqPop() {
+    const top = pq[0];
+    const last = pq.pop();
+    if (pq.length > 0) {
+      pq[0] = last;
+      let i = 0;
+      while (true) {
+        let s = i;
+        const l = 2 * i + 1, r = 2 * i + 2;
+        if (l < pq.length && pq[l].f < pq[s].f) s = l;
+        if (r < pq.length && pq[r].f < pq[s].f) s = r;
+        if (s === i) break;
+        [pq[s], pq[i]] = [pq[i], pq[s]];
+        i = s;
+      }
+    }
+    return top;
+  }
+
+  const closedSet = new Set();
+  const cameFrom = new Map();
+  const gScore = new Map();
+
+  gScore.set(cellKey(sr, sc), 0);
+  pqPush({ r: sr, c: sc, f: heuristic(sr, sc) });
+
+  let found = false;
+  let iterations = 0;
+
+  while (pq.length > 0) {
+    const current = pqPop();
+    const ck = cellKey(current.r, current.c);
+
+    if (closedSet.has(ck)) continue;
+    closedSet.add(ck);
+
+    if (current.r === er && current.c === ec) {
+      found = true;
+      break;
+    }
+
+    iterations++;
+    if (iterations % 10000 === 0) {
+      console.log(`A* iteration ${iterations}, open: ${pq.length}`);
+    }
+
+    const currentH = grid[current.r][current.c];
+    if (currentH === null) continue;
+
+    for (const [dr, dc, dist] of neighbors) {
+      const nr = current.r + dr;
+      const nc = current.c + dc;
+      if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+
+      const nk = cellKey(nr, nc);
+      if (closedSet.has(nk)) continue;
+
+      const nh = grid[nr][nc];
+      if (nh === null) continue;
+
+      const dh = nh - currentH;
+      const cost = toblerCost(dh, dist);
+      const tentG = gScore.get(ck) + cost;
+
+      if (!gScore.has(nk) || tentG < gScore.get(nk)) {
+        gScore.set(nk, tentG);
+        cameFrom.set(nk, ck);
+        pqPush({ r: nr, c: nc, f: tentG + heuristic(nr, nc) });
+      }
+    }
+  }
+
+  if (!found) return null;
+
+  const path = [];
+  let ck = cellKey(er, ec);
+  while (ck !== undefined) {
+    const r = Math.floor(ck / cols);
+    const c = ck % cols;
+    path.unshift({ lat: minLat + r * stepLat, lon: minLon + c * stepLon });
+    ck = cameFrom.get(ck);
+  }
+
+  console.log(`Path: ${path.length} points, ${iterations} iterations`);
+  return path;
+}
+
+async function planPath(start, end) {
+  removePath();
+
+  // Pass 1: coarse 100m grid, 500% expansion
+  const latSpan = Math.abs(end.lat - start.lat) || 0.001;
+  const lonSpan = Math.abs(end.lon - start.lon) || 0.001;
+  const span = Math.max(latSpan, lonSpan);
+
+  console.log("=== Pass 1: coarse (100m) ===");
+  const coarsePath = await runAStar(viewer.terrainProvider, {
+    minLat: Math.min(start.lat, end.lat) - span * 5,
+    maxLat: Math.max(start.lat, end.lat) + span * 5,
+    minLon: Math.min(start.lon, end.lon) - span * 5,
+    maxLon: Math.max(start.lon, end.lon) + span * 5,
+  }, 100, start, end);
+
+  if (!coarsePath) {
+    console.warn("No path found!");
+    return;
+  }
+
+  // Pass 2: fine 10m grid, tight corridor around coarse path
+  let fMinLat = Infinity, fMaxLat = -Infinity, fMinLon = Infinity, fMaxLon = -Infinity;
+  for (const p of coarsePath) {
+    if (p.lat < fMinLat) fMinLat = p.lat;
+    if (p.lat > fMaxLat) fMaxLat = p.lat;
+    if (p.lon < fMinLon) fMinLon = p.lon;
+    if (p.lon > fMaxLon) fMaxLon = p.lon;
+  }
+  const buffer = 0.005; // ~500m
+
+  console.log("=== Pass 2: fine (10m) ===");
+  const finePath = await runAStar(viewer.terrainProvider, {
+    minLat: fMinLat - buffer,
+    maxLat: fMaxLat + buffer,
+    minLon: fMinLon - buffer,
+    maxLon: fMaxLon + buffer,
+  }, 10, start, end);
+
+  let resultPath = finePath || coarsePath;
+
+  // Low-pass filter: moving average on lat/lon (3 passes, window 11)
+  for (let pass = 0; pass < 3; pass++) {
+    const filtered = [resultPath[0]];
+    const w = 5; // half-window
+    for (let i = 1; i < resultPath.length - 1; i++) {
+      let lat = 0, lon = 0, count = 0;
+      for (let k = Math.max(0, i - w); k <= Math.min(resultPath.length - 1, i + w); k++) {
+        lat += resultPath[k].lat;
+        lon += resultPath[k].lon;
+        count++;
+      }
+      filtered.push({ lat: lat / count, lon: lon / count });
+    }
+    filtered.push(resultPath[resultPath.length - 1]);
+    resultPath = filtered;
+  }
+
+  // Convert to Cartesian3
+  const path = resultPath.map(p => Cesium.Cartesian3.fromDegrees(p.lon, p.lat));
+  path[0] = Cesium.Cartesian3.fromDegrees(start.lon, start.lat);
+  path[path.length - 1] = Cesium.Cartesian3.fromDegrees(end.lon, end.lat);
+
+  // Catmull-Rom spline smoothing (extrapolate phantom endpoints)
+  const n = path.length;
+  const phantomStart = Cesium.Cartesian3.subtract(
+    Cesium.Cartesian3.multiplyByScalar(path[0], 2, new Cesium.Cartesian3()),
+    path[1], new Cesium.Cartesian3(),
+  );
+  const phantomEnd = Cesium.Cartesian3.subtract(
+    Cesium.Cartesian3.multiplyByScalar(path[n - 1], 2, new Cesium.Cartesian3()),
+    path[n - 2], new Cesium.Cartesian3(),
+  );
+  const padded = [phantomStart, ...path, phantomEnd];
+  const spline = new Cesium.CatmullRomSpline({
+    times: padded.map((_, i) => i),
+    points: padded,
+  });
+  const smoothPath = [];
+  const subdivisions = 4;
+  for (let i = 1; i < padded.length - 2; i++) {
+    for (let j = 0; j < subdivisions; j++) {
+      smoothPath.push(spline.evaluate(i + j / subdivisions));
+    }
+  }
+  smoothPath.push(spline.evaluate(padded.length - 2));
+
+  pathEntity = viewer.entities.add({
+    polyline: {
+      positions: smoothPath,
+      width: 4,
+      material: Cesium.Color.LIME,
+      clampToGround: true,
+    },
+  });
+}
+
 document.addEventListener("keydown", (event) => {
   if (event.key === "Delete" && clickedEntities.length > 0) {
     viewer.entities.remove(clickedEntities.pop());
     clickedGroundPositions.pop();
     clickedWaypointData.pop();
+    removePath();
   } else if (event.key === "s" || event.key === "S") {
     if (clickedWaypointData.length === 0) return;
     fetch("/data/waypoints.json").then(r => r.json()).then((routes) => {
@@ -241,11 +513,12 @@ document.addEventListener("keydown", (event) => {
     }).then((res) => {
       if (!res || !res.ok) return;
       console.log("Route saved");
-      // Clear clicked points
+      // Clear clicked points and path
       for (const e of clickedEntities) viewer.entities.remove(e);
       clickedEntities.length = 0;
       clickedGroundPositions.length = 0;
       clickedWaypointData.length = 0;
+      removePath();
       // Reload saved routes
       loadWaypoints();
     }).catch((e) => console.error("Save error:", e));
@@ -260,5 +533,13 @@ document.addEventListener("keydown", (event) => {
       roll: Cesium.Math.toDegrees(viewer.camera.roll),
     };
     console.log("Camera view saved:", cameraData);
+  } else if (event.key === "p" || event.key === "P") {
+    if (clickedWaypointData.length < 2) {
+      console.warn("Need at least 2 clicked points for path planning");
+      return;
+    }
+    const start = clickedWaypointData[clickedWaypointData.length - 2];
+    const end = clickedWaypointData[clickedWaypointData.length - 1];
+    planPath(start, end);
   }
 });
