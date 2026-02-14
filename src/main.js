@@ -227,20 +227,23 @@ function removePath() {
   gridEntities.length = 0;
 }
 
-function showGridPoints(bounds, stepMeters, color) {
+function showGridPoints(bounds, stepMeters, color, corridor) {
   const { minLat, maxLat, minLon, maxLon } = bounds;
   const stepLat = stepMeters / 111320;
   const midLat = (minLat + maxLat) / 2;
-  const stepLon = stepMeters / (111320 * Math.cos(midLat * Math.PI / 180));
+  const cosLat = Math.cos(midLat * Math.PI / 180);
+  const stepLon = stepMeters / (111320 * cosLat);
+  const latScale = 111320;
+  const lonScale = 111320 * cosLat;
   const rows = Math.ceil((maxLat - minLat) / stepLat) + 1;
   const cols = Math.ceil((maxLon - minLon) / stepLon) + 1;
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
+      const lat = minLat + r * stepLat;
+      const lon = minLon + c * stepLon;
+      if (corridor && distToPath(lat, lon, corridor.path, latScale, lonScale) > corridor.radius) continue;
       gridEntities.push(viewer.entities.add({
-        position: Cesium.Cartesian3.fromDegrees(
-          minLon + c * stepLon,
-          minLat + r * stepLat,
-        ),
+        position: Cesium.Cartesian3.fromDegrees(lon, lat, 3000),
         point: { pixelSize: 3, color, outlineWidth: 0 },
       }));
     }
@@ -366,11 +369,14 @@ async function runAStar(terrainProvider, bounds, stepMeters, startLatLon, endLat
     return Math.sqrt(dr * dr + dc * dc) / maxSpeed;
   }
 
-  function toblerCost(dh, dist) {
+  const startH = grid[sr][sc] || 0;
+
+  function toblerCost(dh, dist, neighborH) {
     const slope = dh / dist;
     const speed = 6 * Math.exp(-3.5 * Math.abs(slope + 0.05));
     let cost = dist / (speed * 1000 / 3600);
-    if (dh > 0) cost += dh * 10;
+    const above = Math.max(0, neighborH - startH);
+    cost += above * 10;
     return cost;
   }
 
@@ -446,7 +452,7 @@ async function runAStar(terrainProvider, bounds, stepMeters, startLatLon, endLat
       if (nh === null) continue;
 
       const dh = nh - currentH;
-      const cost = toblerCost(dh, dist);
+      const cost = toblerCost(dh, dist, nh);
       const tentG = gScore.get(ck) + cost;
 
       if (!gScore.has(nk) || tentG < gScore.get(nk)) {
@@ -483,8 +489,8 @@ async function planPath(start, end) {
   const distAB = Math.sqrt(dLatM * dLatM + dLonM * dLonM);
   console.log(`Distance AB: ${Math.round(distAB)}m`);
 
-  const coarseStep = distAB / 10;
-  const fineStep = distAB / 100;
+  const coarseStep = Math.max(40, distAB / 60);
+  const fineStep = Math.max(10, distAB / 300);
 
   // Pass 1: coarse grid
   const latSpan = Math.abs(end.lat - start.lat) || 0.001;
@@ -493,13 +499,13 @@ async function planPath(start, end) {
 
   console.log(`=== Pass 1: coarse (${Math.round(coarseStep)}m) ===`);
   const coarseBounds = {
-    minLat: Math.min(start.lat, end.lat) - span * 1,
-    maxLat: Math.max(start.lat, end.lat) + span * 1,
-    minLon: Math.min(start.lon, end.lon) - span * 1,
-    maxLon: Math.max(start.lon, end.lon) + span * 1,
+    minLat: Math.min(start.lat, end.lat) - span * 0.6,
+    maxLat: Math.max(start.lat, end.lat) + span * 0.6,
+    minLon: Math.min(start.lon, end.lon) - span * 0.6,
+    maxLon: Math.max(start.lon, end.lon) + span * 0.6,
   };
   showGridBounds(coarseBounds, Cesium.Color.YELLOW);
-  // showGridPoints(coarseBounds, coarseStep, Cesium.Color.YELLOW);
+  showGridPoints(coarseBounds, coarseStep, Cesium.Color.YELLOW);
   const coarsePath = await runAStar(viewer.terrainProvider, coarseBounds, coarseStep, start, end);
 
   if (!coarsePath) {
@@ -508,7 +514,7 @@ async function planPath(start, end) {
   }
 
   // Pass 2: fine grid, corridor around coarse path
-  const corridorRadius = distAB / 5;
+  const corridorRadius = coarseStep;
   const bufferDeg = corridorRadius / 111320;
   const bufferDegLon = corridorRadius / (111320 * cosLat);
   let fMinLat = Infinity, fMaxLat = -Infinity, fMinLon = Infinity, fMaxLon = -Infinity;
@@ -527,9 +533,9 @@ async function planPath(start, end) {
     maxLon: fMaxLon + bufferDegLon,
   };
   showGridBounds(fineBounds, Cesium.Color.CYAN);
-  // showGridPoints(fineBounds, fineStep, Cesium.Color.CYAN);
-  const finePath = await runAStar(viewer.terrainProvider, fineBounds, fineStep, start, end,
-    { path: coarsePath, radius: corridorRadius });
+  const corridorObj = { path: coarsePath, radius: corridorRadius };
+  showGridPoints(fineBounds, fineStep, Cesium.Color.CYAN, corridorObj);
+  const finePath = await runAStar(viewer.terrainProvider, fineBounds, fineStep, start, end, corridorObj);
 
   let resultPath = finePath || coarsePath;
 
@@ -645,5 +651,8 @@ document.addEventListener("keydown", (event) => {
     const start = clickedWaypointData[clickedWaypointData.length - 2];
     const end = clickedWaypointData[clickedWaypointData.length - 1];
     planPath(start, end);
+  } else if (event.key === "Tab") {
+    event.preventDefault();
+    for (const e of gridEntities) e.show = !e.show;
   }
 });
