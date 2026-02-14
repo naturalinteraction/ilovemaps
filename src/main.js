@@ -243,8 +243,13 @@ function showGridPoints(bounds, stepMeters, color, corridor) {
       const lon = minLon + c * stepLon;
       if (corridor && distToPath(lat, lon, corridor.path, latScale, lonScale) > corridor.radius) continue;
       gridEntities.push(viewer.entities.add({
-        position: Cesium.Cartesian3.fromDegrees(lon, lat, 3000),
-        point: { pixelSize: 3, color, outlineWidth: 0 },
+        position: Cesium.Cartesian3.fromDegrees(lon, lat),
+        point: {
+          pixelSize: 2,
+          color,
+          outlineWidth: 0,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        },
       }));
     }
   }
@@ -263,7 +268,7 @@ function showGridBounds(bounds, color) {
       ]),
       width: 2,
       material: color,
-      clampToGround: true,
+      depthFailMaterial: color,
     },
   }));
 }
