@@ -155,18 +155,25 @@ document.addEventListener("keydown", (event) => {
     clickedWaypointData.pop();
   } else if (event.key === "s" || event.key === "S") {
     if (clickedWaypointData.length === 0) return;
-    const route = clickedWaypointData.map((wp, i) => ({
-      name: `P${i + 1}`,
-      lat: parseFloat(wp.lat.toFixed(6)),
-      lon: parseFloat(wp.lon.toFixed(6)),
-      alt: parseFloat(wp.alt.toFixed(6)),
-    }));
-    fetch("/api/save-route", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(route),
+    fetch("/data/waypoints.json").then(r => r.json()).then((routes) => {
+      if (routes.length >= 26) {
+        console.warn("Maximum 26 routes (A-Z) reached, cannot save more");
+        return;
+      }
+      const letter = String.fromCharCode(65 + routes.length);
+      const route = clickedWaypointData.map((wp, i) => ({
+        name: `${letter}${i + 1}`,
+        lat: parseFloat(wp.lat.toFixed(6)),
+        lon: parseFloat(wp.lon.toFixed(6)),
+        alt: parseFloat(wp.alt.toFixed(6)),
+      }));
+      return fetch("/api/save-route", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(route),
+      });
     }).then((res) => {
-      if (!res.ok) throw new Error("Save failed");
+      if (!res || !res.ok) return;
       console.log("Route saved");
       // Clear clicked points
       for (const e of clickedEntities) viewer.entities.remove(e);
