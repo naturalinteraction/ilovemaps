@@ -216,11 +216,53 @@ handler.setInputAction((click) => {
   clickedWaypointData.push({ lat, lon, alt: carto.height });
 }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
+const gridEntities = [];
+
 function removePath() {
   if (pathEntity) {
     viewer.entities.remove(pathEntity);
     pathEntity = null;
   }
+  for (const e of gridEntities) viewer.entities.remove(e);
+  gridEntities.length = 0;
+}
+
+function showGridPoints(bounds, stepMeters, color) {
+  const { minLat, maxLat, minLon, maxLon } = bounds;
+  const stepLat = stepMeters / 111320;
+  const midLat = (minLat + maxLat) / 2;
+  const stepLon = stepMeters / (111320 * Math.cos(midLat * Math.PI / 180));
+  const rows = Math.ceil((maxLat - minLat) / stepLat) + 1;
+  const cols = Math.ceil((maxLon - minLon) / stepLon) + 1;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      gridEntities.push(viewer.entities.add({
+        position: Cesium.Cartesian3.fromDegrees(
+          minLon + c * stepLon,
+          minLat + r * stepLat,
+        ),
+        point: { pixelSize: 3, color, outlineWidth: 0 },
+      }));
+    }
+  }
+}
+
+function showGridBounds(bounds, color) {
+  const { minLat, maxLat, minLon, maxLon } = bounds;
+  gridEntities.push(viewer.entities.add({
+    polyline: {
+      positions: Cesium.Cartesian3.fromDegreesArray([
+        minLon, minLat,
+        maxLon, minLat,
+        maxLon, maxLat,
+        minLon, maxLat,
+        minLon, minLat,
+      ]),
+      width: 2,
+      material: color,
+      clampToGround: true,
+    },
+  }));
 }
 
 async function runAStar(terrainProvider, bounds, stepMeters, startLatLon, endLatLon) {
@@ -397,12 +439,15 @@ async function planPath(start, end) {
   const span = Math.max(latSpan, lonSpan);
 
   console.log("=== Pass 1: coarse (100m) ===");
-  const coarsePath = await runAStar(viewer.terrainProvider, {
-    minLat: Math.min(start.lat, end.lat) - span * 5,
-    maxLat: Math.max(start.lat, end.lat) + span * 5,
-    minLon: Math.min(start.lon, end.lon) - span * 5,
-    maxLon: Math.max(start.lon, end.lon) + span * 5,
-  }, 100, start, end);
+  const coarseBounds = {
+    minLat: Math.min(start.lat, end.lat) - span * 1.3,
+    maxLat: Math.max(start.lat, end.lat) + span * 1.3,
+    minLon: Math.min(start.lon, end.lon) - span * 1.3,
+    maxLon: Math.max(start.lon, end.lon) + span * 1.3,
+  };
+  showGridBounds(coarseBounds, Cesium.Color.YELLOW);
+  // showGridPoints(coarseBounds, 100, Cesium.Color.YELLOW);
+  const coarsePath = await runAStar(viewer.terrainProvider, coarseBounds, 100, start, end);
 
   if (!coarsePath) {
     console.warn("No path found!");
@@ -420,12 +465,15 @@ async function planPath(start, end) {
   const buffer = 0.005; // ~500m
 
   console.log("=== Pass 2: fine (10m) ===");
-  const finePath = await runAStar(viewer.terrainProvider, {
+  const fineBounds = {
     minLat: fMinLat - buffer,
     maxLat: fMaxLat + buffer,
     minLon: fMinLon - buffer,
     maxLon: fMaxLon + buffer,
-  }, 10, start, end);
+  };
+  showGridBounds(fineBounds, Cesium.Color.CYAN);
+  // showGridPoints(fineBounds, 10, Cesium.Color.CYAN);
+  const finePath = await runAStar(viewer.terrainProvider, fineBounds, 10, start, end);
 
   let resultPath = finePath || coarsePath;
 
