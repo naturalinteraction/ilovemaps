@@ -217,6 +217,7 @@ handler.setInputAction((click) => {
 }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
 const gridEntities = [];
+let gridVisible = false;
 
 function removePath() {
   if (pathEntity) {
@@ -243,6 +244,7 @@ function showGridPoints(bounds, stepMeters, color, corridor) {
       const lon = minLon + c * stepLon;
       if (corridor && distToPath(lat, lon, corridor.path, latScale, lonScale) > corridor.radius) continue;
       gridEntities.push(viewer.entities.add({
+        show: gridVisible,
         position: Cesium.Cartesian3.fromDegrees(lon, lat),
         point: {
           pixelSize: 2,
@@ -258,6 +260,7 @@ function showGridPoints(bounds, stepMeters, color, corridor) {
 function showGridBounds(bounds, color) {
   const { minLat, maxLat, minLon, maxLon } = bounds;
   gridEntities.push(viewer.entities.add({
+    show: gridVisible,
     polyline: {
       positions: Cesium.Cartesian3.fromDegreesArray([
         minLon, minLat,
@@ -519,7 +522,7 @@ async function planPath(start, end) {
   }
 
   // Pass 2: fine grid, corridor around coarse path
-  const corridorRadius = coarseStep;
+  const corridorRadius = coarseStep * 1.5;
   const bufferDeg = corridorRadius / 111320;
   const bufferDegLon = corridorRadius / (111320 * cosLat);
   let fMinLat = Infinity, fMaxLat = -Infinity, fMinLon = Infinity, fMaxLon = -Infinity;
@@ -658,6 +661,7 @@ document.addEventListener("keydown", (event) => {
     planPath(start, end);
   } else if (event.key === "Tab") {
     event.preventDefault();
-    for (const e of gridEntities) e.show = !e.show;
+    gridVisible = !gridVisible;
+    for (const e of gridEntities) e.show = gridVisible;
   }
 });
