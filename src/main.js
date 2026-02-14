@@ -93,6 +93,16 @@ async function loadCameraView() {
 
 loadCameraView();
 
+const clickedGroundPositions = [];
+const clickedPathEntity = viewer.entities.add({
+  polyline: {
+    positions: new Cesium.CallbackProperty(() => clickedGroundPositions, false),
+    width: 3,
+    material: Cesium.Color.WHITE,
+    clampToGround: true,
+  },
+});
+
 const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
 handler.setInputAction((click) => {
   const cartesian = viewer.scene.pickPosition(click.position);
@@ -101,14 +111,15 @@ handler.setInputAction((click) => {
     const lat = Cesium.Math.toDegrees(carto.latitude);
     const lon = Cesium.Math.toDegrees(carto.longitude);
     console.log(`lat: ${lat.toFixed(6)}, lon: ${lon.toFixed(6)}, height: ${carto.height.toFixed(6)}`);
+    const elevatedPosition = Cesium.Cartesian3.fromDegrees(lon, lat, carto.height + 50);
+    clickedGroundPositions.push(Cesium.Cartesian3.fromDegrees(lon, lat));
     viewer.entities.add({
-      position: cartesian,
+      position: elevatedPosition,
       point: {
         pixelSize: 10,
         color: Cesium.Color.RED,
         outlineColor: Cesium.Color.WHITE,
         outlineWidth: 2,
-        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
       },
       label: {
         text: `${lat.toFixed(4)}, ${lon.toFixed(4)}`,
@@ -116,9 +127,15 @@ handler.setInputAction((click) => {
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         outlineWidth: 2,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-        pixelOffset: new Cesium.Cartesian2(0, -0),
-        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        pixelOffset: new Cesium.Cartesian2(0, -15),
+      },
+      polyline: {
+        positions: Cesium.Cartesian3.fromDegreesArrayHeights([
+          lon, lat, carto.height + 50,
+          lon, lat, carto.height - 500,
+        ]),
+        width: 1,
+        material: Cesium.Color.WHITE,
       },
     });
   }
