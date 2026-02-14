@@ -94,6 +94,7 @@ async function loadCameraView() {
 loadCameraView();
 
 const clickedGroundPositions = [];
+const clickedEntities = [];
 const clickedPathEntity = viewer.entities.add({
   polyline: {
     positions: new Cesium.CallbackProperty(() => clickedGroundPositions, false),
@@ -113,7 +114,7 @@ handler.setInputAction((click) => {
     console.log(`lat: ${lat.toFixed(6)}, lon: ${lon.toFixed(6)}, height: ${carto.height.toFixed(6)}`);
     const elevatedPosition = Cesium.Cartesian3.fromDegrees(lon, lat, carto.height + 50);
     clickedGroundPositions.push(Cesium.Cartesian3.fromDegrees(lon, lat));
-    viewer.entities.add({
+    const entity = viewer.entities.add({
       position: elevatedPosition,
       point: {
         pixelSize: 10,
@@ -138,11 +139,15 @@ handler.setInputAction((click) => {
         material: Cesium.Color.WHITE,
       },
     });
+    clickedEntities.push(entity);
   }
 }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "c" || event.key === "C") {
+  if (event.key === "Delete" && clickedEntities.length > 0) {
+    viewer.entities.remove(clickedEntities.pop());
+    clickedGroundPositions.pop();
+  } else if (event.key === "c" || event.key === "C") {
     const cartographic = Cesium.Cartographic.fromCartesian(viewer.camera.position);
     const cameraData = {
       lat: Cesium.Math.toDegrees(cartographic.latitude),
