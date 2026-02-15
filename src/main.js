@@ -292,6 +292,31 @@ function distToPath(lat, lon, path, latScale, lonScale) {
   return minD;
 }
 
+function computeExposure(grid, rows, cols, radius) {
+  const exposure = [];
+  for (let r = 0; r < rows; r++) {
+    exposure[r] = new Float32Array(cols);
+    for (let c = 0; c < cols; c++) {
+      if (grid[r][c] === null) continue;
+      let sum = 0, count = 0;
+      for (let dr = -radius; dr <= radius; dr++) {
+        for (let dc = -radius; dc <= radius; dc++) {
+          if (dr === 0 && dc === 0) continue;
+          const nr = r + dr, nc = c + dc;
+          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc] !== null) {
+            sum += grid[nr][nc];
+            count++;
+          }
+        }
+      }
+      if (count > 0) {
+        exposure[r][c] = Math.max(0, grid[r][c] - sum / count);
+      }
+    }
+  }
+  return exposure;
+}
+
 async function runAStar(terrainProvider, bounds, stepMeters, startLatLon, endLatLon, corridor) {
   const { minLat, maxLat, minLon, maxLon } = bounds;
   const stepLat = stepMeters / 111320;
@@ -350,6 +375,9 @@ async function runAStar(terrainProvider, bounds, stepMeters, startLatLon, endLat
     grid[r][c] = h !== undefined ? h : null;
   }
 
+  const exposureRadius = corridor ? 5 : 3;
+  const exposure = computeExposure(grid, rows, cols, exposureRadius);
+
   const clamp = (v, max) => Math.max(0, Math.min(max - 1, v));
   const sr = clamp(Math.round((startLatLon.lat - minLat) / stepLat), rows);
   const sc = clamp(Math.round((startLatLon.lon - minLon) / stepLon), cols);
@@ -379,12 +407,13 @@ async function runAStar(terrainProvider, bounds, stepMeters, startLatLon, endLat
 
   const startH = grid[sr][sc] || 0;
 
-  function toblerCost(dh, dist, neighborH) {
+  function toblerCost(dh, dist, neighborH, neighborExposure) {
     const slope = dh / dist;
     const speed = 6 * Math.exp(-3.5 * Math.abs(slope + 0.05));
     let cost = dist / (speed * 1000 / 3600);
     const above = Math.max(0, neighborH - startH);
     cost += above * 10;
+    cost += neighborExposure * 0.5;
     return cost;
   }
 
@@ -460,7 +489,7 @@ async function runAStar(terrainProvider, bounds, stepMeters, startLatLon, endLat
       if (nh === null) continue;
 
       const dh = nh - currentH;
-      const cost = toblerCost(dh, dist, nh);
+      const cost = toblerCost(dh, dist, nh, exposure[nr][nc]);
       const tentG = gScore.get(ck) + cost;
 
       if (!gScore.has(nk) || tentG < gScore.get(nk)) {
