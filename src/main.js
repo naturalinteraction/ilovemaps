@@ -216,6 +216,68 @@ handler.setInputAction((click) => {
   clickedWaypointData.push({ lat, lon, alt: carto.height });
 }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
+// Color picker tooltip
+const colorTooltip = document.createElement("div");
+colorTooltip.style.cssText = "position:absolute;display:none;padding:6px 10px;background:rgba(0,0,0,0.8);color:#fff;font:14px monospace;border-radius:4px;pointer-events:none;z-index:9999;white-space:nowrap";
+document.body.appendChild(colorTooltip);
+
+let colorPickerCache = { level: -1, tileX: -1, tileY: -1, ctx: null, rect: null };
+let colorPickerPending = false;
+
+handler.setInputAction(async (movement) => {
+  if (colorPickerPending) return;
+  const ray = viewer.camera.getPickRay(movement.endPosition);
+  const cartesian = ray && viewer.scene.globe.pick(ray, viewer.scene);
+  if (!cartesian) { colorTooltip.style.display = "none"; return; }
+  const carto = Cesium.Cartographic.fromCartesian(cartesian);
+
+  const layer = viewer.imageryLayers.get(0);
+  const provider = layer.imageryProvider;
+  const tilingScheme = provider.tilingScheme;
+  const maxLevel = provider.maximumLevel || 18;
+
+  const camHeight = viewer.camera.positionCartographic.height;
+  const level = Math.max(0, Math.min(maxLevel, Math.round(Math.log2(40075016 / (camHeight * 2)))));
+
+  const tileXY = tilingScheme.positionToTileXY(carto, level);
+  if (!tileXY) { colorTooltip.style.display = "none"; return; }
+
+  // Reuse cached tile if same tile
+  let ctx = colorPickerCache.ctx;
+  let tileRect = colorPickerCache.rect;
+  if (level !== colorPickerCache.level || tileXY.x !== colorPickerCache.tileX || tileXY.y !== colorPickerCache.tileY) {
+    colorPickerPending = true;
+    const image = await provider.requestImage(tileXY.x, tileXY.y, level);
+    colorPickerPending = false;
+    if (!image) { colorTooltip.style.display = "none"; return; }
+    const offscreen = document.createElement("canvas");
+    offscreen.width = image.width;
+    offscreen.height = image.height;
+    ctx = offscreen.getContext("2d");
+    ctx.drawImage(image, 0, 0);
+    tileRect = tilingScheme.tileXYToRectangle(tileXY.x, tileXY.y, level);
+    colorPickerCache = { level, tileX: tileXY.x, tileY: tileXY.y, ctx, rect: tileRect };
+  }
+
+  const u = (carto.longitude - tileRect.west) / (tileRect.east - tileRect.west);
+  let v;
+  if (tilingScheme instanceof Cesium.WebMercatorTilingScheme) {
+    const mercY = (lat) => Math.log(Math.tan(Math.PI / 4 + lat / 2));
+    v = (mercY(carto.latitude) - mercY(tileRect.south)) / (mercY(tileRect.north) - mercY(tileRect.south));
+  } else {
+    v = (carto.latitude - tileRect.south) / (tileRect.north - tileRect.south);
+  }
+  const px = Math.min(Math.max(0, Math.floor(u * ctx.canvas.width)), ctx.canvas.width - 1);
+  const py = Math.min(Math.max(0, Math.floor(v * ctx.canvas.height)), ctx.canvas.height - 1);
+  const [r, g, b] = ctx.getImageData(px, py, 1, 1).data;
+
+  const hex = `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+  colorTooltip.innerHTML = `<span style="display:inline-block;width:14px;height:14px;background:${hex};border:1px solid #fff;vertical-align:middle;margin-right:6px"></span>RGB(${r}, ${g}, ${b}) ${hex}`;
+  colorTooltip.style.left = (movement.endPosition.x + 15) + "px";
+  colorTooltip.style.top = (movement.endPosition.y - 10) + "px";
+  colorTooltip.style.display = "block";
+}, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
 const gridEntities = [];
 let gridVisible = false;
 
