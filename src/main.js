@@ -221,6 +221,12 @@ const colorTooltip = document.createElement("div");
 colorTooltip.style.cssText = "position:absolute;display:none;padding:6px 10px;background:rgba(0,0,0,0.8);color:#fff;font:14px monospace;border-radius:4px;pointer-events:none;z-index:9999;white-space:nowrap";
 document.body.appendChild(colorTooltip);
 
+// Debug tile preview in bottom-left corner
+const tilePreview = document.createElement("canvas");
+tilePreview.style.cssText = "position:absolute;bottom:10px;left:10px;width:200px;height:200px;border:2px solid #fff;z-index:9999;pointer-events:none;image-rendering:pixelated;display:none";
+document.body.appendChild(tilePreview);
+const tilePreviewCtx = tilePreview.getContext("2d");
+
 let colorPickerCache = { level: -1, tileX: -1, tileY: -1, ctx: null, rect: null };
 let colorPickerPending = false;
 
@@ -228,7 +234,7 @@ handler.setInputAction(async (movement) => {
   if (colorPickerPending) return;
   const ray = viewer.camera.getPickRay(movement.endPosition);
   const cartesian = ray && viewer.scene.globe.pick(ray, viewer.scene);
-  if (!cartesian) { colorTooltip.style.display = "none"; return; }
+  if (!cartesian) { colorTooltip.style.display = "none"; tilePreview.style.display = "none"; return; }
   const carto = Cesium.Cartographic.fromCartesian(cartesian);
 
   const layer = viewer.imageryLayers.get(0);
@@ -270,6 +276,19 @@ handler.setInputAction(async (movement) => {
   const px = Math.min(Math.max(0, Math.floor(u * ctx.canvas.width)), ctx.canvas.width - 1);
   const py = Math.min(Math.max(0, Math.floor(v * ctx.canvas.height)), ctx.canvas.height - 1);
   const [r, g, b] = ctx.getImageData(px, py, 1, 1).data;
+
+  // Draw tile preview with crosshair
+  tilePreview.width = ctx.canvas.width;
+  tilePreview.height = ctx.canvas.height;
+  tilePreview.style.display = "block";
+  tilePreviewCtx.drawImage(ctx.canvas, 0, 0);
+  const crossY = py; // flip Y for screen coords
+  tilePreviewCtx.strokeStyle = "red";
+  tilePreviewCtx.lineWidth = 1;
+  tilePreviewCtx.beginPath();
+  tilePreviewCtx.moveTo(px, 0); tilePreviewCtx.lineTo(px, ctx.canvas.height);
+  tilePreviewCtx.moveTo(0, crossY); tilePreviewCtx.lineTo(ctx.canvas.width, crossY);
+  tilePreviewCtx.stroke();
 
   const hex = `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
   colorTooltip.innerHTML = `<span style="display:inline-block;width:14px;height:14px;background:${hex};border:1px solid #fff;vertical-align:middle;margin-right:6px"></span>RGB(${r}, ${g}, ${b}) ${hex}`;
