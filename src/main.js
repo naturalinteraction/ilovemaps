@@ -291,7 +291,9 @@ handler.setInputAction(async (movement) => {
   tilePreviewCtx.stroke();
 
   const hex = `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
-  colorTooltip.innerHTML = `<span style="display:inline-block;width:14px;height:14px;background:${hex};border:1px solid #fff;vertical-align:middle;margin-right:6px"></span>RGB(${r}, ${g}, ${b}) ${hex}`;
+  const denom = 2 * r + b;
+  const gval = denom > 0 ? (g / denom).toFixed(2) : "0.00";
+  colorTooltip.innerHTML = `<span style="display:inline-block;width:14px;height:14px;background:${hex};border:1px solid #fff;vertical-align:middle;margin-right:6px"></span>RGB(${r}, ${g}, ${b}) ${hex}<br>greenness: ${gval}`;
   colorTooltip.style.left = (movement.endPosition.x + 15) + "px";
   colorTooltip.style.top = (movement.endPosition.y - 10) + "px";
   colorTooltip.style.display = "block";
@@ -373,6 +375,70 @@ function distToPath(lat, lon, path, latScale, lonScale) {
   return minD;
 }
 
+// Sample greenness (g/(r+b)) from imagery tiles for a grid of lat/lon points
+async function sampleGreennessGrid(rows, cols, minLat, minLon, stepLat, stepLon, inCorridor) {
+  const layer = viewer.imageryLayers.get(0);
+  const provider = layer.imageryProvider;
+  const tilingScheme = provider.tilingScheme;
+  const maxLevel = provider.maximumLevel || 18;
+  const level = Math.min(maxLevel, 15); // use a reasonable detail level
+
+  const greenness = [];
+  for (let r = 0; r < rows; r++) greenness[r] = new Float32Array(cols); // default 0
+
+  // Group cells by tile to minimize tile fetches
+  const tileGroups = new Map(); // "tx,ty" -> [{r, c, carto}]
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (!inCorridor[r][c]) continue;
+      const lat = minLat + r * stepLat;
+      const lon = minLon + c * stepLon;
+      const carto = Cesium.Cartographic.fromDegrees(lon, lat);
+      const tileXY = tilingScheme.positionToTileXY(carto, level);
+      if (!tileXY) continue;
+      const key = `${tileXY.x},${tileXY.y}`;
+      if (!tileGroups.has(key)) tileGroups.set(key, { tileXY, cells: [] });
+      tileGroups.get(key).cells.push({ r, c, carto });
+    }
+  }
+
+  console.log(`Sampling greenness: ${tileGroups.size} tiles at level ${level}...`);
+  const isMercator = tilingScheme instanceof Cesium.WebMercatorTilingScheme;
+  const mercY = (lat) => Math.log(Math.tan(Math.PI / 4 + lat / 2));
+
+  for (const [, group] of tileGroups) {
+    const { tileXY, cells } = group;
+    let image;
+    try { image = await provider.requestImage(tileXY.x, tileXY.y, level); } catch { continue; }
+    if (!image) continue;
+    const offscreen = document.createElement("canvas");
+    offscreen.width = image.width;
+    offscreen.height = image.height;
+    const ctx = offscreen.getContext("2d");
+    ctx.drawImage(image, 0, 0);
+    const tileRect = tilingScheme.tileXYToRectangle(tileXY.x, tileXY.y, level);
+    const imgData = ctx.getImageData(0, 0, image.width, image.height).data;
+
+    for (const { r, c, carto } of cells) {
+      const u = (carto.longitude - tileRect.west) / (tileRect.east - tileRect.west);
+      let v;
+      if (isMercator) {
+        v = (mercY(carto.latitude) - mercY(tileRect.south)) / (mercY(tileRect.north) - mercY(tileRect.south));
+      } else {
+        v = (carto.latitude - tileRect.south) / (tileRect.north - tileRect.south);
+      }
+      const px = Math.min(Math.max(0, Math.floor(u * image.width)), image.width - 1);
+      const py = Math.min(Math.max(0, Math.floor((1 - v) * image.height)), image.height - 1);
+      const idx = (py * image.width + px) * 4;
+      const rr = imgData[idx], gg = imgData[idx + 1], bb = imgData[idx + 2];
+      const denom = 2 * rr + bb;
+      greenness[r][c] = denom > 0 ? gg / denom : 0;
+    }
+  }
+  console.log("Greenness sampling done.");
+  return greenness;
+}
+
 async function runAStar(terrainProvider, bounds, stepMeters, startLatLon, endLatLon, corridor) {
   const { minLat, maxLat, minLon, maxLon } = bounds;
   const stepLat = stepMeters / 111320;
@@ -431,6 +497,9 @@ async function runAStar(terrainProvider, bounds, stepMeters, startLatLon, endLat
     grid[r][c] = h !== undefined ? h : null;
   }
 
+  // Sample imagery greenness for cost function
+  const greenness = await sampleGreennessGrid(rows, cols, minLat, minLon, stepLat, stepLon, inCorridor);
+
   const clamp = (v, max) => Math.max(0, Math.min(max - 1, v));
   const sr = clamp(Math.round((startLatLon.lat - minLat) / stepLat), rows);
   const sc = clamp(Math.round((startLatLon.lon - minLon) / stepLon), cols);
@@ -460,12 +529,17 @@ async function runAStar(terrainProvider, bounds, stepMeters, startLatLon, endLat
 
   const startH = grid[sr][sc] || 0;
 
-  function toblerCost(dh, dist, neighborH) {
+  // greenness ~1.0 = very green (g equal to r+b), higher = greener
+  // penalty: less green -> higher cost multiplier
+  function toblerCost(dh, dist, neighborH, neighborGreenness) {
     const slope = dh / dist;
     const speed = 6 * Math.exp(-3.5 * Math.abs(slope + 0.05));
     let cost = dist / (speed * 1000 / 3600);
     const above = Math.max(0, neighborH - startH);
     cost += above * 10;
+    // g/(r+b): ~1 is neutral, <1 means not green -> heavy penalty
+    const gn = Math.max(0.01, neighborGreenness);
+    cost *= 1 + 50 * Math.max(0, 1 - gn);
     return cost;
   }
 
@@ -541,7 +615,7 @@ async function runAStar(terrainProvider, bounds, stepMeters, startLatLon, endLat
       if (nh === null) continue;
 
       const dh = nh - currentH;
-      const cost = toblerCost(dh, dist, nh);
+      const cost = toblerCost(dh, dist, nh, greenness[nr][nc]);
       const tentG = gScore.get(ck) + cost;
 
       if (!gScore.has(nk) || tentG < gScore.get(nk)) {
@@ -602,6 +676,16 @@ async function planPath(start, end) {
     return;
   }
 
+  // Show coarse path in red (no spline)
+  viewer.entities.add({
+    polyline: {
+      positions: coarsePath.map(p => Cesium.Cartesian3.fromDegrees(p.lon, p.lat)),
+      width: 3,
+      material: Cesium.Color.RED,
+      clampToGround: true,
+    },
+  });
+
   // Pass 2: fine grid, corridor around coarse path
   const corridorRadius = coarseStep * 1.5;
   const bufferDeg = corridorRadius / 111320;
@@ -626,57 +710,55 @@ async function planPath(start, end) {
   showGridPoints(fineBounds, fineStep, Cesium.Color.CYAN, corridorObj);
   const finePath = await runAStar(viewer.terrainProvider, fineBounds, fineStep, start, end, corridorObj);
 
-  let resultPath = finePath || coarsePath;
+  const resultPath = finePath || coarsePath;
 
-  // Low-pass filter: moving average on lat/lon (2 passes, window 7)
-  for (let pass = 0; pass < 2; pass++) {
-    const filtered = [resultPath[0]];
-    const w = 3; // half-window
-    for (let i = 1; i < resultPath.length - 1; i++) {
-      let lat = 0, lon = 0, count = 0;
-      for (let k = Math.max(0, i - w); k <= Math.min(resultPath.length - 1, i + w); k++) {
-        lat += resultPath[k].lat;
-        lon += resultPath[k].lon;
-        count++;
-      }
-      filtered.push({ lat: lat / count, lon: lon / count });
-    }
-    filtered.push(resultPath[resultPath.length - 1]);
-    resultPath = filtered;
-  }
+  // // Low-pass filter: moving average on lat/lon (2 passes, window 7)
+  // for (let pass = 0; pass < 2; pass++) {
+  //   const filtered = [resultPath[0]];
+  //   const w = 3; // half-window
+  //   for (let i = 1; i < resultPath.length - 1; i++) {
+  //     let lat = 0, lon = 0, count = 0;
+  //     for (let k = Math.max(0, i - w); k <= Math.min(resultPath.length - 1, i + w); k++) {
+  //       lat += resultPath[k].lat;
+  //       lon += resultPath[k].lon;
+  //       count++;
+  //     }
+  //     filtered.push({ lat: lat / count, lon: lon / count });
+  //   }
+  //   filtered.push(resultPath[resultPath.length - 1]);
+  //   resultPath = filtered;
+  // }
 
-  // Convert to Cartesian3
-  const path = resultPath.map(p => Cesium.Cartesian3.fromDegrees(p.lon, p.lat));
-  path[0] = Cesium.Cartesian3.fromDegrees(start.lon, start.lat);
-  path[path.length - 1] = Cesium.Cartesian3.fromDegrees(end.lon, end.lat);
-
-  // Catmull-Rom spline smoothing (extrapolate phantom endpoints)
-  const n = path.length;
-  const phantomStart = Cesium.Cartesian3.subtract(
-    Cesium.Cartesian3.multiplyByScalar(path[0], 2, new Cesium.Cartesian3()),
-    path[1], new Cesium.Cartesian3(),
-  );
-  const phantomEnd = Cesium.Cartesian3.subtract(
-    Cesium.Cartesian3.multiplyByScalar(path[n - 1], 2, new Cesium.Cartesian3()),
-    path[n - 2], new Cesium.Cartesian3(),
-  );
-  const padded = [phantomStart, ...path, phantomEnd];
-  const spline = new Cesium.CatmullRomSpline({
-    times: padded.map((_, i) => i),
-    points: padded,
-  });
-  const smoothPath = [];
-  const subdivisions = 4;
-  for (let i = 1; i < padded.length - 2; i++) {
-    for (let j = 0; j < subdivisions; j++) {
-      smoothPath.push(spline.evaluate(i + j / subdivisions));
-    }
-  }
-  smoothPath.push(spline.evaluate(padded.length - 2));
+  // // Catmull-Rom spline smoothing (extrapolate phantom endpoints)
+  // const path = resultPath.map(p => Cesium.Cartesian3.fromDegrees(p.lon, p.lat));
+  // path[0] = Cesium.Cartesian3.fromDegrees(start.lon, start.lat);
+  // path[path.length - 1] = Cesium.Cartesian3.fromDegrees(end.lon, end.lat);
+  // const n = path.length;
+  // const phantomStart = Cesium.Cartesian3.subtract(
+  //   Cesium.Cartesian3.multiplyByScalar(path[0], 2, new Cesium.Cartesian3()),
+  //   path[1], new Cesium.Cartesian3(),
+  // );
+  // const phantomEnd = Cesium.Cartesian3.subtract(
+  //   Cesium.Cartesian3.multiplyByScalar(path[n - 1], 2, new Cesium.Cartesian3()),
+  //   path[n - 2], new Cesium.Cartesian3(),
+  // );
+  // const padded = [phantomStart, ...path, phantomEnd];
+  // const spline = new Cesium.CatmullRomSpline({
+  //   times: padded.map((_, i) => i),
+  //   points: padded,
+  // });
+  // const smoothPath = [];
+  // const subdivisions = 4;
+  // for (let i = 1; i < padded.length - 2; i++) {
+  //   for (let j = 0; j < subdivisions; j++) {
+  //     smoothPath.push(spline.evaluate(i + j / subdivisions));
+  //   }
+  // }
+  // smoothPath.push(spline.evaluate(padded.length - 2));
 
   pathEntity = viewer.entities.add({
     polyline: {
-      positions: smoothPath,
+      positions: resultPath.map(p => Cesium.Cartesian3.fromDegrees(p.lon, p.lat)),
       width: 4,
       material: Cesium.Color.LIME,
       clampToGround: true,
