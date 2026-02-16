@@ -14,26 +14,39 @@
           "id": "pl1",
           "name": "1 Plt",
           "type": "platoon",
-          "position": { "lat": 46.542, "lon": 7.938, "alt": 1700 },
+          "position": { "lat": 46.596, "lon": 7.965, "alt": 1700 },
           "children": [
-            { "id": "sq1", "name": "1 Sqd", "type": "squad", "position": { "lat": 46.548, "lon": 7.921, "alt": 1650 }, "children": [] },
-            { "id": "sq2", "name": "2 Sqd", "type": "squad", "position": { "lat": 46.536, "lon": 7.947, "alt": 1750 }, "children": [] },
-            { "id": "sq3", "name": "3 Sqd", "type": "squad", "position": { "lat": 46.545, "lon": 7.932, "alt": 1680 }, "children": [] },
-            { "id": "sq4", "name": "4 Sqd", "type": "squad", "position": { "lat": 46.539, "lon": 7.955, "alt": 1720 }, "children": [] },
-            { "id": "sq5", "name": "5 Sqd", "type": "squad", "position": { "lat": 46.551, "lon": 7.942, "alt": 1690 }, "children": [] }
+            { "id": "sq1", "name": "1 Sqd", "type": "squad", "position": { "lat": 46.602, "lon": 7.948, "alt": 1650 }, "children": [] },
+            { "id": "sq2", "name": "2 Sqd", "type": "squad", "position": { "lat": 46.590, "lon": 7.974, "alt": 1750 }, "children": [] },
+            { "id": "sq3", "name": "3 Sqd", "type": "squad", "position": { "lat": 46.599, "lon": 7.959, "alt": 1680 }, "children": [] },
+            { "id": "sq4", "name": "4 Sqd", "type": "squad", "position": { "lat": 46.593, "lon": 7.982, "alt": 1720 }, "children": [] },
+            { "id": "sq5", "name": "5 Sqd", "type": "squad", "position": { "lat": 46.605, "lon": 7.969, "alt": 1690 }, "children": [] }
           ]
         },
         {
           "id": "pl2",
           "name": "2 Plt",
           "type": "platoon",
-          "position": { "lat": 46.568, "lon": 7.983, "alt": 1900 },
+          "position": { "lat": 46.533, "lon": 8.001, "alt": 1900 },
           "children": [
-            { "id": "sq6", "name": "6 Sqd", "type": "squad", "position": { "lat": 46.574, "lon": 7.971, "alt": 1850 }, "children": [] },
-            { "id": "sq7", "name": "7 Sqd", "type": "squad", "position": { "lat": 46.561, "lon": 7.998, "alt": 1950 }, "children": [] },
-            { "id": "sq8", "name": "8 Sqd", "type": "squad", "position": { "lat": 46.571, "lon": 7.989, "alt": 1880 }, "children": [] },
-            { "id": "sq9", "name": "9 Sqd", "type": "squad", "position": { "lat": 46.565, "lon": 7.975, "alt": 1920 }, "children": [] },
-            { "id": "sq10", "name": "10 Sqd", "type": "squad", "position": { "lat": 46.558, "lon": 7.992, "alt": 1870 }, "children": [] }
+            { "id": "sq6", "name": "6 Sqd", "type": "squad", "position": { "lat": 46.539, "lon": 7.989, "alt": 1850 }, "children": [] },
+            { "id": "sq7", "name": "7 Sqd", "type": "squad", "position": { "lat": 46.526, "lon": 8.016, "alt": 1950 }, "children": [] },
+            { "id": "sq8", "name": "8 Sqd", "type": "squad", "position": { "lat": 46.536, "lon": 8.007, "alt": 1880 }, "children": [] },
+            { "id": "sq9", "name": "9 Sqd", "type": "squad", "position": { "lat": 46.530, "lon": 7.993, "alt": 1920 }, "children": [] },
+            { "id": "sq10", "name": "10 Sqd", "type": "squad", "position": { "lat": 46.523, "lon": 8.010, "alt": 1870 }, "children": [] }
+          ]
+        },
+        {
+          "id": "pl5",
+          "name": "5 Plt",
+          "type": "platoon",
+          "position": { "lat": 46.533, "lon": 7.929, "alt": 1800 },
+          "children": [
+            { "id": "sq21", "name": "21 Sqd", "type": "squad", "position": { "lat": 46.538, "lon": 7.919, "alt": 1770 }, "children": [] },
+            { "id": "sq22", "name": "22 Sqd", "type": "squad", "position": { "lat": 46.527, "lon": 7.936, "alt": 1830 }, "children": [] },
+            { "id": "sq23", "name": "23 Sqd", "type": "squad", "position": { "lat": 46.535, "lon": 7.924, "alt": 1790 }, "children": [] },
+            { "id": "sq24", "name": "24 Sqd", "type": "squad", "position": { "lat": 46.530, "lon": 7.941, "alt": 1810 }, "children": [] },
+            { "id": "sq25", "name": "25 Sqd", "type": "squad", "position": { "lat": 46.541, "lon": 7.931, "alt": 1760 }, "children": [] }
           ]
         }
       ]
@@ -48,26 +61,39 @@
           "id": "pl3",
           "name": "3 Plt",
           "type": "platoon",
-          "position": { "lat": 46.583, "lon": 8.028, "alt": 2100 },
+          "position": { "lat": 46.628, "lon": 8.052, "alt": 2100 },
           "children": [
-            { "id": "sq11", "name": "11 Sqd", "type": "squad", "position": { "lat": 46.579, "lon": 8.015, "alt": 2050 }, "children": [] },
-            { "id": "sq12", "name": "12 Sqd", "type": "squad", "position": { "lat": 46.589, "lon": 8.039, "alt": 2150 }, "children": [] },
-            { "id": "sq13", "name": "13 Sqd", "type": "squad", "position": { "lat": 46.585, "lon": 8.022, "alt": 2080 }, "children": [] },
-            { "id": "sq14", "name": "14 Sqd", "type": "squad", "position": { "lat": 46.577, "lon": 8.035, "alt": 2120 }, "children": [] },
-            { "id": "sq15", "name": "15 Sqd", "type": "squad", "position": { "lat": 46.592, "lon": 8.018, "alt": 2060 }, "children": [] }
+            { "id": "sq11", "name": "11 Sqd", "type": "squad", "position": { "lat": 46.624, "lon": 8.039, "alt": 2050 }, "children": [] },
+            { "id": "sq12", "name": "12 Sqd", "type": "squad", "position": { "lat": 46.634, "lon": 8.063, "alt": 2150 }, "children": [] },
+            { "id": "sq13", "name": "13 Sqd", "type": "squad", "position": { "lat": 46.630, "lon": 8.046, "alt": 2080 }, "children": [] },
+            { "id": "sq14", "name": "14 Sqd", "type": "squad", "position": { "lat": 46.622, "lon": 8.059, "alt": 2120 }, "children": [] },
+            { "id": "sq15", "name": "15 Sqd", "type": "squad", "position": { "lat": 46.637, "lon": 8.042, "alt": 2060 }, "children": [] }
           ]
         },
         {
           "id": "pl4",
           "name": "4 Plt",
           "type": "platoon",
-          "position": { "lat": 46.598, "lon": 8.071, "alt": 2300 },
+          "position": { "lat": 46.573, "lon": 8.084, "alt": 2300 },
           "children": [
-            { "id": "sq16", "name": "16 Sqd", "type": "squad", "position": { "lat": 46.603, "lon": 8.058, "alt": 2250 }, "children": [] },
-            { "id": "sq17", "name": "17 Sqd", "type": "squad", "position": { "lat": 46.593, "lon": 8.086, "alt": 2350 }, "children": [] },
-            { "id": "sq18", "name": "18 Sqd", "type": "squad", "position": { "lat": 46.601, "lon": 8.075, "alt": 2280 }, "children": [] },
-            { "id": "sq19", "name": "19 Sqd", "type": "squad", "position": { "lat": 46.596, "lon": 8.063, "alt": 2310 }, "children": [] },
-            { "id": "sq20", "name": "20 Sqd", "type": "squad", "position": { "lat": 46.605, "lon": 8.081, "alt": 2270 }, "children": [] }
+            { "id": "sq16", "name": "16 Sqd", "type": "squad", "position": { "lat": 46.578, "lon": 8.071, "alt": 2250 }, "children": [] },
+            { "id": "sq17", "name": "17 Sqd", "type": "squad", "position": { "lat": 46.568, "lon": 8.099, "alt": 2350 }, "children": [] },
+            { "id": "sq18", "name": "18 Sqd", "type": "squad", "position": { "lat": 46.576, "lon": 8.088, "alt": 2280 }, "children": [] },
+            { "id": "sq19", "name": "19 Sqd", "type": "squad", "position": { "lat": 46.571, "lon": 8.076, "alt": 2310 }, "children": [] },
+            { "id": "sq20", "name": "20 Sqd", "type": "squad", "position": { "lat": 46.580, "lon": 8.094, "alt": 2270 }, "children": [] }
+          ]
+        },
+        {
+          "id": "pl6",
+          "name": "6 Plt",
+          "type": "platoon",
+          "position": { "lat": 46.573, "lon": 8.020, "alt": 2190 },
+          "children": [
+            { "id": "sq26", "name": "26 Sqd", "type": "squad", "position": { "lat": 46.578, "lon": 8.014, "alt": 2160 }, "children": [] },
+            { "id": "sq27", "name": "27 Sqd", "type": "squad", "position": { "lat": 46.569, "lon": 8.027, "alt": 2220 }, "children": [] },
+            { "id": "sq28", "name": "28 Sqd", "type": "squad", "position": { "lat": 46.575, "lon": 8.018, "alt": 2180 }, "children": [] },
+            { "id": "sq29", "name": "29 Sqd", "type": "squad", "position": { "lat": 46.571, "lon": 8.032, "alt": 2210 }, "children": [] },
+            { "id": "sq30", "name": "30 Sqd", "type": "squad", "position": { "lat": 46.580, "lon": 8.022, "alt": 2170 }, "children": [] }
           ]
         }
       ]

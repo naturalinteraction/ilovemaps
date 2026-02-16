@@ -3,7 +3,7 @@ import * as Cesium from "cesium";
 // --- Symbol rendering ---
 
 const SYMBOL_SIZE = 64;
-const BLUE = "#4080FF";
+const BLUE = "#2040FF";
 
 function drawMilitarySymbol(type) {
   const canvas = document.createElement("canvas");
@@ -106,8 +106,8 @@ function playBeep(freq, duration = 0.08) {
   osc.stop(ctx.currentTime + duration);
 }
 
-const MERGE_BEEP_FREQ = 880;   // A5 — higher pitch for merge (converging)
-const UNMERGE_BEEP_FREQ = 440; // A4 — lower pitch for unmerge (expanding)
+const UNMERGE_BEEP_FREQ = 880;   // A5 — higher pitch for unmerge
+const MERGE_BEEP_FREQ = 440;     // A4 — lower pitch for merge
 
 // Animation state
 const animations = []; // { entity, from, to, startTime, duration, fade, onComplete }
@@ -184,7 +184,7 @@ export async function loadMilitaryUnits(viewer) {
 
 // --- Zoom-based level ---
 
-const ZOOM_THRESHOLDS = [12000, 30000, 80000]; // meters
+const ZOOM_THRESHOLDS = [10000, 20000, 40000]; // meters
 
 function levelForHeight(height) {
   for (let i = 0; i < ZOOM_THRESHOLDS.length; i++) {
@@ -487,88 +487,98 @@ function showLevel(levelIdx) {
 
 // --- Click toggle ---
 
-export function handleClick(viewer, click) {
-  if (animating) return false;
-
+function pickMilNode(viewer, click) {
+  if (animating) return null;
   const picked = viewer.scene.pick(click.position);
-  if (!picked || !(picked.id instanceof Cesium.Entity)) return false;
-
+  if (!picked || !(picked.id instanceof Cesium.Entity)) return null;
   const entity = picked.id;
   const node = entity._milNode;
-  if (!node || node.children.length === 0) return false;
-
-  // Toggle: if children are visible, merge; otherwise unmerge
+  if (!node || node.children.length === 0) return null;
   const childType = LEVEL_ORDER[LEVEL_ORDER.indexOf(node.type) - 1];
-  if (!childType) return false;
+  if (!childType) return null;
+  return { entity, node, childType };
+}
+
+export function handleRightClick(viewer, click) {
+  if (animating) return false;
+  const picked = viewer.scene.pick(click.position);
+  if (!picked || !(picked.id instanceof Cesium.Entity)) return false;
+  const entity = picked.id;
+  const node = entity._milNode;
+  if (!node || !node.parent) return false; // need a parent to merge into
+
+  const parent = node.parent;
+  const parentEntity = entitiesById[parent.id];
+  const childType = node.type;
+
+  const anims = [];
+  forEachDescendantAtLevel(parent, childType, (desc) => {
+    const e = entitiesById[desc.id];
+    anims.push({
+      entity: e,
+      from: desc.homePosition,
+      to: parent.homePosition,
+      duration: ANIM_DURATION,
+      fade: "out",
+      onComplete: () => {
+        e.show = false;
+        e.position = desc.homePosition;
+      },
+    });
+  });
+  parentEntity.position = parent.homePosition;
+  anims.push({
+    entity: parentEntity,
+    from: parent.homePosition,
+    to: parent.homePosition,
+    duration: ANIM_DURATION,
+    fade: "in",
+    popScale: true,
+    fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
+    fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+    onComplete: () => { parentEntity.position = parent.homePosition; },
+  });
+  if (anims.length > 0) { playBeep(MERGE_BEEP_FREQ); startAnimations(anims); }
+  return true;
+}
+
+export function handleLeftClick(viewer, click) {
+  const hit = pickMilNode(viewer, click);
+  if (!hit) return false;
+  const { entity, node, childType } = hit;
 
   const firstChild = node.children[0];
   const childEntity = entitiesById[firstChild.id];
-  const childrenVisible = childEntity.show;
+  if (childEntity.show) return false; // children already visible, nothing to unmerge
 
-  if (childrenVisible) {
-    // Merge children into this node
-    const anims = [];
-    forEachDescendantAtLevel(node, childType, (desc) => {
-      const e = entitiesById[desc.id];
-      anims.push({
-        entity: e,
-        from: desc.homePosition,
-        to: node.homePosition,
-        duration: ANIM_DURATION,
-        fade: "out",
-        onComplete: () => {
-          e.show = false;
-          e.position = desc.homePosition;
-        },
-      });
-    });
-    // Fade in parent (twice as fast, delayed by half)
-    entity.position = node.homePosition;
+  const anims = [];
+  anims.push({
+    entity,
+    from: node.homePosition,
+    to: node.homePosition,
+    duration: ANIM_DURATION,
+    fade: "out",
+    popScale: true,
+    fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+    onComplete: () => {
+      entity.show = false;
+      entity.position = node.homePosition;
+    },
+  });
+  forEachDescendantAtLevel(node, childType, (desc) => {
+    const e = entitiesById[desc.id];
     anims.push({
-      entity,
+      entity: e,
       from: node.homePosition,
-      to: node.homePosition,
+      to: desc.homePosition,
       duration: ANIM_DURATION,
       fade: "in",
-      popScale: true,
-      fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
-      fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
-      onComplete: () => { entity.position = node.homePosition; },
-    });
-    if (anims.length > 0) { playBeep(MERGE_BEEP_FREQ); startAnimations(anims); }
-  } else {
-    // Unmerge: fade out parent, show children expanding from parent
-    const anims = [];
-    // Fade out parent (twice as fast)
-    anims.push({
-      entity,
-      from: node.homePosition,
-      to: node.homePosition,
-      duration: ANIM_DURATION,
-      fade: "out",
-      popScale: true,
-      fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
       onComplete: () => {
-        entity.show = false;
-        entity.position = node.homePosition;
+        e.position = desc.homePosition;
       },
     });
-    forEachDescendantAtLevel(node, childType, (desc) => {
-      const e = entitiesById[desc.id];
-      anims.push({
-        entity: e,
-        from: node.homePosition,
-        to: desc.homePosition,
-        duration: ANIM_DURATION,
-        fade: "in",
-          onComplete: () => {
-          e.position = desc.homePosition;
-        },
-      });
-    });
-    if (anims.length > 0) { playBeep(UNMERGE_BEEP_FREQ); startAnimations(anims); }
-  }
-
+  });
+  if (anims.length > 0) { playBeep(UNMERGE_BEEP_FREQ); startAnimations(anims); }
   return true;
 }
 

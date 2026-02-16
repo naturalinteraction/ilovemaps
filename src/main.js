@@ -1,6 +1,6 @@
 import * as Cesium from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
-import { loadMilitaryUnits, setupZoomListener, setupPreRender, handleClick, handleKeydown } from "./clustering.js";
+import { loadMilitaryUnits, setupZoomListener, setupPreRender, handleLeftClick, handleRightClick, handleKeydown } from "./clustering.js";
 
 // Token Cesium Ion (registrarsi su cesium.com/ion per ottenerne uno)
 // Il globo funziona anche senza token, ma senza terrain 3D
@@ -158,8 +158,8 @@ function formatLabel(name, totalDist, dPlus, dMinus) {
 
 const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
 handler.setInputAction((click) => {
-  // Check military unit click first
-  if (handleClick(viewer, click)) return;
+  // Check military unit left-click (unmerge only)
+  if (handleLeftClick(viewer, click)) return;
 
   // Restore previously inspected black pin label
   if (inspectedEntity) {
@@ -235,6 +235,10 @@ handler.setInputAction((click) => {
   clickedEntities.push(entity);
   clickedWaypointData.push({ lat, lon, alt: carto.height });
 }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+handler.setInputAction((click) => {
+  handleRightClick(viewer, click);
+}, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
 
 // Color picker tooltip
 const colorTooltip = document.createElement("div");
