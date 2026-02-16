@@ -1,5 +1,6 @@
 import * as Cesium from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
+import { loadMilitaryUnits, setupZoomListener, setupPreRender, handleClick, handleKeydown } from "./clustering.js";
 
 // Token Cesium Ion (registrarsi su cesium.com/ion per ottenerne uno)
 // Il globo funziona anche senza token, ma senza terrain 3D
@@ -103,6 +104,11 @@ async function loadCameraView() {
 
 loadCameraView();
 
+// Military unit clustering
+loadMilitaryUnits(viewer);
+setupZoomListener(viewer);
+setupPreRender(viewer);
+
 let currentRouteLetter = "?";
 let inspectedEntity = null; // black pin with temporarily changed label
 let inspectedOriginalLabel = null;
@@ -141,6 +147,9 @@ function formatLabel(name, totalDist, dPlus, dMinus) {
 
 const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
 handler.setInputAction((click) => {
+  // Check military unit click first
+  if (handleClick(viewer, click)) return;
+
   // Restore previously inspected black pin label
   if (inspectedEntity) {
     inspectedEntity.label.text = inspectedOriginalLabel;
@@ -685,6 +694,9 @@ async function planPath(start, end) {
 }
 
 document.addEventListener("keydown", (event) => {
+  // Military clustering keys (M, 1-4)
+  if (handleKeydown(event, viewer)) return;
+
   if (event.key === "Delete" && clickedEntities.length > 0) {
     viewer.entities.remove(clickedEntities.pop());
     clickedGroundPositions.pop();

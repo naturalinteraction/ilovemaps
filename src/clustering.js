@@ -1,0 +1,488 @@
+import * as Cesium from "cesium";
+
+// --- Symbol rendering ---
+
+const SYMBOL_SIZE = 64;
+const BLUE = "#4080FF";
+
+function drawMilitarySymbol(type) {
+  const canvas = document.createElement("canvas");
+  canvas.width = SYMBOL_SIZE;
+  canvas.height = SYMBOL_SIZE;
+  const ctx = canvas.getContext("2d");
+
+  // Rectangle body
+  const rx = 10, ry = 20, rw = 44, rh = 24;
+  ctx.strokeStyle = BLUE;
+  ctx.fillStyle = "rgba(64,128,255,0.3)";
+  ctx.lineWidth = 2;
+  ctx.fillRect(rx, ry, rw, rh);
+  ctx.strokeRect(rx, ry, rw, rh);
+
+  // Echelon marker above rectangle
+  const cx = SYMBOL_SIZE / 2;
+  ctx.fillStyle = BLUE;
+  ctx.strokeStyle = BLUE;
+  ctx.lineWidth = 2;
+
+  if (type === "squad") {
+    // × (cross)
+    const y = ry - 4;
+    ctx.beginPath();
+    ctx.moveTo(cx - 5, y - 5); ctx.lineTo(cx + 5, y + 5);
+    ctx.moveTo(cx + 5, y - 5); ctx.lineTo(cx - 5, y + 5);
+    ctx.stroke();
+  } else if (type === "platoon") {
+    // • • •
+    const y = ry - 6;
+    for (const dx of [-8, 0, 8]) {
+      ctx.beginPath();
+      ctx.arc(cx + dx, y, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (type === "company") {
+    // |
+    ctx.beginPath();
+    ctx.moveTo(cx, ry - 2); ctx.lineTo(cx, ry - 12);
+    ctx.stroke();
+  } else if (type === "battalion") {
+    // | |
+    ctx.beginPath();
+    ctx.moveTo(cx - 5, ry - 2); ctx.lineTo(cx - 5, ry - 12);
+    ctx.moveTo(cx + 5, ry - 2); ctx.lineTo(cx + 5, ry - 12);
+    ctx.stroke();
+  }
+
+  return canvas;
+}
+
+// Cache billboard images
+const symbolImages = {};
+function getSymbolImage(type) {
+  if (!symbolImages[type]) {
+    symbolImages[type] = drawMilitarySymbol(type);
+  }
+  return symbolImages[type];
+}
+
+// --- Data structures ---
+
+const LEVEL_ORDER = ["squad", "platoon", "company", "battalion"];
+
+// All nodes indexed by id
+const nodesById = {};
+// Flat list of all nodes
+let allNodes = [];
+// Root node
+let rootNode = null;
+
+// Cesium entities indexed by node id
+const entitiesById = {};
+
+// Current visible level index (0=squad, 3=battalion)
+let currentLevel = 0;
+let militaryVisible = true;
+
+// Animation state
+const animations = []; // { entity, from, to, startTime, duration, onComplete }
+let animating = false;
+
+// --- Loading ---
+
+function flattenTree(node, parent) {
+  node.parent = parent;
+  nodesById[node.id] = node;
+  allNodes.push(node);
+  node.homePosition = Cesium.Cartesian3.fromDegrees(
+    node.position.lon, node.position.lat, node.position.alt + 50
+  );
+  for (const child of node.children) {
+    flattenTree(child, node);
+  }
+}
+
+export async function loadMilitaryUnits(viewer) {
+  const response = await fetch("/data/military-units.json");
+  const tree = await response.json();
+  allNodes = [];
+  rootNode = tree;
+  flattenTree(tree, null);
+
+  for (const node of allNodes) {
+    const levelIdx = LEVEL_ORDER.indexOf(node.type);
+    const image = getSymbolImage(node.type);
+
+    const entity = viewer.entities.add({
+      name: node.name,
+      position: node.homePosition,
+      billboard: {
+        image,
+        width: SYMBOL_SIZE,
+        height: SYMBOL_SIZE,
+        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      },
+      label: {
+        text: node.name,
+        font: "39px sans-serif",
+        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        outlineWidth: 2,
+        verticalOrigin: Cesium.VerticalOrigin.TOP,
+        pixelOffset: new Cesium.Cartesian2(0, 4),
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      },
+      show: levelIdx === currentLevel,
+    });
+
+    entity._milNode = node;
+    entitiesById[node.id] = entity;
+  }
+
+  return { entitiesById, nodesById, allNodes };
+}
+
+// --- Zoom-based level ---
+
+const ZOOM_THRESHOLDS = [12000, 30000, 80000]; // meters
+
+function levelForHeight(height) {
+  for (let i = 0; i < ZOOM_THRESHOLDS.length; i++) {
+    if (height < ZOOM_THRESHOLDS[i]) return i;
+  }
+  return ZOOM_THRESHOLDS.length; // battalion
+}
+
+// --- Animation ---
+
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function computeControlPoint(from, to) {
+  // Midpoint
+  const mid = Cesium.Cartesian3.midpoint(from, to, new Cesium.Cartesian3());
+  // Direction from→to
+  const dir = Cesium.Cartesian3.subtract(to, from, new Cesium.Cartesian3());
+  const dist = Cesium.Cartesian3.magnitude(dir);
+  // Surface normal at midpoint (points "up" from globe)
+  const normal = Cesium.Cartesian3.normalize(mid, new Cesium.Cartesian3());
+  // Perpendicular in the plane: cross(dir, normal)
+  const perp = Cesium.Cartesian3.cross(dir, normal, new Cesium.Cartesian3());
+  Cesium.Cartesian3.normalize(perp, perp);
+  // Offset midpoint sideways by 20% of distance
+  const offset = Cesium.Cartesian3.multiplyByScalar(perp, dist * 0.2, new Cesium.Cartesian3());
+  return Cesium.Cartesian3.add(mid, offset, new Cesium.Cartesian3());
+}
+
+function quadraticBezier(from, control, to, t, result) {
+  // B(t) = (1-t)²·from + 2(1-t)t·control + t²·to
+  const omt = 1 - t;
+  const a = omt * omt;
+  const b = 2 * omt * t;
+  const c = t * t;
+  result.x = a * from.x + b * control.x + c * to.x;
+  result.y = a * from.y + b * control.y + c * to.y;
+  result.z = a * from.z + b * control.z + c * to.z;
+  return result;
+}
+
+function startAnimations(anims) {
+  const now = performance.now();
+  for (const a of anims) {
+    a.startTime = now;
+    a.control = computeControlPoint(a.from, a.to);
+    a.entity.show = true;
+    const anim = a;
+    a.entity.position = new Cesium.CallbackProperty(() => {
+      const t = Math.min(1, (performance.now() - anim.startTime) / anim.duration);
+      const eased = easeInOutCubic(t);
+      return quadraticBezier(anim.from, anim.control, anim.to, eased, new Cesium.Cartesian3());
+    }, false);
+    animations.push(a);
+  }
+  animating = true;
+}
+
+export function onPreRender() {
+  if (!animating) return;
+
+  const now = performance.now();
+  let allDone = true;
+
+  for (let i = animations.length - 1; i >= 0; i--) {
+    const a = animations[i];
+    const t = (now - a.startTime) / a.duration;
+    if (t >= 1) {
+      // Animation complete — replace CallbackProperty with static position
+      a.entity.position = a.to;
+      if (a.onComplete) a.onComplete();
+      animations.splice(i, 1);
+    } else {
+      allDone = false;
+    }
+  }
+
+  if (allDone) {
+    animating = false;
+  }
+}
+
+// --- Merge / Unmerge ---
+
+const ANIM_DURATION = 300;
+
+function getNodesAtLevel(levelIdx) {
+  const type = LEVEL_ORDER[levelIdx];
+  return allNodes.filter(n => n.type === type);
+}
+
+function setLevel(newLevel, viewer) {
+  if (newLevel === currentLevel || animating) return;
+  if (newLevel < 0 || newLevel > LEVEL_ORDER.length - 1) return;
+
+  const oldLevel = currentLevel;
+  currentLevel = newLevel;
+
+  if (newLevel > oldLevel) {
+    // Merging: children converge to parent
+    // For each step up, animate children → parent
+    mergeStep(oldLevel, newLevel);
+  } else {
+    // Unmerging: parent expands to children
+    unmergeStep(oldLevel, newLevel);
+  }
+}
+
+function mergeStep(fromLevel, toLevel) {
+  const anims = [];
+
+  // Hide all levels except what's animating
+  for (const node of allNodes) {
+    const lvl = LEVEL_ORDER.indexOf(node.type);
+    if (lvl < fromLevel || lvl > toLevel) {
+      entitiesById[node.id].show = false;
+    }
+  }
+
+  // Animate nodes at fromLevel → their ancestor at toLevel
+  const fromNodes = getNodesAtLevel(fromLevel);
+  for (const node of fromNodes) {
+    const entity = entitiesById[node.id];
+    // Find ancestor at toLevel
+    let ancestor = node;
+    while (ancestor && LEVEL_ORDER.indexOf(ancestor.type) < toLevel) {
+      ancestor = ancestor.parent;
+    }
+    if (!ancestor) continue;
+
+    const fromPos = node.homePosition;
+    const toPos = ancestor.homePosition;
+
+    anims.push({
+      entity,
+      from: fromPos,
+      to: toPos,
+      duration: ANIM_DURATION,
+      onComplete: () => {
+        entity.show = false;
+        entity.position = node.homePosition; // reset
+        // Show parent
+        entitiesById[ancestor.id].show = true;
+        entitiesById[ancestor.id].position = ancestor.homePosition;
+      },
+    });
+  }
+
+  // Also animate intermediate levels if jumping multiple levels
+  for (let lvl = fromLevel + 1; lvl < toLevel; lvl++) {
+    for (const node of getNodesAtLevel(lvl)) {
+      entitiesById[node.id].show = false;
+    }
+  }
+
+  // Show toLevel parents immediately hidden (they appear when children arrive)
+  for (const node of getNodesAtLevel(toLevel)) {
+    entitiesById[node.id].show = false;
+  }
+
+  if (anims.length > 0) {
+    startAnimations(anims);
+  } else {
+    // No animations needed, just show correct level
+    showLevel(toLevel);
+  }
+}
+
+function unmergeStep(fromLevel, toLevel) {
+  const anims = [];
+
+  // Hide everything first
+  for (const node of allNodes) {
+    entitiesById[node.id].show = false;
+  }
+
+  // Animate nodes at toLevel from their ancestor at fromLevel
+  const toNodes = getNodesAtLevel(toLevel);
+  for (const node of toNodes) {
+    const entity = entitiesById[node.id];
+    // Find ancestor at fromLevel
+    let ancestor = node;
+    while (ancestor && LEVEL_ORDER.indexOf(ancestor.type) < fromLevel) {
+      ancestor = ancestor.parent;
+    }
+    if (!ancestor) continue;
+
+    const fromPos = ancestor.homePosition;
+    const toPos = node.homePosition;
+
+    anims.push({
+      entity,
+      from: fromPos,
+      to: toPos,
+      duration: ANIM_DURATION,
+      onComplete: () => {
+        entity.position = node.homePosition;
+      },
+    });
+  }
+
+  if (anims.length > 0) {
+    startAnimations(anims);
+  } else {
+    showLevel(toLevel);
+  }
+}
+
+function showLevel(levelIdx) {
+  const type = LEVEL_ORDER[levelIdx];
+  for (const node of allNodes) {
+    const entity = entitiesById[node.id];
+    entity.show = militaryVisible && node.type === type;
+    entity.position = node.homePosition;
+  }
+}
+
+// --- Click toggle ---
+
+export function handleClick(viewer, click) {
+  if (animating) return false;
+
+  const picked = viewer.scene.pick(click.position);
+  if (!picked || !(picked.id instanceof Cesium.Entity)) return false;
+
+  const entity = picked.id;
+  const node = entity._milNode;
+  if (!node || node.children.length === 0) return false;
+
+  // Toggle: if children are visible, merge; otherwise unmerge
+  const childType = LEVEL_ORDER[LEVEL_ORDER.indexOf(node.type) - 1];
+  if (!childType) return false;
+
+  const firstChild = node.children[0];
+  const childEntity = entitiesById[firstChild.id];
+  const childrenVisible = childEntity.show;
+
+  if (childrenVisible) {
+    // Merge children into this node
+    const anims = [];
+    forEachDescendantAtLevel(node, childType, (desc) => {
+      const e = entitiesById[desc.id];
+      anims.push({
+        entity: e,
+        from: desc.homePosition,
+        to: node.homePosition,
+        duration: ANIM_DURATION,
+        onComplete: () => {
+          e.show = false;
+          e.position = desc.homePosition;
+          entity.show = true;
+          entity.position = node.homePosition;
+        },
+      });
+    });
+    if (anims.length > 0) startAnimations(anims);
+  } else {
+    // Unmerge: hide parent, show children expanding from parent
+    entity.show = false;
+    const anims = [];
+    forEachDescendantAtLevel(node, childType, (desc) => {
+      const e = entitiesById[desc.id];
+      anims.push({
+        entity: e,
+        from: node.homePosition,
+        to: desc.homePosition,
+        duration: ANIM_DURATION,
+        onComplete: () => {
+          e.position = desc.homePosition;
+        },
+      });
+    });
+    if (anims.length > 0) startAnimations(anims);
+  }
+
+  return true;
+}
+
+function forEachDescendantAtLevel(node, type, fn) {
+  for (const child of node.children) {
+    if (child.type === type) {
+      fn(child);
+    } else {
+      forEachDescendantAtLevel(child, type, fn);
+    }
+  }
+}
+
+// --- Zoom listener ---
+
+let zoomDebounceTimer = null;
+
+export function setupZoomListener(viewer) {
+  viewer.camera.changed.addEventListener(() => {
+    if (zoomDebounceTimer) clearTimeout(zoomDebounceTimer);
+    zoomDebounceTimer = setTimeout(() => {
+      if (!militaryVisible) return;
+      const height = viewer.camera.positionCartographic.height;
+      const newLevel = levelForHeight(height);
+      if (newLevel !== currentLevel) {
+        setLevel(newLevel, viewer);
+      }
+    }, 50);
+  });
+  viewer.camera.percentageChanged = 0.1;
+}
+
+// --- Keyboard ---
+
+export function handleKeydown(event, viewer) {
+  if (event.key === "m" || event.key === "M") {
+    militaryVisible = !militaryVisible;
+    if (!animating) {
+      for (const node of allNodes) {
+        const entity = entitiesById[node.id];
+        if (militaryVisible) {
+          entity.show = node.type === LEVEL_ORDER[currentLevel];
+        } else {
+          entity.show = false;
+        }
+      }
+    }
+    return true;
+  }
+
+  if (event.key >= "1" && event.key <= "4") {
+    const level = parseInt(event.key) - 1;
+    setLevel(level, viewer);
+    return true;
+  }
+
+  return false;
+}
+
+// --- Pre-render hook ---
+
+export function setupPreRender(viewer) {
+  viewer.scene.preRender.addEventListener(() => {
+    onPreRender();
+  });
+}
