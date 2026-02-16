@@ -237,7 +237,6 @@ export function onPreRender() {
       a.entity.position = a.to;
       animations.splice(i, 1);
     } else {
-      // Update alpha during animation (with optional fadeDelay and fadeDuration)
       if (a.fade) {
         const fadeDelay = a.fadeDelay || 0;
         const fadeDur = a.fadeDuration || a.duration;
@@ -258,7 +257,7 @@ export function onPreRender() {
 
 // --- Merge / Unmerge ---
 
-const ANIM_DURATION = 300;
+const ANIM_DURATION = 500;
 
 function getNodesAtLevel(levelIdx) {
   const type = LEVEL_ORDER[levelIdx];
