@@ -105,7 +105,16 @@ async function loadCameraView() {
 loadCameraView();
 
 // Military unit clustering
-loadMilitaryUnits(viewer);
+loadMilitaryUnits(viewer).then(({ allNodes }) => {
+  const battalion = allNodes.find(n => n.type === "battalion");
+  if (battalion) {
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(
+        battalion.position.lon, battalion.position.lat, 100000
+      ),
+    });
+  }
+});
 setupZoomListener(viewer);
 setupPreRender(viewer);
 

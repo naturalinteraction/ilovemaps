@@ -88,11 +88,12 @@ const animations = []; // { entity, from, to, startTime, duration, fade, onCompl
 let animating = false;
 const WHITE = Cesium.Color.WHITE;
 
-function setEntityAlpha(entity, alpha) {
+function setEntityAlpha(entity, alpha, labelAlpha) {
   // Use small epsilon for billboard to prevent Cesium from skipping fully-transparent billboards
   entity.billboard.color = new Cesium.Color(1, 1, 1, Math.max(alpha, 0.005));
-  entity.label.fillColor = new Cesium.Color(1, 1, 1, alpha);
-  entity.label.outlineColor = new Cesium.Color(0, 0, 0, alpha);
+  const la = labelAlpha !== undefined ? labelAlpha : alpha;
+  entity.label.fillColor = new Cesium.Color(1, 1, 1, la);
+  entity.label.outlineColor = new Cesium.Color(0, 0, 0, la);
 }
 
 function setEntityScale(entity, scale) {
@@ -205,8 +206,8 @@ function startAnimations(anims) {
   for (const a of anims) {
     a.startTime = now;
     a.entity.show = true;
-    if (a.fade === "in") { setEntityAlpha(a.entity, 0); if (a.popScale) setEntityScale(a.entity, PARENT_POP_SCALE); }
-    else if (a.fade === "out") { setEntityAlpha(a.entity, 1); if (a.popScale) setEntityScale(a.entity, 1); }
+    if (a.fade === "in") { setEntityAlpha(a.entity, 0, 0); if (a.popScale) setEntityScale(a.entity, PARENT_POP_SCALE); }
+    else if (a.fade === "out") { setEntityAlpha(a.entity, 1, 1); if (a.popScale) setEntityScale(a.entity, 1); }
     const stationary = Cesium.Cartesian3.equals(a.from, a.to);
     if (!stationary) {
       a.control = computeControlPoint(a.from, a.to);
@@ -250,11 +251,27 @@ export function onPreRender() {
         const ft = Math.max(0, Math.min(1, elapsed / fadeDur));
         const eased = easeInOutCubic(ft);
         const alpha = a.fade === "in" ? eased : 1 - eased;
-        setEntityAlpha(a.entity, alpha);
+        // Labels: separate timing — fade out during pre-delay, fade in after delay
+        let labelAlpha;
+        if (a.fadeDelay || a.fadeDuration) {
+          if (a.fade === "out") {
+            // Fade out label during the pre-delay period (duration - fadeDuration)
+            const preDelay = a.duration - (a.fadeDuration || a.duration);
+            const lt = preDelay > 0 ? easeInOutCubic(Math.min(1, (now - a.startTime) / preDelay)) : 1;
+            labelAlpha = 1 - lt;
+          } else {
+            // Fade in label after the delay, over fadeDuration
+            labelAlpha = easeInOutCubic(ft);
+          }
+        } else {
+          // No special timing (children): label follows billboard
+          labelAlpha = alpha;
+        }
+        setEntityAlpha(a.entity, alpha, labelAlpha);
         if (a.popScale) {
           const scale = a.fade === "in"
             ? PARENT_POP_SCALE + (1 - PARENT_POP_SCALE) * eased
-            : 1 + (PARENT_POP_SCALE - 1) * (1 - eased);
+            : 1 + (PARENT_POP_SCALE - 1) * eased;
           setEntityScale(a.entity, scale);
         }
       }
