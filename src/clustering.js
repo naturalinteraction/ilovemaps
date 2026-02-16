@@ -95,6 +95,11 @@ function setEntityAlpha(entity, alpha) {
   entity.label.outlineColor = new Cesium.Color(0, 0, 0, alpha);
 }
 
+function setEntityScale(entity, scale) {
+  entity.billboard.width = SYMBOL_SIZE * scale;
+  entity.billboard.height = SYMBOL_SIZE * scale;
+}
+
 
 // --- Loading ---
 
@@ -200,8 +205,8 @@ function startAnimations(anims) {
   for (const a of anims) {
     a.startTime = now;
     a.entity.show = true;
-    if (a.fade === "in") setEntityAlpha(a.entity, 0);
-    else if (a.fade === "out") setEntityAlpha(a.entity, 1);
+    if (a.fade === "in") { setEntityAlpha(a.entity, 0); if (a.popScale) setEntityScale(a.entity, PARENT_POP_SCALE); }
+    else if (a.fade === "out") { setEntityAlpha(a.entity, 1); if (a.popScale) setEntityScale(a.entity, 1); }
     const stationary = Cesium.Cartesian3.equals(a.from, a.to);
     if (!stationary) {
       a.control = computeControlPoint(a.from, a.to);
@@ -231,8 +236,9 @@ export function onPreRender() {
     const a = animations[i];
     const t = (now - a.startTime) / a.duration;
     if (t >= 1) {
-      // Animation complete — reset alpha, run callback, swap position
+      // Animation complete — reset alpha/scale, run callback, swap position
       if (a.fade) setEntityAlpha(a.entity, 1);
+      if (a.popScale) setEntityScale(a.entity, 1);
       if (a.onComplete) a.onComplete();
       a.entity.position = a.to;
       animations.splice(i, 1);
@@ -245,6 +251,12 @@ export function onPreRender() {
         const eased = easeInOutCubic(ft);
         const alpha = a.fade === "in" ? eased : 1 - eased;
         setEntityAlpha(a.entity, alpha);
+        if (a.popScale) {
+          const scale = a.fade === "in"
+            ? PARENT_POP_SCALE + (1 - PARENT_POP_SCALE) * eased
+            : 1 + (PARENT_POP_SCALE - 1) * (1 - eased);
+          setEntityScale(a.entity, scale);
+        }
       }
       allDone = false;
     }
@@ -258,6 +270,8 @@ export function onPreRender() {
 // --- Merge / Unmerge ---
 
 const ANIM_DURATION = 500;
+const PARENT_POP_SCALE = 1.2; // max scale factor for parent appear/disappear effect
+const PARENT_FADE_SPEED = 0.5; // parent fade duration relative to ANIM_DURATION (also used as delay for fade-in)
 
 function getNodesAtLevel(levelIdx) {
   const type = LEVEL_ORDER[levelIdx];
@@ -336,8 +350,9 @@ function mergeStep(fromLevel, toLevel) {
       to: node.homePosition,
       duration: ANIM_DURATION,
       fade: "in",
-      fadeDelay: ANIM_DURATION / 2,
-      fadeDuration: ANIM_DURATION / 2,
+      popScale: true,
+      fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_SPEED),
+      fadeDuration: ANIM_DURATION * PARENT_FADE_SPEED,
       onComplete: () => {
         pe.position = node.homePosition;
       },
@@ -399,7 +414,8 @@ function unmergeStep(fromLevel, toLevel) {
       to: node.homePosition,
       duration: ANIM_DURATION,
       fade: "out",
-      fadeDuration: ANIM_DURATION / 2,
+      popScale: true,
+      fadeDuration: ANIM_DURATION * PARENT_FADE_SPEED,
       onComplete: () => {
         pe.show = false;
         pe.position = node.homePosition;
@@ -468,8 +484,9 @@ export function handleClick(viewer, click) {
       to: node.homePosition,
       duration: ANIM_DURATION,
       fade: "in",
-      fadeDelay: ANIM_DURATION / 2,
-      fadeDuration: ANIM_DURATION / 2,
+      popScale: true,
+      fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_SPEED),
+      fadeDuration: ANIM_DURATION * PARENT_FADE_SPEED,
       onComplete: () => { entity.position = node.homePosition; },
     });
     if (anims.length > 0) startAnimations(anims);
@@ -483,7 +500,8 @@ export function handleClick(viewer, click) {
       to: node.homePosition,
       duration: ANIM_DURATION,
       fade: "out",
-      fadeDuration: ANIM_DURATION / 2,
+      popScale: true,
+      fadeDuration: ANIM_DURATION * PARENT_FADE_SPEED,
       onComplete: () => {
         entity.show = false;
         entity.position = node.homePosition;
