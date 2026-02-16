@@ -22,6 +22,7 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
   timeline: false,
   fullscreenButton: false,
 });
+viewer.scene.globe.depthTestAgainstTerrain = true;
 
 const waypointEntities = [];
 const waypointRouteInfo = new Map(); // entity -> { route: [{lat,lon,alt}...], wpIdx: number }
