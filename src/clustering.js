@@ -185,7 +185,7 @@ export async function loadMilitaryUnits(viewer) {
 
 // --- Zoom-based level ---
 
-const ZOOM_THRESHOLDS = [9000, 28000, 40000]; // meters
+const ZOOM_THRESHOLDS = [9000, 32000, 60000]; // meters
 
 function levelForHeight(height) {
   for (let i = 0; i < ZOOM_THRESHOLDS.length; i++) {
