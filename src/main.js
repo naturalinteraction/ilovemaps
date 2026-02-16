@@ -1,6 +1,6 @@
 import * as Cesium from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
-import { loadMilitaryUnits, setupZoomListener, setupPreRender, handleLeftClick, handleRightClick, handleKeydown } from "./clustering.js";
+import { loadMilitaryUnits, setupZoomListener, setupPreRender, handleLeftClick, handleRightClick, handleKeydown, playBeep } from "./clustering.js";
 
 // Token Cesium Ion (registrarsi su cesium.com/ion per ottenerne uno)
 // Il globo funziona anche senza token, ma senza terrain 3D
@@ -197,6 +197,7 @@ handler.setInputAction((click) => {
   }
 
   // Add new red point to current route
+  playBeep(440);
   clickedGroundPositions.push(Cesium.Cartesian3.fromDegrees(lon, lat));
 
   const allPts = [...clickedWaypointData, { lat, lon, alt: carto.height }];
@@ -698,6 +699,7 @@ async function planPath(start, end) {
   }
   smoothPath.push(spline.evaluate(padded.length - 2));
 
+  playBeep(880);
   pathEntity = viewer.entities.add({
     polyline: {
       positions: smoothPath,

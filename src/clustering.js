@@ -14,7 +14,7 @@ function drawMilitarySymbol(type) {
   // Rectangle body
   const rx = 10, ry = 20, rw = 44, rh = 24;
   ctx.strokeStyle = BLUE;
-  ctx.fillStyle = "rgba(64,128,255,0.5)";
+  ctx.fillStyle = "rgba(30,60,255,0.6)";
   ctx.lineWidth = 2;
   ctx.fillRect(rx, ry, rw, rh);
   ctx.strokeRect(rx, ry, rw, rh);
@@ -91,7 +91,7 @@ function getAudioCtx() {
   return audioCtx;
 }
 
-function playBeep(freq, duration = 0.08) {
+export function playBeep(freq, duration = 0.08) {
   const ctx = getAudioCtx();
   if (ctx.state === "suspended") ctx.resume();
   const osc = ctx.createOscillator();
@@ -184,7 +184,7 @@ export async function loadMilitaryUnits(viewer) {
 
 // --- Zoom-based level ---
 
-const ZOOM_THRESHOLDS = [10000, 20000, 40000]; // meters
+const ZOOM_THRESHOLDS = [9000, 28000, 40000]; // meters
 
 function levelForHeight(height) {
   for (let i = 0; i < ZOOM_THRESHOLDS.length; i++) {
