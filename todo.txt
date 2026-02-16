@@ -1,2 +1,3 @@
 - linee leggere che congiungono le unita' figlie al centro del cluster
 - animazione che mostra che sta cercando il path planning
+- integrazione claude o mcp
