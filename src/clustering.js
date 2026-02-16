@@ -251,21 +251,17 @@ export function onPreRender() {
         const ft = Math.max(0, Math.min(1, elapsed / fadeDur));
         const eased = easeInOutCubic(ft);
         const alpha = a.fade === "in" ? eased : 1 - eased;
-        // Labels: separate timing — fade out during pre-delay, fade in after delay
+        // Labels: fade out during delay period, fade in only after delay
+        const labelDelay = a.duration * (1 - PARENT_FADE_SPEED);
+        const labelDur = a.duration * PARENT_FADE_SPEED;
         let labelAlpha;
-        if (a.fadeDelay || a.fadeDuration) {
-          if (a.fade === "out") {
-            // Fade out label during the pre-delay period (duration - fadeDuration)
-            const preDelay = a.duration - (a.fadeDuration || a.duration);
-            const lt = preDelay > 0 ? easeInOutCubic(Math.min(1, (now - a.startTime) / preDelay)) : 1;
-            labelAlpha = 1 - lt;
-          } else {
-            // Fade in label after the delay, over fadeDuration
-            labelAlpha = easeInOutCubic(ft);
-          }
+        if (a.fade === "out") {
+          const lt = labelDelay > 0 ? easeInOutCubic(Math.min(1, (now - a.startTime) / labelDelay)) : 1;
+          labelAlpha = 1 - lt;
         } else {
-          // No special timing (children): label follows billboard
-          labelAlpha = alpha;
+          const labelElapsed = now - a.startTime - labelDelay;
+          const lt = Math.max(0, Math.min(1, labelElapsed / labelDur));
+          labelAlpha = easeInOutCubic(lt);
         }
         setEntityAlpha(a.entity, alpha, labelAlpha);
         if (a.popScale) {
