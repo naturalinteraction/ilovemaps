@@ -84,8 +84,17 @@ let currentLevel = 0;
 let militaryVisible = true;
 
 // Animation state
-const animations = []; // { entity, from, to, startTime, duration, onComplete }
+const animations = []; // { entity, from, to, startTime, duration, fade, onComplete }
 let animating = false;
+const WHITE = Cesium.Color.WHITE;
+
+function setEntityAlpha(entity, alpha) {
+  // Use small epsilon for billboard to prevent Cesium from skipping fully-transparent billboards
+  entity.billboard.color = new Cesium.Color(1, 1, 1, Math.max(alpha, 0.005));
+  entity.label.fillColor = new Cesium.Color(1, 1, 1, alpha);
+  entity.label.outlineColor = new Cesium.Color(0, 0, 0, alpha);
+}
+
 
 // --- Loading ---
 
@@ -124,7 +133,7 @@ export async function loadMilitaryUnits(viewer) {
       },
       label: {
         text: node.name,
-        font: "39px sans-serif",
+        font: "20px sans-serif",
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         outlineWidth: 2,
         verticalOrigin: Cesium.VerticalOrigin.TOP,
@@ -190,14 +199,23 @@ function startAnimations(anims) {
   const now = performance.now();
   for (const a of anims) {
     a.startTime = now;
-    a.control = computeControlPoint(a.from, a.to);
     a.entity.show = true;
-    const anim = a;
-    a.entity.position = new Cesium.CallbackProperty(() => {
-      const t = Math.min(1, (performance.now() - anim.startTime) / anim.duration);
-      const eased = easeInOutCubic(t);
-      return quadraticBezier(anim.from, anim.control, anim.to, eased, new Cesium.Cartesian3());
-    }, false);
+    if (a.fade === "in") setEntityAlpha(a.entity, 0);
+    else if (a.fade === "out") setEntityAlpha(a.entity, 1);
+    const stationary = Cesium.Cartesian3.equals(a.from, a.to);
+    if (!stationary) {
+      a.control = computeControlPoint(a.from, a.to);
+      const anim = a;
+      a.entity.position = new Cesium.CallbackProperty(() => {
+        const t = Math.min(1, (performance.now() - anim.startTime) / anim.duration);
+        const eased = easeInOutCubic(t);
+        return quadraticBezier(anim.from, anim.control, anim.to, eased, new Cesium.Cartesian3());
+      }, false);
+    } else {
+      // Force Cesium to treat entity as dynamic for re-render every frame
+      const pos = a.from;
+      a.entity.position = new Cesium.CallbackProperty(() => pos, false);
+    }
     animations.push(a);
   }
   animating = true;
@@ -213,11 +231,22 @@ export function onPreRender() {
     const a = animations[i];
     const t = (now - a.startTime) / a.duration;
     if (t >= 1) {
-      // Animation complete — replace CallbackProperty with static position
-      a.entity.position = a.to;
+      // Animation complete — reset alpha, run callback, swap position
+      if (a.fade) setEntityAlpha(a.entity, 1);
       if (a.onComplete) a.onComplete();
+      a.entity.position = a.to;
       animations.splice(i, 1);
     } else {
+      // Update alpha during animation (with optional fadeDelay and fadeDuration)
+      if (a.fade) {
+        const fadeDelay = a.fadeDelay || 0;
+        const fadeDur = a.fadeDuration || a.duration;
+        const elapsed = now - a.startTime - fadeDelay;
+        const ft = Math.max(0, Math.min(1, elapsed / fadeDur));
+        const eased = easeInOutCubic(ft);
+        const alpha = a.fade === "in" ? eased : 1 - eased;
+        setEntityAlpha(a.entity, alpha);
+      }
       allDone = false;
     }
   }
@@ -283,12 +312,10 @@ function mergeStep(fromLevel, toLevel) {
       from: fromPos,
       to: toPos,
       duration: ANIM_DURATION,
+      fade: "out",
       onComplete: () => {
         entity.show = false;
         entity.position = node.homePosition; // reset
-        // Show parent
-        entitiesById[ancestor.id].show = true;
-        entitiesById[ancestor.id].position = ancestor.homePosition;
       },
     });
   }
@@ -300,9 +327,22 @@ function mergeStep(fromLevel, toLevel) {
     }
   }
 
-  // Show toLevel parents immediately hidden (they appear when children arrive)
+  // Fade in parent entities at toLevel (twice as fast, delayed by half)
   for (const node of getNodesAtLevel(toLevel)) {
-    entitiesById[node.id].show = false;
+    const pe = entitiesById[node.id];
+    pe.position = node.homePosition;
+    anims.push({
+      entity: pe,
+      from: node.homePosition,
+      to: node.homePosition,
+      duration: ANIM_DURATION,
+      fade: "in",
+      fadeDelay: ANIM_DURATION / 2,
+      fadeDuration: ANIM_DURATION / 2,
+      onComplete: () => {
+        pe.position = node.homePosition;
+      },
+    });
   }
 
   if (anims.length > 0) {
@@ -316,9 +356,12 @@ function mergeStep(fromLevel, toLevel) {
 function unmergeStep(fromLevel, toLevel) {
   const anims = [];
 
-  // Hide everything first
+  // Hide levels not involved in the animation
   for (const node of allNodes) {
-    entitiesById[node.id].show = false;
+    const lvl = LEVEL_ORDER.indexOf(node.type);
+    if (lvl !== fromLevel && lvl !== toLevel) {
+      entitiesById[node.id].show = false;
+    }
   }
 
   // Animate nodes at toLevel from their ancestor at fromLevel
@@ -340,8 +383,27 @@ function unmergeStep(fromLevel, toLevel) {
       from: fromPos,
       to: toPos,
       duration: ANIM_DURATION,
+      fade: "in",
       onComplete: () => {
         entity.position = node.homePosition;
+      },
+    });
+  }
+
+  // Fade out the old parent entities (twice as fast)
+  for (const node of getNodesAtLevel(fromLevel)) {
+    const pe = entitiesById[node.id];
+    pe.position = node.homePosition;
+    anims.push({
+      entity: pe,
+      from: node.homePosition,
+      to: node.homePosition,
+      duration: ANIM_DURATION,
+      fade: "out",
+      fadeDuration: ANIM_DURATION / 2,
+      onComplete: () => {
+        pe.show = false;
+        pe.position = node.homePosition;
       },
     });
   }
@@ -392,19 +454,42 @@ export function handleClick(viewer, click) {
         from: desc.homePosition,
         to: node.homePosition,
         duration: ANIM_DURATION,
+        fade: "out",
         onComplete: () => {
           e.show = false;
           e.position = desc.homePosition;
-          entity.show = true;
-          entity.position = node.homePosition;
         },
       });
     });
+    // Fade in parent (twice as fast, delayed by half)
+    entity.position = node.homePosition;
+    anims.push({
+      entity,
+      from: node.homePosition,
+      to: node.homePosition,
+      duration: ANIM_DURATION,
+      fade: "in",
+      fadeDelay: ANIM_DURATION / 2,
+      fadeDuration: ANIM_DURATION / 2,
+      onComplete: () => { entity.position = node.homePosition; },
+    });
     if (anims.length > 0) startAnimations(anims);
   } else {
-    // Unmerge: hide parent, show children expanding from parent
-    entity.show = false;
+    // Unmerge: fade out parent, show children expanding from parent
     const anims = [];
+    // Fade out parent (twice as fast)
+    anims.push({
+      entity,
+      from: node.homePosition,
+      to: node.homePosition,
+      duration: ANIM_DURATION,
+      fade: "out",
+      fadeDuration: ANIM_DURATION / 2,
+      onComplete: () => {
+        entity.show = false;
+        entity.position = node.homePosition;
+      },
+    });
     forEachDescendantAtLevel(node, childType, (desc) => {
       const e = entitiesById[desc.id];
       anims.push({
@@ -412,6 +497,7 @@ export function handleClick(viewer, click) {
         from: node.homePosition,
         to: desc.homePosition,
         duration: ANIM_DURATION,
+        fade: "in",
         onComplete: () => {
           e.position = desc.homePosition;
         },
