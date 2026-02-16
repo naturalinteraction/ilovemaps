@@ -82,6 +82,7 @@ const entitiesById = {};
 // Current visible level index (0=squad, 3=battalion)
 let currentLevel = 0;
 let militaryVisible = true;
+let manualMode = false; // disables zoom-based auto-leveling after click merge/unmerge
 
 // --- Sound effects ---
 
@@ -538,7 +539,7 @@ export function handleRightClick(viewer, click) {
     fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
     onComplete: () => { parentEntity.position = parent.homePosition; },
   });
-  if (anims.length > 0) { playBeep(MERGE_BEEP_FREQ); startAnimations(anims); }
+  if (anims.length > 0) { manualMode = true; playBeep(MERGE_BEEP_FREQ); startAnimations(anims); }
   return true;
 }
 
@@ -578,7 +579,7 @@ export function handleLeftClick(viewer, click) {
       },
     });
   });
-  if (anims.length > 0) { playBeep(UNMERGE_BEEP_FREQ); startAnimations(anims); }
+  if (anims.length > 0) { manualMode = true; playBeep(UNMERGE_BEEP_FREQ); startAnimations(anims); }
   return true;
 }
 
@@ -600,7 +601,7 @@ export function setupZoomListener(viewer) {
   viewer.camera.changed.addEventListener(() => {
     if (zoomDebounceTimer) clearTimeout(zoomDebounceTimer);
     zoomDebounceTimer = setTimeout(() => {
-      if (!militaryVisible) return;
+      if (!militaryVisible || manualMode) return;
       const height = viewer.camera.positionCartographic.height;
       const newLevel = levelForHeight(height);
       if (newLevel !== currentLevel) {
@@ -630,6 +631,7 @@ export function handleKeydown(event, viewer) {
   }
 
   if (event.key >= "1" && event.key <= "4") {
+    manualMode = false;
     const level = parseInt(event.key) - 1;
     setLevel(level, viewer);
     return true;

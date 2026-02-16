@@ -13,6 +13,14 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
   }),
   selectionIndicator: false,
   infoBox: false,
+  geocoder: false,
+  homeButton: false,
+  sceneModePicker: false,
+  baseLayerPicker: false,
+  navigationHelpButton: false,
+  animation: false,
+  timeline: false,
+  fullscreenButton: false,
 });
 
 const waypointEntities = [];
