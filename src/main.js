@@ -11,6 +11,8 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
   terrain: Cesium.Terrain.fromWorldTerrain({
     requestWaterMask: true,
   }),
+  selectionIndicator: false,
+  infoBox: false,
 });
 
 const waypointEntities = [];

@@ -14,7 +14,7 @@ function drawMilitarySymbol(type) {
   // Rectangle body
   const rx = 10, ry = 20, rw = 44, rh = 24;
   ctx.strokeStyle = BLUE;
-  ctx.fillStyle = "rgba(64,128,255,0.3)";
+  ctx.fillStyle = "rgba(64,128,255,0.5)";
   ctx.lineWidth = 2;
   ctx.fillRect(rx, ry, rw, rh);
   ctx.strokeRect(rx, ry, rw, rh);
@@ -82,6 +82,32 @@ const entitiesById = {};
 // Current visible level index (0=squad, 3=battalion)
 let currentLevel = 0;
 let militaryVisible = true;
+
+// --- Sound effects ---
+
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new AudioContext();
+  return audioCtx;
+}
+
+function playBeep(freq, duration = 0.08) {
+  const ctx = getAudioCtx();
+  if (ctx.state === "suspended") ctx.resume();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = "sine";
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.15, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + duration);
+}
+
+const MERGE_BEEP_FREQ = 880;   // A5 — higher pitch for merge (converging)
+const UNMERGE_BEEP_FREQ = 440; // A4 — lower pitch for unmerge (expanding)
 
 // Animation state
 const animations = []; // { entity, from, to, startTime, duration, fade, onComplete }
@@ -206,8 +232,13 @@ function startAnimations(anims) {
   for (const a of anims) {
     a.startTime = now;
     a.entity.show = true;
-    if (a.fade === "in") { setEntityAlpha(a.entity, 0, 0); if (a.popScale) setEntityScale(a.entity, PARENT_POP_SCALE); }
-    else if (a.fade === "out") { setEntityAlpha(a.entity, 1, 1); if (a.popScale) setEntityScale(a.entity, 1); }
+    if (a.fade === "in") {
+      setEntityAlpha(a.entity, 0, 0);
+      if (a.popScale) setEntityScale(a.entity, PARENT_POP_SCALE);
+    } else if (a.fade === "out") {
+      setEntityAlpha(a.entity, 1, 1);
+      if (a.popScale) setEntityScale(a.entity, 1);
+    }
     const stationary = Cesium.Cartesian3.equals(a.from, a.to);
     if (!stationary) {
       a.control = computeControlPoint(a.from, a.to);
@@ -252,8 +283,8 @@ export function onPreRender() {
         const eased = easeInOutCubic(ft);
         const alpha = a.fade === "in" ? eased : 1 - eased;
         // Labels: fade out during delay period, fade in only after delay
-        const labelDelay = a.duration * (1 - PARENT_FADE_SPEED);
-        const labelDur = a.duration * PARENT_FADE_SPEED;
+        const labelDelay = a.duration * (1 - PARENT_FADE_RELATIVE_DURATION);
+        const labelDur = a.duration * PARENT_FADE_RELATIVE_DURATION;
         let labelAlpha;
         if (a.fade === "out") {
           const lt = labelDelay > 0 ? easeInOutCubic(Math.min(1, (now - a.startTime) / labelDelay)) : 1;
@@ -282,9 +313,9 @@ export function onPreRender() {
 
 // --- Merge / Unmerge ---
 
-const ANIM_DURATION = 500;
+const ANIM_DURATION = 400;
 const PARENT_POP_SCALE = 1.2; // max scale factor for parent appear/disappear effect
-const PARENT_FADE_SPEED = 0.5; // parent fade duration relative to ANIM_DURATION (also used as delay for fade-in)
+const PARENT_FADE_RELATIVE_DURATION = 0.5; // parent fade duration relative to ANIM_DURATION (also used as delay for fade-in)
 
 function getNodesAtLevel(levelIdx) {
   const type = LEVEL_ORDER[levelIdx];
@@ -364,8 +395,8 @@ function mergeStep(fromLevel, toLevel) {
       duration: ANIM_DURATION,
       fade: "in",
       popScale: true,
-      fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_SPEED),
-      fadeDuration: ANIM_DURATION * PARENT_FADE_SPEED,
+      fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
+      fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
       onComplete: () => {
         pe.position = node.homePosition;
       },
@@ -373,6 +404,7 @@ function mergeStep(fromLevel, toLevel) {
   }
 
   if (anims.length > 0) {
+    playBeep(MERGE_BEEP_FREQ);
     startAnimations(anims);
   } else {
     // No animations needed, just show correct level
@@ -428,7 +460,7 @@ function unmergeStep(fromLevel, toLevel) {
       duration: ANIM_DURATION,
       fade: "out",
       popScale: true,
-      fadeDuration: ANIM_DURATION * PARENT_FADE_SPEED,
+      fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
       onComplete: () => {
         pe.show = false;
         pe.position = node.homePosition;
@@ -437,6 +469,7 @@ function unmergeStep(fromLevel, toLevel) {
   }
 
   if (anims.length > 0) {
+    playBeep(UNMERGE_BEEP_FREQ);
     startAnimations(anims);
   } else {
     showLevel(toLevel);
@@ -498,11 +531,11 @@ export function handleClick(viewer, click) {
       duration: ANIM_DURATION,
       fade: "in",
       popScale: true,
-      fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_SPEED),
-      fadeDuration: ANIM_DURATION * PARENT_FADE_SPEED,
+      fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
+      fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
       onComplete: () => { entity.position = node.homePosition; },
     });
-    if (anims.length > 0) startAnimations(anims);
+    if (anims.length > 0) { playBeep(MERGE_BEEP_FREQ); startAnimations(anims); }
   } else {
     // Unmerge: fade out parent, show children expanding from parent
     const anims = [];
@@ -514,7 +547,7 @@ export function handleClick(viewer, click) {
       duration: ANIM_DURATION,
       fade: "out",
       popScale: true,
-      fadeDuration: ANIM_DURATION * PARENT_FADE_SPEED,
+      fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
       onComplete: () => {
         entity.show = false;
         entity.position = node.homePosition;
@@ -528,12 +561,12 @@ export function handleClick(viewer, click) {
         to: desc.homePosition,
         duration: ANIM_DURATION,
         fade: "in",
-        onComplete: () => {
+          onComplete: () => {
           e.position = desc.homePosition;
         },
       });
     });
-    if (anims.length > 0) startAnimations(anims);
+    if (anims.length > 0) { playBeep(UNMERGE_BEEP_FREQ); startAnimations(anims); }
   }
 
   return true;
