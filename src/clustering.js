@@ -245,7 +245,16 @@ export async function loadMilitaryUnits(viewer) {
           return points;
         }, false),
         width: 8,
-        material: Cesium.Color.fromCssColorString(BLUE).withAlpha(0.5),
+        material: new Cesium.ColorMaterialProperty(
+          new Cesium.CallbackProperty(() => {
+            try {
+              const c = entity.billboard.color.getValue(Cesium.JulianDate.now());
+              return Cesium.Color.fromCssColorString(BLUE).withAlpha(0.35 * c.alpha);
+            } catch (e) {
+              return Cesium.Color.fromCssColorString(BLUE).withAlpha(0.35);
+            }
+          }, false)
+        ),
         clampToGround: true,
       },
       show: entity.show,
