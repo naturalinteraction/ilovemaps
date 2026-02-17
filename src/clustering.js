@@ -78,6 +78,13 @@ let rootNode = null;
 
 // Cesium entities indexed by node id
 const entitiesById = {};
+// Polyline entities connecting each node to its parent
+const linesById = {};
+// Scratch variables for polyline position computation
+const scratchDir = new Cesium.Cartesian3();
+const scratchOffset = new Cesium.Cartesian3();
+const scratchStart = new Cesium.Cartesian3();
+const scratchEnd = new Cesium.Cartesian3();
 
 // Current visible level index (0=squad, 3=battalion)
 let currentLevel = 0;
@@ -161,7 +168,8 @@ export async function loadMilitaryUnits(viewer) {
         image,
         width: SYMBOL_SIZE,
         height: SYMBOL_SIZE,
-        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        verticalOrigin: Cesium.VerticalOrigin.CENTER,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
       label: {
@@ -170,7 +178,8 @@ export async function loadMilitaryUnits(viewer) {
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         outlineWidth: 2,
         verticalOrigin: Cesium.VerticalOrigin.TOP,
-        pixelOffset: new Cesium.Cartesian2(0, 4),
+        pixelOffset: new Cesium.Cartesian2(0, SYMBOL_SIZE / 2 + 4),
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
       show: levelIdx === currentLevel,
@@ -178,6 +187,46 @@ export async function loadMilitaryUnits(viewer) {
 
     entity._milNode = node;
     entitiesById[node.id] = entity;
+  }
+
+  // Create polylines connecting each node to its parent
+  for (const node of allNodes) {
+    if (!node.parent) continue;
+    const entity = entitiesById[node.id];
+    const parentNode = node.parent;
+    const lineEntity = viewer.entities.add({
+      polyline: {
+        positions: new Cesium.CallbackProperty(() => {
+          let currentPos = node.homePosition;
+          try {
+            const val = entity.position.getValue(Cesium.JulianDate.now());
+            if (val) currentPos = val;
+          } catch (e) { /* use homePosition */ }
+          const parentPos = parentNode.homePosition;
+          // Shorten line so it starts/ends outside the symbols
+          const dir = Cesium.Cartesian3.subtract(parentPos, currentPos, scratchDir);
+          const dist = Cesium.Cartesian3.magnitude(dir);
+          if (dist < 1) return [currentPos, parentPos];
+          Cesium.Cartesian3.divideByScalar(dir, dist, dir);
+          // Compute symbol radius in world-space meters
+          const camDist = Cesium.Cartesian3.distance(viewer.camera.position, currentPos);
+          const fov = viewer.camera.frustum.fovy || 1.0;
+          const metersPerPx = 2 * camDist * Math.tan(fov / 2) / viewer.canvas.height;
+          const symbolRadius = metersPerPx * SYMBOL_SIZE * 0.6;
+          const offset = Math.min(symbolRadius, dist * 0.4);
+          const start = Cesium.Cartesian3.add(currentPos,
+            Cesium.Cartesian3.multiplyByScalar(dir, offset, scratchOffset), scratchStart);
+          const end = Cesium.Cartesian3.subtract(parentPos,
+            Cesium.Cartesian3.multiplyByScalar(dir, offset / 3, scratchOffset), scratchEnd);
+          return [Cesium.Cartesian3.clone(start), Cesium.Cartesian3.clone(end)];
+        }, false),
+        width: 2,
+        material: Cesium.Color.fromCssColorString(BLUE).withAlpha(0.5),
+        clampToGround: true,
+      },
+      show: entity.show,
+    });
+    linesById[node.id] = lineEntity;
   }
 
   return { entitiesById, nodesById, allNodes };
@@ -645,5 +694,10 @@ export function handleKeydown(event, viewer) {
 export function setupPreRender(viewer) {
   viewer.scene.preRender.addEventListener(() => {
     onPreRender();
+    // Sync line visibility with entity visibility
+    for (const node of allNodes) {
+      const line = linesById[node.id];
+      if (line) line.show = entitiesById[node.id].show;
+    }
   });
 }
