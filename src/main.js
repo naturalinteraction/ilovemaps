@@ -137,14 +137,31 @@ const clickedGroundPositions = [];
 const clickedEntities = [];
 const clickedWaypointData = [];
 let pathEntity = null;
+let pathAnimating = false;
+let dashPatternValue = 0xFF00;
+let dashFrameCount = 0;
 
 const clickedPathEntity = viewer.entities.add({
   polyline: {
     positions: new Cesium.CallbackProperty(() => clickedGroundPositions, false),
-    width: 3,
-    material: Cesium.Color.WHITE,
+    width: 4,
+    material: new Cesium.PolylineDashMaterialProperty({
+      color: Cesium.Color.WHITE,
+      dashLength: 16,
+      dashPattern: new Cesium.CallbackProperty(() => dashPatternValue, false),
+    }),
     clampToGround: true,
   },
+});
+
+viewer.scene.preRender.addEventListener(() => {
+  if (pathAnimating) {
+    // Rotate the 16-bit pattern by 3 bits every frame for fast motion
+    for (let i = 0; i < 3; i++) {
+      const bit = (dashPatternValue >> 15) & 1;
+      dashPatternValue = ((dashPatternValue << 1) | bit) & 0xFFFF;
+    }
+  }
 });
 
 function computeRouteStats(waypoints, upToIndex) {
@@ -603,6 +620,11 @@ async function runAStar(terrainProvider, bounds, stepMeters, startLatLon, endLat
 
 async function planPath(start, end) {
   removePath();
+  pathAnimating = true;
+  dashPatternValue = 0xFF00;
+  dashFrameCount = 0;
+  // Yield to let the browser render the animated dashes before heavy computation
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
   // Distance AB in meters
   const midLat = (start.lat + end.lat) / 2;
@@ -633,6 +655,7 @@ async function planPath(start, end) {
 
   if (!coarsePath) {
     console.warn("No path found!");
+    pathAnimating = false;
     return;
   }
 
@@ -708,6 +731,7 @@ async function planPath(start, end) {
   }
   smoothPath.push(spline.evaluate(padded.length - 2));
 
+  pathAnimating = false;
   playBeep(880);
   pathEntity = viewer.entities.add({
     polyline: {
