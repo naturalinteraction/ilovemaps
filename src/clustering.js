@@ -244,7 +244,7 @@ export async function loadMilitaryUnits(viewer) {
           }
           return points;
         }, false),
-        width: 2,
+        width: 8,
         material: Cesium.Color.fromCssColorString(BLUE).withAlpha(0.5),
         clampToGround: true,
       },
