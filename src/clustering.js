@@ -85,6 +85,8 @@ const scratchDir = new Cesium.Cartesian3();
 const scratchOffset = new Cesium.Cartesian3();
 const scratchStart = new Cesium.Cartesian3();
 const scratchEnd = new Cesium.Cartesian3();
+const ARC_SEGMENTS = 16;
+const ARC_BOW = 0.15; // perpendicular offset as fraction of distance
 
 // Current visible level index (0=squad, 3=battalion)
 let currentLevel = 0;
@@ -203,7 +205,7 @@ export async function loadMilitaryUnits(viewer) {
             if (val) currentPos = val;
           } catch (e) { /* use homePosition */ }
           const parentPos = parentNode.homePosition;
-          // Shorten line so it starts/ends outside the symbols
+          // Direction and distance
           const dir = Cesium.Cartesian3.subtract(parentPos, currentPos, scratchDir);
           const dist = Cesium.Cartesian3.magnitude(dir);
           if (dist < 1) return [currentPos, parentPos];
@@ -213,12 +215,34 @@ export async function loadMilitaryUnits(viewer) {
           const fov = viewer.camera.frustum.fovy || 1.0;
           const metersPerPx = 2 * camDist * Math.tan(fov / 2) / viewer.canvas.height;
           const symbolRadius = metersPerPx * SYMBOL_SIZE * 0.6;
-          const offset = Math.min(symbolRadius, dist * 0.4);
-          const start = Cesium.Cartesian3.add(currentPos,
-            Cesium.Cartesian3.multiplyByScalar(dir, offset, scratchOffset), scratchStart);
-          const end = Cesium.Cartesian3.subtract(parentPos,
-            Cesium.Cartesian3.multiplyByScalar(dir, offset / 3, scratchOffset), scratchEnd);
-          return [Cesium.Cartesian3.clone(start), Cesium.Cartesian3.clone(end)];
+          const trimStart = Math.min(symbolRadius, dist * 0.4);
+          const trimEnd = trimStart / 3;
+          // Perpendicular vector for arc bow (cross dir with surface normal at midpoint)
+          const mid = Cesium.Cartesian3.midpoint(currentPos, parentPos, new Cesium.Cartesian3());
+          const normal = Cesium.Cartesian3.normalize(mid, new Cesium.Cartesian3());
+          const perp = Cesium.Cartesian3.cross(dir, normal, new Cesium.Cartesian3());
+          Cesium.Cartesian3.normalize(perp, perp);
+          const bowDist = dist * ARC_BOW;
+          // Control point for quadratic bezier
+          const control = Cesium.Cartesian3.add(mid,
+            Cesium.Cartesian3.multiplyByScalar(perp, bowDist, new Cesium.Cartesian3()),
+            new Cesium.Cartesian3());
+          // Parameter range trimmed to stay outside symbols
+          const tStart = trimStart / dist;
+          const tEnd = 1 - trimEnd / dist;
+          // Sample arc points
+          const points = [];
+          for (let i = 0; i <= ARC_SEGMENTS; i++) {
+            const t = tStart + (tEnd - tStart) * (i / ARC_SEGMENTS);
+            const omt = 1 - t;
+            const p = new Cesium.Cartesian3(
+              omt * omt * currentPos.x + 2 * omt * t * control.x + t * t * parentPos.x,
+              omt * omt * currentPos.y + 2 * omt * t * control.y + t * t * parentPos.y,
+              omt * omt * currentPos.z + 2 * omt * t * control.z + t * t * parentPos.z,
+            );
+            points.push(p);
+          }
+          return points;
         }, false),
         width: 2,
         material: Cesium.Color.fromCssColorString(BLUE).withAlpha(0.5),
