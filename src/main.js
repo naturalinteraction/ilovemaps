@@ -832,10 +832,36 @@ async function sendToClaude() {
   claudeResponse.textContent = "…";
   claudeSend.disabled = true;
   try {
+    const cartographic = Cesium.Cartographic.fromCartesian(viewer.camera.position);
+    const camera = {
+      lat:     Cesium.Math.toDegrees(cartographic.latitude),
+      lon:     Cesium.Math.toDegrees(cartographic.longitude),
+      height:  cartographic.height,
+      heading: Cesium.Math.toDegrees(viewer.camera.heading),
+      pitch:   Cesium.Math.toDegrees(viewer.camera.pitch),
+      roll:    Cesium.Math.toDegrees(viewer.camera.roll),
+      lookAt:  null,
+    };
+
+    const canvas = viewer.scene.canvas;
+    const center = new Cesium.Cartesian2(canvas.clientWidth / 2, canvas.clientHeight / 2);
+    const ray = viewer.camera.getPickRay(center);
+    const hit = viewer.scene.globe.pick(ray, viewer.scene)
+             ?? viewer.camera.pickEllipsoid(center);
+    if (hit) {
+      const c = Cesium.Cartographic.fromCartesian(hit);
+      camera.lookAt = {
+        lat:      Cesium.Math.toDegrees(c.latitude),
+        lon:      Cesium.Math.toDegrees(c.longitude),
+        alt:      c.height,
+        distance: Cesium.Cartesian3.distance(viewer.camera.position, hit),
+      };
+    }
+
     const res = await fetch("/api/claude", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt }),
+      body: JSON.stringify({ prompt, camera }),
     });
     const data = await res.json();
     claudeResponse.textContent = data.text ?? data.error ?? "No response";

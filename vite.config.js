@@ -103,6 +103,11 @@ const MAP_TOOLS = [
     description: "Get all military units and saved routes currently on the map.",
     input_schema: { type: "object", properties: {}, required: [] },
   },
+  {
+    name: "get_camera",
+    description: "Get the current camera state: position (lat/lon/height), orientation (heading/pitch/roll in degrees), and the geographic point at the center of the viewport (lookAt).",
+    input_schema: { type: "object", properties: {}, required: [] },
+  },
 ];
 
 function flattenUnits(node) {
@@ -112,7 +117,23 @@ function flattenUnits(node) {
   return result;
 }
 
-function resolveToolResult(name) {
+async function resolveToolResult(name, camera) {
+  if (name === "get_camera") {
+    const result = camera ?? {};
+    const target = camera?.lookAt ?? (camera ? { lat: camera.lat, lon: camera.lon } : null);
+    if (target) {
+      try {
+        const r = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${target.lat}&lon=${target.lon}&format=json`,
+          { headers: { "User-Agent": "ilovemaps/1.0" } }
+        );
+        const geo = await r.json();
+        result.place = geo.display_name ?? null;
+        result.address = geo.address ?? null;
+      } catch (_) {}
+    }
+    return JSON.stringify(result);
+  }
   if (name !== "get_entities") return "ok";
   const units = flattenUnits(JSON.parse(fs.readFileSync(path.resolve("data/military-units.json"), "utf-8")));
   const rawRoutes = JSON.parse(fs.readFileSync(path.resolve("data/waypoints.json"), "utf-8"));
@@ -137,7 +158,7 @@ function claudePlugin() {
         req.on("data", (c) => (body += c));
         req.on("end", async () => {
           try {
-            const { prompt } = JSON.parse(body);
+            const { prompt, camera } = JSON.parse(body);
             const client = new Anthropic();
             const messages = [{ role: "user", content: prompt }];
             const commands = [];
@@ -153,16 +174,16 @@ function claudePlugin() {
               if (msg.stop_reason === "tool_use") {
                 const toolUses = msg.content.filter(b => b.type === "tool_use");
                 for (const tu of toolUses) {
-                  if (tu.name !== "get_entities") commands.push({ name: tu.name, input: tu.input });
+                  if (tu.name !== "get_entities" && tu.name !== "get_camera") commands.push({ name: tu.name, input: tu.input });
                 }
                 messages.push({ role: "assistant", content: msg.content });
                 messages.push({
                   role: "user",
-                  content: toolUses.map(tu => ({
+                  content: await Promise.all(toolUses.map(async tu => ({
                     type: "tool_result",
                     tool_use_id: tu.id,
-                    content: resolveToolResult(tu.name),
-                  })),
+                    content: await resolveToolResult(tu.name, camera),
+                  }))),
                 });
               } else {
                 const text = msg.content.find(b => b.type === "text")?.text ?? "";
