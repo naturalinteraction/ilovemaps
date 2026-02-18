@@ -1,0 +1,1 @@
+psql -U av ilovemaps -c "UPDATE settings SET value='false' WHERE key='CLAUDE_PANEL_ENABLED';"
