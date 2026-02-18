@@ -142,13 +142,13 @@ const clickedEntities = [];
 const clickedWaypointData = [];
 let pathEntity = null;
 let pathAnimating = false;
-let dashPatternValue = 0xFF00;
+let dashPatternValue = 0xFFFF;
 let dashFrameCount = 0;
 
 const clickedPathEntity = viewer.entities.add({
   polyline: {
     positions: new Cesium.CallbackProperty(() => clickedGroundPositions, false),
-    width: 1,
+    width: 4,
     material: new Cesium.PolylineDashMaterialProperty({
       color: Cesium.Color.WHITE,
       dashLength: 16,
@@ -362,6 +362,7 @@ function removePath() {
     pathEntity = null;
   }
   clickedPathEntity.polyline.show = true;
+  dashPatternValue = 0xFFFF;
   for (const e of gridEntities) viewer.entities.remove(e);
   gridEntities.length = 0;
 }
@@ -738,7 +739,7 @@ async function planPath(start, end) {
   smoothPath.push(spline.evaluate(padded.length - 2));
 
   pathAnimating = false;
-  clickedPathEntity.polyline.show = false;
+  dashPatternValue = 0xFFFF;
   playBeep(880);
   pathEntity = viewer.entities.add({
     polyline: {
