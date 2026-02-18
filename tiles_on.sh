@@ -1,0 +1,1 @@
+psql -U av ilovemaps -c "UPDATE settings SET value='true' WHERE key='TILE_PREVIEW_ENABLED';"

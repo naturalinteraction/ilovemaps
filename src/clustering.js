@@ -267,7 +267,7 @@ export async function loadMilitaryUnits(viewer) {
 
 // --- Zoom-based level ---
 
-const ZOOM_THRESHOLDS = [9000, 32000, 60000]; // meters (distance to look-at point)
+const ZOOM_THRESHOLDS = [10000, 30000, 70000]; // meters (distance to look-at point)
 
 function levelForDist(dist) {
   for (let i = 0; i < ZOOM_THRESHOLDS.length; i++) {

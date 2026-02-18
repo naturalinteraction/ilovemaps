@@ -7,11 +7,9 @@ import { loadMilitaryUnits, setupZoomListener, setupPreRender, handleLeftClick, 
 // Per vedere il terrain 3D occorre anche selezionare Cesium 3D Terrain nell'interfaccia grafica
 Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4NjI4NDI4Mi1jM2I2LTRiYzgtOTcwMy1mYWY1OTFjYmZiMzEiLCJpZCI6Mzg5OTAwLCJpYXQiOjE3NzA4ODE0ODd9.mPlDG2N5Kct-2CMb5olZ4eZeI5kzJOq3UNOOKPlCI-Y";
 
-// Debug tile preview in bottom-left corner
-const TILE_PREVIEW_ENABLED = false;
-
-// Claude chat panel
-const CLAUDE_PANEL_ENABLED = false;
+const settings = await fetch("/api/settings").then(r => r.json()).catch(() => ({}));
+const TILE_PREVIEW_ENABLED = settings.TILE_PREVIEW_ENABLED ?? false;
+const CLAUDE_PANEL_ENABLED = settings.CLAUDE_PANEL_ENABLED ?? false;
 
 const viewer = new Cesium.Viewer("cesiumContainer", {
   terrain: Cesium.Terrain.fromWorldTerrain({

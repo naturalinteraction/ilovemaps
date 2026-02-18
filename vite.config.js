@@ -3,6 +3,55 @@ import cesium from "vite-plugin-cesium";
 import fs from "fs";
 import path from "path";
 import Anthropic from "@anthropic-ai/sdk";
+import pg from "pg";
+
+const pool = new pg.Pool({ database: "ilovemaps", host: "/var/run/postgresql" });
+
+function settingsPlugin() {
+  return {
+    name: "settings",
+    configureServer(server) {
+      server.middlewares.use("/api/settings", (req, res) => {
+        if (req.method === "GET") {
+          pool.query("SELECT key, value FROM settings")
+            .then(({ rows }) => {
+              const obj = {};
+              for (const row of rows) obj[row.key] = row.value;
+              res.setHeader("Content-Type", "application/json");
+              res.end(JSON.stringify(obj));
+            })
+            .catch((e) => {
+              res.statusCode = 500;
+              res.end(JSON.stringify({ error: e.message }));
+            });
+        } else if (req.method === "POST") {
+          let body = "";
+          req.on("data", (chunk) => (body += chunk));
+          req.on("end", () => {
+            try {
+              const { key, value } = JSON.parse(body);
+              pool.query("UPDATE settings SET value=$2 WHERE key=$1", [key, JSON.stringify(value)])
+                .then(() => {
+                  res.setHeader("Content-Type", "application/json");
+                  res.end(JSON.stringify({ ok: true }));
+                })
+                .catch((e) => {
+                  res.statusCode = 500;
+                  res.end(JSON.stringify({ error: e.message }));
+                });
+            } catch (e) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: e.message }));
+            }
+          });
+        } else {
+          res.statusCode = 405;
+          res.end("Method not allowed");
+        }
+      });
+    },
+  };
+}
 
 function saveRoutePlugin() {
   return {
@@ -104,5 +153,5 @@ function claudePlugin() {
 }
 
 export default defineConfig({
-  plugins: [cesium(), saveRoutePlugin(), claudePlugin()],
+  plugins: [cesium(), settingsPlugin(), saveRoutePlugin(), claudePlugin()],
 });
