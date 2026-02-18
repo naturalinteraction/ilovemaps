@@ -7,6 +7,12 @@ import { loadMilitaryUnits, setupZoomListener, setupPreRender, handleLeftClick, 
 // Per vedere il terrain 3D occorre anche selezionare Cesium 3D Terrain nell'interfaccia grafica
 Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4NjI4NDI4Mi1jM2I2LTRiYzgtOTcwMy1mYWY1OTFjYmZiMzEiLCJpZCI6Mzg5OTAwLCJpYXQiOjE3NzA4ODE0ODd9.mPlDG2N5Kct-2CMb5olZ4eZeI5kzJOq3UNOOKPlCI-Y";
 
+// Debug tile preview in bottom-left corner
+const TILE_PREVIEW_ENABLED = false;
+
+// Claude chat panel
+const CLAUDE_PANEL_ENABLED = false;
+
 const viewer = new Cesium.Viewer("cesiumContainer", {
   terrain: Cesium.Terrain.fromWorldTerrain({
     requestWaterMask: true,
@@ -272,7 +278,6 @@ const colorTooltip = document.createElement("div");
 colorTooltip.style.cssText = "position:absolute;display:none;padding:6px 10px;background:rgba(0,0,0,0.8);color:#fff;font:14px monospace;border-radius:4px;pointer-events:none;z-index:9999;white-space:nowrap";
 document.body.appendChild(colorTooltip);
 
-// Debug tile preview in bottom-left corner
 const tilePreview = document.createElement("canvas");
 tilePreview.style.cssText = "position:absolute;bottom:10px;left:10px;width:200px;height:200px;border:2px solid #fff;z-index:9999;pointer-events:none;image-rendering:pixelated;display:none";
 document.body.appendChild(tilePreview);
@@ -285,7 +290,7 @@ handler.setInputAction(async (movement) => {
   if (colorPickerPending) return;
   const ray = viewer.camera.getPickRay(movement.endPosition);
   const cartesian = ray && viewer.scene.globe.pick(ray, viewer.scene);
-  if (!cartesian) { colorTooltip.style.display = "none"; tilePreview.style.display = "none"; return; }
+  if (!cartesian) { colorTooltip.style.display = "none"; if (TILE_PREVIEW_ENABLED) tilePreview.style.display = "none"; return; }
   const carto = Cesium.Cartographic.fromCartesian(cartesian);
 
   const layer = viewer.imageryLayers.get(0);
@@ -329,17 +334,19 @@ handler.setInputAction(async (movement) => {
   const [r, g, b] = ctx.getImageData(px, py, 1, 1).data;
 
   // Draw tile preview with crosshair
-  tilePreview.width = ctx.canvas.width;
-  tilePreview.height = ctx.canvas.height;
-  tilePreview.style.display = "block";
-  tilePreviewCtx.drawImage(ctx.canvas, 0, 0);
-  const crossY = py; // flip Y for screen coords
-  tilePreviewCtx.strokeStyle = "red";
-  tilePreviewCtx.lineWidth = 1;
-  tilePreviewCtx.beginPath();
-  tilePreviewCtx.moveTo(px, 0); tilePreviewCtx.lineTo(px, ctx.canvas.height);
-  tilePreviewCtx.moveTo(0, crossY); tilePreviewCtx.lineTo(ctx.canvas.width, crossY);
-  tilePreviewCtx.stroke();
+  if (TILE_PREVIEW_ENABLED) {
+    tilePreview.width = ctx.canvas.width;
+    tilePreview.height = ctx.canvas.height;
+    tilePreview.style.display = "block";
+    tilePreviewCtx.drawImage(ctx.canvas, 0, 0);
+    const crossY = py; // flip Y for screen coords
+    tilePreviewCtx.strokeStyle = "red";
+    tilePreviewCtx.lineWidth = 1;
+    tilePreviewCtx.beginPath();
+    tilePreviewCtx.moveTo(px, 0); tilePreviewCtx.lineTo(px, ctx.canvas.height);
+    tilePreviewCtx.moveTo(0, crossY); tilePreviewCtx.lineTo(ctx.canvas.width, crossY);
+    tilePreviewCtx.stroke();
+  }
 
   const hex = `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
   colorTooltip.innerHTML = `<span style="display:inline-block;width:14px;height:14px;background:${hex};border:1px solid #fff;vertical-align:middle;margin-right:6px"></span>RGB(${r}, ${g}, ${b}) ${hex}`;
@@ -811,7 +818,11 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-// Claude chat panel
+const claudePanel = document.getElementById("claude-panel");
+if (!CLAUDE_PANEL_ENABLED) {
+  claudePanel.style.display = "none";
+}
+
 const claudeInput = document.getElementById("claude-input");
 const claudeResponse = document.getElementById("claude-response");
 const claudeSend = document.getElementById("claude-send");
@@ -844,7 +855,9 @@ async function sendToClaude() {
   }
 }
 
-claudeSend.addEventListener("click", sendToClaude);
-claudeInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && e.ctrlKey) sendToClaude();
-});
+if (CLAUDE_PANEL_ENABLED) {
+  claudeSend.addEventListener("click", sendToClaude);
+  claudeInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && e.ctrlKey) sendToClaude();
+  });
+}
