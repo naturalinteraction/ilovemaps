@@ -267,13 +267,22 @@ export async function loadMilitaryUnits(viewer) {
 
 // --- Zoom-based level ---
 
-const ZOOM_THRESHOLDS = [9000, 32000, 60000]; // meters
+const ZOOM_THRESHOLDS = [9000, 32000, 60000]; // meters (distance to look-at point)
 
-function levelForHeight(height) {
+function levelForDist(dist) {
   for (let i = 0; i < ZOOM_THRESHOLDS.length; i++) {
-    if (height < ZOOM_THRESHOLDS[i]) return i;
+    if (dist < ZOOM_THRESHOLDS[i]) return i;
   }
   return ZOOM_THRESHOLDS.length; // battalion
+}
+
+function cameraZoomDist(viewer) {
+  // H / sin(-pitch) is the camera-to-focal-point distance.
+  // It stays constant during orbit (tilt/rotate) and panning — only zoom changes it.
+  const H = viewer.camera.positionCartographic.height;
+  const sinDown = Math.sin(-viewer.camera.pitch); // 1 = straight down, 0 = horizon
+  if (sinDown < 0.05) return null; // near-horizontal view, skip
+  return H / sinDown;
 }
 
 // --- Animation ---
@@ -684,8 +693,9 @@ export function setupZoomListener(viewer) {
     if (zoomDebounceTimer) clearTimeout(zoomDebounceTimer);
     zoomDebounceTimer = setTimeout(() => {
       if (!militaryVisible || manualMode) return;
-      const height = viewer.camera.positionCartographic.height;
-      const newLevel = levelForHeight(height);
+      const dist = cameraZoomDist(viewer);
+      if (dist === null) return;
+      const newLevel = levelForDist(dist);
       if (newLevel !== currentLevel) {
         setLevel(newLevel, viewer);
       }
