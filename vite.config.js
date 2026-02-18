@@ -98,7 +98,34 @@ const MAP_TOOLS = [
       required: ["lat", "lon", "height"],
     },
   },
+  {
+    name: "get_entities",
+    description: "Get all military units and saved routes currently on the map.",
+    input_schema: { type: "object", properties: {}, required: [] },
+  },
 ];
+
+function flattenUnits(node) {
+  const { name, type, position } = node;
+  const result = [{ name, type, lat: position.lat, lon: position.lon }];
+  for (const child of node.children ?? []) result.push(...flattenUnits(child));
+  return result;
+}
+
+function resolveToolResult(name) {
+  if (name !== "get_entities") return "ok";
+  const units = flattenUnits(JSON.parse(fs.readFileSync(path.resolve("data/military-units.json"), "utf-8")));
+  const rawRoutes = JSON.parse(fs.readFileSync(path.resolve("data/waypoints.json"), "utf-8"));
+  const routes = rawRoutes.map((wps) => {
+    const letter = wps[0].name[0];
+    const center = {
+      lat: wps.reduce((s, w) => s + w.lat, 0) / wps.length,
+      lon: wps.reduce((s, w) => s + w.lon, 0) / wps.length,
+    };
+    return { letter, center, waypoints: wps.map(({ name, lat, lon }) => ({ name, lat, lon })) };
+  });
+  return JSON.stringify({ units, routes });
+}
 
 function claudePlugin() {
   return {
@@ -125,14 +152,16 @@ function claudePlugin() {
 
               if (msg.stop_reason === "tool_use") {
                 const toolUses = msg.content.filter(b => b.type === "tool_use");
-                for (const tu of toolUses) commands.push({ name: tu.name, input: tu.input });
+                for (const tu of toolUses) {
+                  if (tu.name !== "get_entities") commands.push({ name: tu.name, input: tu.input });
+                }
                 messages.push({ role: "assistant", content: msg.content });
                 messages.push({
                   role: "user",
                   content: toolUses.map(tu => ({
                     type: "tool_result",
                     tool_use_id: tu.id,
-                    content: "ok",
+                    content: resolveToolResult(tu.name),
                   })),
                 });
               } else {
