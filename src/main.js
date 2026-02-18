@@ -810,3 +810,41 @@ document.addEventListener("keydown", (event) => {
     for (const e of gridEntities) e.show = gridVisible;
   }
 });
+
+// Claude chat panel
+const claudeInput = document.getElementById("claude-input");
+const claudeResponse = document.getElementById("claude-response");
+const claudeSend = document.getElementById("claude-send");
+
+async function sendToClaude() {
+  const prompt = claudeInput.value.trim();
+  if (!prompt) return;
+  claudeResponse.textContent = "…";
+  claudeSend.disabled = true;
+  try {
+    const res = await fetch("/api/claude", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt }),
+    });
+    const data = await res.json();
+    claudeResponse.textContent = data.text ?? data.error ?? "No response";
+    for (const cmd of data.commands ?? []) {
+      if (cmd.name === "move_camera") {
+        const { lat, lon, height } = cmd.input;
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(lon, lat, height),
+        });
+      }
+    }
+  } catch (e) {
+    claudeResponse.textContent = `Error: ${e.message}`;
+  } finally {
+    claudeSend.disabled = false;
+  }
+}
+
+claudeSend.addEventListener("click", sendToClaude);
+claudeInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && e.ctrlKey) sendToClaude();
+});
