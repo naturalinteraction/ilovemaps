@@ -1,0 +1,16 @@
+Here are the most interesting options, roughly ranked:
+
+  plan_path — Claude chooses start + end coordinates (using get_entities to find unit positions or waypoints) and tells the client to run the
+  existing A* terrain pathfinder. The result is a terrain-hugging LIME route on the map. This is the most compelling because Claude's
+  reasoning drives a computationally heavy operation that already exists. Prompt: "Route 1 Plt to waypoint B3, avoid exposed terrain".
+
+  draw_circle — Claude places a circle entity on the map: threat zones, LZ coverage, exclusion areas, observation post radii. Pure Cesium
+  primitive, no server side, very easy. Prompt: "Mark a 500m threat zone around the enemy position I'm looking at".
+
+  add_waypoints — Claude places a sequence of pins on the map forming a route. Less interesting than plan_path because it's just coordinates,
+  not terrain-aware movement.
+
+  set_level — Claude switches between squad/platoon/company/battalion display. Trivial (one function call), only useful as part of a compound
+  action.
+
+  move_unit — Claude repositions a military unit. Most complex: requires mutating the JSON tree on disk and reloading client entities.
