@@ -49,13 +49,21 @@
         outline: none;
       }
       #claude-input::placeholder { color: rgba(255,255,255,0.4); }
+      #claude-proactive {
+        color: rgba(255,255,255,0.55);
+        font-size: 12px;
+        font-style: italic;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
     </style>
   </head>
   <body>
     <div id="cesiumContainer"></div>
     <div id="claude-panel">
       <div id="claude-response"></div>
-      <textarea id="claude-input" rows="3" placeholder="Ask Claude… (Enter to send, Shift+Enter for newline)"></textarea>
+      <div id="claude-proactive"></div>
+      <textarea id="claude-input" rows="3" placeholder="Tell me..."></textarea>
     </div>
     <script type="module" src="/src/main.js"></script>
   </body>

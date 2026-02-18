@@ -738,8 +738,6 @@ async function planPath(start, end) {
   }
   smoothPath.push(spline.evaluate(padded.length - 2));
 
-  pathAnimating = false;
-  dashPatternValue = 0xFFFF;
   playBeep(880);
   pathEntity = viewer.entities.add({
     polyline: {
@@ -749,6 +747,17 @@ async function planPath(start, end) {
       clampToGround: true,
     },
   });
+
+  const distKm = (distAB / 1000).toFixed(1);
+  proactiveClaude(
+    `A terrain-aware path was just planned from [${start.lat.toFixed(4)}, ${start.lon.toFixed(4)}] ` +
+    `to [${end.lat.toFixed(4)}, ${end.lon.toFixed(4)}], covering roughly ${distKm} km as-the-crow-flies ` +
+    `with ${resultPath.length} route points after smoothing. ` +
+    `In 1–2 sentences, comment on what this route crosses or its tactical character.`
+  );
+
+  pathAnimating = false;
+  dashPatternValue = 0xFFFF;
 }
 
 document.addEventListener("keydown", (event) => {
@@ -824,6 +833,51 @@ if (!CLAUDE_PANEL_ENABLED) {
 
 const claudeInput = document.getElementById("claude-input");
 const claudeResponse = document.getElementById("claude-response");
+const claudeProactive = document.getElementById("claude-proactive");
+
+function buildCamera() {
+  const cartographic = Cesium.Cartographic.fromCartesian(viewer.camera.position);
+  const camera = {
+    lat:     Cesium.Math.toDegrees(cartographic.latitude),
+    lon:     Cesium.Math.toDegrees(cartographic.longitude),
+    height:  cartographic.height,
+    heading: Cesium.Math.toDegrees(viewer.camera.heading),
+    pitch:   Cesium.Math.toDegrees(viewer.camera.pitch),
+    roll:    Cesium.Math.toDegrees(viewer.camera.roll),
+    lookAt:  null,
+  };
+  const canvas = viewer.scene.canvas;
+  const center = new Cesium.Cartesian2(canvas.clientWidth / 2, canvas.clientHeight / 2);
+  const ray = viewer.camera.getPickRay(center);
+  const hit = viewer.scene.globe.pick(ray, viewer.scene)
+           ?? viewer.camera.pickEllipsoid(center);
+  if (hit) {
+    const c = Cesium.Cartographic.fromCartesian(hit);
+    camera.lookAt = {
+      lat:      Cesium.Math.toDegrees(c.latitude),
+      lon:      Cesium.Math.toDegrees(c.longitude),
+      alt:      c.height,
+      distance: Cesium.Cartesian3.distance(viewer.camera.position, hit),
+    };
+  }
+  return camera;
+}
+
+async function proactiveClaude(prompt) {
+  if (claudeInput.disabled) return;
+  claudeProactive.textContent = "…";
+  try {
+    const res = await fetch("/api/claude", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt, camera: buildCamera() }),
+    });
+    const data = await res.json();
+    claudeProactive.textContent = data.text ?? "";
+  } catch (_) {
+    claudeProactive.textContent = "";
+  }
+}
 
 async function sendToClaude() {
   const prompt = claudeInput.value.trim();
@@ -831,36 +885,10 @@ async function sendToClaude() {
   claudeResponse.textContent = "…";
   claudeInput.disabled = true;
   try {
-    const cartographic = Cesium.Cartographic.fromCartesian(viewer.camera.position);
-    const camera = {
-      lat:     Cesium.Math.toDegrees(cartographic.latitude),
-      lon:     Cesium.Math.toDegrees(cartographic.longitude),
-      height:  cartographic.height,
-      heading: Cesium.Math.toDegrees(viewer.camera.heading),
-      pitch:   Cesium.Math.toDegrees(viewer.camera.pitch),
-      roll:    Cesium.Math.toDegrees(viewer.camera.roll),
-      lookAt:  null,
-    };
-
-    const canvas = viewer.scene.canvas;
-    const center = new Cesium.Cartesian2(canvas.clientWidth / 2, canvas.clientHeight / 2);
-    const ray = viewer.camera.getPickRay(center);
-    const hit = viewer.scene.globe.pick(ray, viewer.scene)
-             ?? viewer.camera.pickEllipsoid(center);
-    if (hit) {
-      const c = Cesium.Cartographic.fromCartesian(hit);
-      camera.lookAt = {
-        lat:      Cesium.Math.toDegrees(c.latitude),
-        lon:      Cesium.Math.toDegrees(c.longitude),
-        alt:      c.height,
-        distance: Cesium.Cartesian3.distance(viewer.camera.position, hit),
-      };
-    }
-
     const res = await fetch("/api/claude", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt, camera }),
+      body: JSON.stringify({ prompt, camera: buildCamera() }),
     });
     const data = await res.json();
     claudeResponse.textContent = data.text ?? data.error ?? "No response";
