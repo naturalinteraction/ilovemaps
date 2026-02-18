@@ -18,7 +18,7 @@
         position: fixed;
         bottom: 20px;
         right: 20px;
-        width: 340px;
+        width: 680px;
         background: rgba(0, 0, 0, 0.75);
         border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 8px;
@@ -49,25 +49,13 @@
         outline: none;
       }
       #claude-input::placeholder { color: rgba(255,255,255,0.4); }
-      #claude-send {
-        align-self: flex-end;
-        background: rgba(255, 255, 255, 0.15);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 4px;
-        color: #fff;
-        cursor: pointer;
-        font-size: 13px;
-        padding: 5px 14px;
-      }
-      #claude-send:hover { background: rgba(255, 255, 255, 0.25); }
     </style>
   </head>
   <body>
     <div id="cesiumContainer"></div>
     <div id="claude-panel">
       <div id="claude-response"></div>
-      <textarea id="claude-input" rows="3" placeholder="Ask Claude…"></textarea>
-      <button id="claude-send">Send</button>
+      <textarea id="claude-input" rows="3" placeholder="Ask Claude… (Enter to send, Shift+Enter for newline)"></textarea>
     </div>
     <script type="module" src="/src/main.js"></script>
   </body>

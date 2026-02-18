@@ -824,13 +824,12 @@ if (!CLAUDE_PANEL_ENABLED) {
 
 const claudeInput = document.getElementById("claude-input");
 const claudeResponse = document.getElementById("claude-response");
-const claudeSend = document.getElementById("claude-send");
 
 async function sendToClaude() {
   const prompt = claudeInput.value.trim();
   if (!prompt) return;
   claudeResponse.textContent = "…";
-  claudeSend.disabled = true;
+  claudeInput.disabled = true;
   try {
     const cartographic = Cesium.Cartographic.fromCartesian(viewer.camera.position);
     const camera = {
@@ -876,13 +875,16 @@ async function sendToClaude() {
   } catch (e) {
     claudeResponse.textContent = `Error: ${e.message}`;
   } finally {
-    claudeSend.disabled = false;
+    claudeInput.disabled = false;
+    claudeInput.focus();
   }
 }
 
 if (CLAUDE_PANEL_ENABLED) {
-  claudeSend.addEventListener("click", sendToClaude);
   claudeInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && e.ctrlKey) sendToClaude();
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendToClaude();
+    }
   });
 }
