@@ -7,9 +7,9 @@ import drapeShaderGLSL from "./drapeShader.glsl?raw";
 const DRONE_POSE = {
   lat: 46.22,       // degrees
   lon: 8.82,        // degrees
-  alt: 500,         // metres above ellipsoid
+  alt: 1500,        // metres above ellipsoid
   heading: 0,       // degrees, 0 = North, clockwise
-  pitch: -45,       // degrees, 0 = horizontal, negative = looking down
+  pitch: -85,       // degrees, 0 = horizontal, negative = looking down
   roll: 0,          // degrees
   hFovDeg: 60,      // horizontal field of view
   aspectRatio: 16 / 9,

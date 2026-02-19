@@ -1,5 +1,5 @@
 uniform sampler2D colorTexture;
-uniform sampler2D czm_depthTexture;
+uniform sampler2D depthTexture;
 uniform sampler2D videoTexture;
 uniform vec3 droneEcefPosition;
 uniform mat4 droneCameraMatrix;
@@ -8,7 +8,7 @@ uniform float videoAlpha;
 in vec2 v_textureCoordinates;
 
 void main() {
-    float depth = czm_readDepth(czm_depthTexture, v_textureCoordinates);
+    float depth = czm_readDepth(depthTexture, v_textureCoordinates);
 
     // Sky / background: depth at far plane — pass through unchanged
     if (depth >= 1.0) {
@@ -23,7 +23,6 @@ void main() {
     vec4 worldPos = czm_inverseView * eyeCoords;
 
     // Relative-to-center: shift origin to drone ECEF position
-    // (keeps float32 precision — ECEF values are ~6.4 M metres)
     vec3 rtcPos = worldPos.xyz - droneEcefPosition;
 
     // Project through drone camera (proj * view in RTC frame)
