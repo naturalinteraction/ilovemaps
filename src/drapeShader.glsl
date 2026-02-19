@@ -1,5 +1,6 @@
+#version 300 es
 uniform sampler2D colorTexture;
-uniform sampler2D czm_depthTexture;
+uniform sampler2D depthTexture;
 uniform sampler2D videoTexture;
 uniform vec3 droneEcefPosition;
 uniform mat4 droneCameraMatrix;
@@ -8,7 +9,7 @@ uniform float videoAlpha;
 in vec2 v_textureCoordinates;
 
 void main() {
-    float depth = czm_readDepth(czm_depthTexture, v_textureCoordinates);
+    float depth = czm_readDepth(depthTexture, v_textureCoordinates);
 
     // Sky / background: depth at far plane — pass through unchanged
     if (depth >= 1.0) {

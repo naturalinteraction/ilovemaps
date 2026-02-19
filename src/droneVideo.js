@@ -1,19 +1,8 @@
 import * as Cesium from "cesium";
+console.log("Cesium in droneVideo.js:", Cesium);
 import drapeShaderGLSL from "./drapeShader.glsl?raw";
 
-// ---------------------------------------------------------------------------
-// Hardcoded 6-DOF pose (matches data/drone_pose.json)
-// ---------------------------------------------------------------------------
-const DRONE_POSE = {
-  lat: 46.22,       // degrees
-  lon: 8.82,        // degrees
-  alt: 500,         // metres above ellipsoid
-  heading: 0,       // degrees, 0 = North, clockwise
-  pitch: -45,       // degrees, 0 = horizontal, negative = looking down
-  roll: 0,          // degrees
-  hFovDeg: 60,      // horizontal field of view
-  aspectRatio: 16 / 9,
-};
+
 
 // ---------------------------------------------------------------------------
 // Build drone camera matrix (projection * view) in RTC frame
@@ -88,14 +77,29 @@ function computeDroneCameraMatrix(pose) {
 // Public API
 // ---------------------------------------------------------------------------
 export async function setupDroneVideoLayer(viewer) {
-  const image = await Cesium.Resource.fetchImage({ url: "/data/drone_frame.jpg" });
+  const [image, pose] = await Promise.all([
+    Cesium.Resource.fetchImage({ url: "/data/drone_frame.jpg" }),
+    fetch("/data/drone_pose.json").then(r => r.json()),
+  ]);
+
+  console.log("Image loaded:", image); // Debug log
+
+  // Create a temporary canvas to flip the image horizontally
+  const canvas = document.createElement("canvas");
+  canvas.width = image.width;
+  canvas.height = image.height;
+  const ctx = canvas.getContext("2d");
+  ctx.translate(image.width, 0); // Move origin to the right edge
+  ctx.scale(-1, 1);             // Flip horizontally
+  ctx.drawImage(image, 0, 0);   // Draw the image
 
   const texture = new Cesium.Texture({
     context: viewer.scene.context,
-    source: image,
+    source: canvas, // Use the flipped canvas as the texture source
   });
+  console.log("Texture created:", texture); // Debug log
 
-  const drone = computeDroneCameraMatrix(DRONE_POSE);
+  const drone = computeDroneCameraMatrix(pose);
 
   const stage = new Cesium.PostProcessStage({
     fragmentShader: drapeShaderGLSL,
@@ -103,7 +107,7 @@ export async function setupDroneVideoLayer(viewer) {
       videoTexture:      () => texture,
       droneEcefPosition: () => drone.ecef,
       droneCameraMatrix: () => drone.matrix,
-      videoAlpha:        () => 0.8,
+      videoAlpha:        0.8, // Static value for debugging
     },
   });
 
