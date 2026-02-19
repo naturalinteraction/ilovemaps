@@ -1,0 +1,203 @@
+# Plan: Drone Video Draping on Terrain
+
+## Context
+
+The goal is to project live drone video footage onto the 3D terrain in real-time, using the drone's known 6DOF pose (position + orientation) and the known terrain geometry. The solution must run on mobile browsers. The existing stack is CesiumJS 1.138 with world terrain already loaded.
+
+This problem is known in geospatial circles as **video draping**, **georeferenced video overlay**, or **projective texture mapping on terrain**. The key challenge is correctly accounting for terrain relief so that the video footprint conforms to the actual 3D terrain surface — not a flat plane.
+
+---
+
+## The Four Main Approaches
+
+### Approach 1: PostProcessStage with Projective Texturing (RECOMMENDED)
+
+**How it works:**
+CesiumJS renders the scene to a framebuffer. A full-screen GLSL fragment shader then runs as a post-process stage. The shader:
+
+1. Reads the depth buffer → `czm_readDepth(czm_depthTexture, uv)`
+2. Reconstructs the ECEF world position of each pixel using the inverse of the viewer's camera matrices + the depth value
+3. Transforms that world position into the drone camera's coordinate system using the drone's 6DOF pose matrix
+4. Divides by Z (perspective divide) to get UV coordinates in the drone's image space
+5. Clips anything outside [0,1] UV range (outside the video frustum)
+6. Samples the live video texture at those UV coordinates
+7. Alpha-blends the video color over the scene color
+
+**Why it works for terrain relief:** The depth buffer contains the *actual rendered depth* of every terrain pixel. Reconstructing world positions from depth means you're reading the true 3D surface — ridges, valleys, and all. No terrain re-sampling needed.
+
+**Mobile friendliness:** Fully GPU-based. One extra render pass per frame, similar cost to FXAA. CesiumJS already ships with a PostProcessStage infrastructure.
+
+**Known gotcha — ECEF double precision:** GPU floats are 32-bit. ECEF coordinates near the Earth's surface have values ~6.4M metres, so naive float encoding loses sub-metre precision. Solution: encode positions as **relative-to-center (RTC)** — pass the drone's ECEF position as the origin, and encode the reconstructed pixel position relative to that. Cesium uses this internally.
+
+**Known gotcha — occlusion from drone's perspective:** The depth buffer reflects what the *viewer* camera sees, not the drone camera. If the viewer looks at a hillside that blocks the drone's view, the video will still be projected there. For low-altitude, near-nadir drone footage (typical use), this is rarely visible. For oblique views with complex terrain, you'd need a separate shadow/occlusion pass from the drone's perspective — complex, skip for now.
+
+**Implementation sketch:**
+```js
+const videoEl = document.createElement('video');
+videoEl.src = droneStreamUrl; // WebRTC, HLS, or local file
+videoEl.play();
+
+// Upload video frame to WebGL texture each frame
+const videoTexture = new Cesium.Texture({ ... }); // updated via copyFromFramebuffer or texSubImage2D
+
+const drapeStage = new Cesium.PostProcessStage({
+  fragmentShader: drapeShaderGLSL, // see below
+  uniforms: {
+    videoTexture: () => videoTexture,
+    droneEcefPosition: () => droneEcef,       // Cartesian3
+    droneCameraMatrix: () => droneProjView,   // Matrix4 = proj * view in drone frame
+    videoAlpha: () => 0.8,
+  }
+});
+viewer.scene.postProcessStages.add(drapeStage);
+```
+
+Core shader logic:
+```glsl
+uniform sampler2D colorTexture;
+uniform sampler2D czm_depthTexture; // provided automatically
+uniform sampler2D videoTexture;
+uniform vec3 droneEcefPosition;    // RTC origin
+uniform mat4 droneCameraMatrix;    // proj * view of drone camera (RTC)
+uniform float videoAlpha;
+in vec2 v_textureCoordinates;
+
+void main() {
+    float depth = czm_readDepth(czm_depthTexture, v_textureCoordinates);
+    if (depth >= 1.0) { out_FragColor = texture(colorTexture, v_textureCoordinates); return; }
+
+    // Reconstruct world position from depth (Cesium built-ins)
+    vec4 ndc = vec4(v_textureCoordinates * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
+    vec4 eyeCoords = czm_inverseProjection * ndc;
+    eyeCoords /= eyeCoords.w;
+    vec4 worldPos = czm_inverseView * eyeCoords;
+    vec3 rtcPos = worldPos.xyz - droneEcefPosition; // relative-to-center
+
+    // Project through drone camera
+    vec4 droneClip = droneCameraMatrix * vec4(rtcPos, 1.0);
+    if (droneClip.w <= 0.0) { out_FragColor = texture(colorTexture, v_textureCoordinates); return; }
+    vec2 droneUV = (droneClip.xy / droneClip.w) * 0.5 + 0.5;
+
+    // Clip to video frustum
+    if (droneUV.x < 0.0 || droneUV.x > 1.0 || droneUV.y < 0.0 || droneUV.y > 1.0) {
+        out_FragColor = texture(colorTexture, v_textureCoordinates); return;
+    }
+
+    vec4 video = texture(videoTexture, droneUV);
+    vec4 scene = texture(colorTexture, v_textureCoordinates);
+    out_FragColor = mix(scene, video, videoAlpha);
+}
+```
+
+---
+
+### Approach 2: Dynamic SingleTileImageryProvider (Simple, Near-Nadir Only)
+
+**How it works:**
+Each video frame is drawn to a `<canvas>` element. A `Cesium.SingleTileImageryProvider` (or a custom `ImageryProvider`) uses that canvas as its texture. The rectangle is computed from the drone's footprint on the ground (ground footprint from known altitude + FOV).
+
+**Limitation:** Imagery layers use a geographic (lat/lon) UV mapping — the video is stretched flat across the footprint rectangle regardless of terrain. For near-nadir views and relatively flat terrain this looks acceptable. For oblique views or mountain terrain, distortion will be obvious.
+
+**When to use it:** Quick prototype, nadir-view only, minimal code.
+
+---
+
+### Approach 3: KLV / STANAG 4609 Metadata Stream
+
+The military/intelligence standard for exactly this problem. Video frames are MPEG-TS with embedded KLV (Key-Length-Value) metadata containing full sensor model parameters (drone position, camera angles, intrinsics, distortion, target point, etc.).
+
+- **Libraries:** Cesium has experimental KLV support in its roadmap; OpenLayers has plugins; NASA WorldWind had support.
+- **Tooling:** Kitware's Kwiver, FFmpeg can extract KLV.
+- **Real-time browser:** Not practical. Requires WASM decode of KLV from MPEG-TS, very complex pipeline.
+- **Skip for now** unless integrating with an existing STANAG 4609 sensor system.
+
+---
+
+### Approach 4: WebGPU Terrain Mesh + Raycast
+
+Build a local terrain mesh from Cesium elevation data, load it into WebGPU, and do projective texturing in a WebGPU render pass. The most powerful and flexible approach.
+
+- **Problem:** WebGPU on mobile is still early (iOS Safari partial, Android Chrome 121+). Not viable for "must run on mobile."
+- **Future consideration** once WebGPU mobile support matures.
+
+---
+
+## Recommendation: Approach 1 (PostProcessStage)
+
+Best fit for the existing CesiumJS stack, real-time, mobile.
+
+---
+
+## Prerequisites / Assumptions
+
+**Video delivery:** GStreamer pipeline outputs raw uncompressed frames (RGB/RGBA). These are assumed to arrive in the browser as an `ArrayBuffer` (e.g. via WebSocket binary frames from a thin server-side bridge). The implementation receives frames via a callback and uploads them directly to a WebGL texture — no codec latency, no `<video>` element needed.
+
+**6DOF telemetry:** Hardcoded as a `const DRONE_POSE` struct for now. Shape:
+```js
+const DRONE_POSE = {
+  lat: 46.22, lon: 8.82, alt: 500,   // metres MSL
+  heading: 0,   // degrees, 0=North, clockwise
+  pitch: -45,   // degrees, 0=horizontal, negative=looking down
+  roll: 0,      // degrees, clockwise from above
+};
+```
+
+**Camera intrinsics (required for correct projection):**
+- Horizontal FOV (or focal length + sensor size)
+- For initial implementation: assume square pixels, centered principal point, no distortion
+
+---
+
+## Implementation Plan
+
+### Files to modify
+- `src/main.js` — add PostProcessStage setup, video texture management, 6DOF matrix computation
+- `vite.config.js` — optionally add WebSocket proxy if telemetry server is separate
+
+### New files
+- `src/droneVideo.js` — encapsulate all drone video draping logic
+- `src/drapeShader.glsl` — the GLSL fragment shader
+
+### Steps
+
+1. **Raw frame → WebGL texture pipeline**
+   - Receive each uncompressed frame as `ArrayBuffer` (RGB or RGBA, known WxH)
+   - On `viewer.scene.preRender`, call `gl.texSubImage2D` to upload the buffer directly to a WebGL texture (zero-copy path)
+   - Wrap in a `Cesium.Texture` (or use raw WebGL texture handle) so it can be passed as a PostProcessStage uniform
+   - No `<video>` element needed; avoids decoder latency entirely
+
+2. **6DOF → drone camera matrix (JavaScript)**
+   - Convert lat/lon/alt to ECEF Cartesian3
+   - Build local ENU frame at drone position (east/north/up axes in ECEF)
+   - Apply heading/pitch/roll rotations to get camera look-direction and up-vector
+   - Compute view matrix = inverse of camera world matrix
+   - Compute projection matrix from FOV and aspect ratio
+   - Pass as `Matrix4` uniform to shader
+
+3. **PostProcessStage setup**
+   - Create stage with shader, uniforms as callbacks (re-evaluated each frame)
+   - Add to `viewer.scene.postProcessStages`
+
+4. **WebSocket telemetry consumer** (if live)
+   - Connect to telemetry WS endpoint
+   - Update drone pose state on each message
+   - Interpolate pose between messages for smooth rendering
+
+5. **Alpha/opacity control**
+   - Slider or UI control for video opacity (0–1)
+   - Fade in/out on signal loss
+
+### Verification
+- Load a local drone video file and hardcode a pose matching the recorded flight
+- Verify that building corners / roads in the video align with Cesium terrain features
+- Test on mobile Chrome (Android) and Safari (iOS) for performance
+- Measure frame time: target < 16ms for 60fps
+
+---
+
+## Existing Code to Reuse
+
+- `viewer.scene.globe.depthTestAgainstTerrain = true` — already set (main.js:29), depth buffer is populated
+- `viewer.scene.postProcessStages` — already accessible via the viewer
+- Cesium built-in GLSL uniforms: `czm_inverseView`, `czm_inverseProjection`, `czm_depthTexture`
+- Cesium coordinate utilities: `Cesium.Cartesian3.fromDegrees()`, `Cesium.Transforms.eastNorthUpToFixedFrame()`, `Cesium.Matrix4`
