@@ -766,7 +766,15 @@ document.addEventListener("keydown", (event) => {
   // Military clustering keys (M, 1-4)
   if (handleKeydown(event, viewer)) return;
 
-  if (event.key === "Delete" && clickedEntities.length > 0) {
+  if (event.key === "w" || event.key === "W") {
+    if (updateDronePose) updateDronePose(0, 2);
+  } else if (event.key === "s" && updateDronePose) {
+    updateDronePose(0, -2);
+  } else if (event.key === "a" || event.key === "A") {
+    if (updateDronePose) updateDronePose(-2, 0);
+  } else if (event.key === "d" || event.key === "D") {
+    if (updateDronePose) updateDronePose(2, 0);
+  } else if (event.key === "Delete" && clickedEntities.length > 0) {
     viewer.entities.remove(clickedEntities.pop());
     clickedGroundPositions.pop();
     clickedWaypointData.pop();
@@ -919,4 +927,7 @@ if (CLAUDE_PANEL_ENABLED) {
   });
 }
 
-setupDroneVideoLayer(viewer).catch(console.error);
+let updateDronePose = null;
+setupDroneVideoLayer(viewer).then(({ updatePose }) => {
+  updateDronePose = updatePose;
+}).catch(console.error);

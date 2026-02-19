@@ -99,18 +99,25 @@ export async function setupDroneVideoLayer(viewer) {
   });
   console.log("Texture created:", texture); // Debug log
 
-  const drone = computeDroneCameraMatrix(pose);
+  let currentDrone = computeDroneCameraMatrix(pose);
 
   const stage = new Cesium.PostProcessStage({
     fragmentShader: drapeShaderGLSL,
     uniforms: {
       videoTexture:      () => texture,
-      droneEcefPosition: () => drone.ecef,
-      droneCameraMatrix: () => drone.matrix,
-      videoAlpha:        0.8, // Static value for debugging
+      droneEcefPosition: () => currentDrone.ecef,
+      droneCameraMatrix: () => currentDrone.matrix,
+      videoAlpha:        0.8,
     },
   });
 
   viewer.scene.postProcessStages.add(stage);
-  return stage;
+
+  function updatePose(deltaHeading, deltaPitch) {
+    pose.heading += deltaHeading;
+    pose.pitch = Math.max(-90, Math.min(90, pose.pitch + deltaPitch));
+    currentDrone = computeDroneCameraMatrix(pose);
+  }
+
+  return { stage, updatePose };
 }
