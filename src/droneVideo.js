@@ -9,7 +9,7 @@ const DRONE_POSE = {
   lon: 8.8,        // degrees
   alt: 1500,        // metres above ellipsoid
   heading: 0,       // degrees, 0 = North, clockwise
-  pitch: -89,       // degrees, 0 = horizontal, negative = looking down
+  pitch: -45,       // degrees, 0 = horizontal, negative = looking down
   roll: 0,          // degrees
   hFovDeg: 60,      // horizontal field of view
   aspectRatio: 16 / 9,
@@ -95,7 +95,7 @@ export async function setupDroneVideoLayer(viewer) {
     source: image,
   });
 
-  const drone = computeDroneCameraMatrix(DRONE_POSE);
+  let drone = computeDroneCameraMatrix(DRONE_POSE);
 
   const stage = new Cesium.PostProcessStage({
     fragmentShader: drapeShaderGLSL,
@@ -108,5 +108,22 @@ export async function setupDroneVideoLayer(viewer) {
   });
 
   viewer.scene.postProcessStages.add(stage);
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "a") {
+      DRONE_POSE.heading -= 0.2;
+      drone = computeDroneCameraMatrix(DRONE_POSE);
+    } else if (e.key === "d") {
+      DRONE_POSE.heading += 0.2;
+      drone = computeDroneCameraMatrix(DRONE_POSE);
+    } else if (e.key === "w") {
+      DRONE_POSE.pitch += 0.2;
+      drone = computeDroneCameraMatrix(DRONE_POSE);
+    } else if (e.key === "s") {
+      DRONE_POSE.pitch -= 0.2;
+      drone = computeDroneCameraMatrix(DRONE_POSE);
+    }
+  });
+
   return stage;
 }
