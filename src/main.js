@@ -1,6 +1,7 @@
 import * as Cesium from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import { loadMilitaryUnits, setupZoomListener, setupPreRender, handleLeftClick, handleRightClick, handleKeydown, playBeep } from "./clustering.js";
+import { setupDroneVideoLayer } from "./droneVideo.js";
 
 // Token Cesium Ion (registrarsi su cesium.com/ion per ottenerne uno)
 // Il globo funziona anche senza token, ma senza terrain 3D
@@ -916,3 +917,5 @@ if (CLAUDE_PANEL_ENABLED) {
     }
   });
 }
+
+setupDroneVideoLayer(viewer).catch(console.error);
