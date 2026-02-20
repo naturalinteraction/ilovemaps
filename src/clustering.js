@@ -208,9 +208,9 @@ export async function loadMilitaryUnits(viewer) {
 
   for (const node of allNodes) {
     const image = getSymbolImage(node.type);
-    // Staff show when their owning unit's level is current
+    // Staff visible only when their unit is unmerged (current level below unit's level)
     const initShow = node.isStaff
-      ? LEVEL_ORDER.indexOf(node.staffOwner.type) === currentLevel
+      ? currentLevel < LEVEL_ORDER.indexOf(node.staffOwner.type)
       : LEVEL_ORDER.indexOf(node.type) === currentLevel;
 
     const entity = viewer.entities.add({
@@ -489,11 +489,20 @@ function effectiveLevel(node) {
 function mergeStep(fromLevel, toLevel) {
   const anims = [];
 
-  // Hide all levels except what's animating (staff follow their owner's level)
+  // Hide all levels except what's animating
+  // Staff above toLevel stay visible (their units are still exploded)
   for (const node of allNodes) {
-    const lvl = effectiveLevel(node);
-    if (lvl < fromLevel || lvl > toLevel) {
-      entitiesById[node.id].show = false;
+    if (node.isStaff) {
+      const ownerLvl = LEVEL_ORDER.indexOf(node.staffOwner.type);
+      if (ownerLvl < fromLevel || ownerLvl === toLevel) {
+        entitiesById[node.id].show = false;
+      }
+      // Staff above toLevel remain visible — don't hide them
+    } else {
+      const lvl = LEVEL_ORDER.indexOf(node.type);
+      if (lvl < fromLevel || lvl > toLevel) {
+        entitiesById[node.id].show = false;
+      }
     }
   }
 
@@ -567,21 +576,19 @@ function mergeStep(fromLevel, toLevel) {
       },
     });
 
-    // Fade in staff of the parent unit
+    // Staff of the now-merged unit fade out (they were visible when unit was exploded)
     const staff = staffByUnit[node.id];
     if (staff) {
       for (const s of staff) {
         const se = entitiesById[s.id];
-        se.position = s.homePosition;
         anims.push({
           entity: se,
           from: s.homePosition,
           to: s.homePosition,
           duration: ANIM_DURATION,
-          fade: "in",
-          fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
+          fade: "out",
           fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
-          onComplete: () => { se.position = s.homePosition; },
+          onComplete: () => { se.show = false; se.position = s.homePosition; },
         });
       }
     }
@@ -599,11 +606,19 @@ function mergeStep(fromLevel, toLevel) {
 function unmergeStep(fromLevel, toLevel) {
   const anims = [];
 
-  // Hide levels not involved in the animation (staff follow their owner)
+  // Hide levels not involved in the animation
+  // Staff above toLevel stay visible (their units remain exploded)
   for (const node of allNodes) {
-    const lvl = effectiveLevel(node);
-    if (lvl !== fromLevel && lvl !== toLevel) {
-      entitiesById[node.id].show = false;
+    if (node.isStaff) {
+      const ownerLvl = LEVEL_ORDER.indexOf(node.staffOwner.type);
+      if (ownerLvl !== fromLevel && ownerLvl <= toLevel) {
+        entitiesById[node.id].show = false;
+      }
+    } else {
+      const lvl = LEVEL_ORDER.indexOf(node.type);
+      if (lvl !== fromLevel && lvl !== toLevel) {
+        entitiesById[node.id].show = false;
+      }
     }
   }
 
@@ -632,20 +647,10 @@ function unmergeStep(fromLevel, toLevel) {
       },
     });
 
-    // Fade in staff of this node
+    // Children at toLevel are merged — their staff stay hidden
     const staff = staffByUnit[node.id];
     if (staff) {
-      for (const s of staff) {
-        const se = entitiesById[s.id];
-        anims.push({
-          entity: se,
-          from: fromPos,
-          to: s.homePosition,
-          duration: ANIM_DURATION,
-          fade: "in",
-          onComplete: () => { se.position = s.homePosition; },
-        });
-      }
+      for (const s of staff) entitiesById[s.id].show = false;
     }
   }
 
@@ -667,19 +672,21 @@ function unmergeStep(fromLevel, toLevel) {
       },
     });
 
-    // Fade out staff of the old parent
+    // Parent is now unmerged — fade IN its staff
     const staff = staffByUnit[node.id];
     if (staff) {
       for (const s of staff) {
         const se = entitiesById[s.id];
+        se.position = s.homePosition;
         anims.push({
           entity: se,
           from: s.homePosition,
           to: s.homePosition,
           duration: ANIM_DURATION,
-          fade: "out",
+          fade: "in",
+          fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
           fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
-          onComplete: () => { se.show = false; se.position = s.homePosition; },
+          onComplete: () => { se.position = s.homePosition; },
         });
       }
     }
@@ -698,8 +705,9 @@ function showLevel(levelIdx) {
   for (const node of allNodes) {
     const entity = entitiesById[node.id];
     if (node.isStaff) {
-      // Staff show when their owning unit is visible
-      entity.show = militaryVisible && node.staffOwner.type === type;
+      // Staff visible only when the unit is unmerged (current level is below the unit's level)
+      const ownerLevel = LEVEL_ORDER.indexOf(node.staffOwner.type);
+      entity.show = militaryVisible && levelIdx < ownerLevel;
     } else {
       entity.show = militaryVisible && node.type === type;
     }
@@ -772,18 +780,16 @@ export function handleRightClick(viewer, click) {
     fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
     onComplete: () => { parentEntity.position = parent.homePosition; },
   });
-  // Fade in staff of the parent
+  // Parent is now merged — fade out its staff (they were visible when parent was exploded)
   const parentStaff = staffByUnit[parent.id];
   if (parentStaff) {
     for (const s of parentStaff) {
       const se = entitiesById[s.id];
-      se.position = s.homePosition;
       anims.push({
         entity: se, from: s.homePosition, to: s.homePosition,
-        duration: ANIM_DURATION, fade: "in",
-        fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
+        duration: ANIM_DURATION, fade: "out",
         fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
-        onComplete: () => { se.position = s.homePosition; },
+        onComplete: () => { se.show = false; se.position = s.homePosition; },
       });
     }
   }
@@ -814,16 +820,18 @@ export function handleLeftClick(viewer, click) {
       entity.position = node.homePosition;
     },
   });
-  // Fade out staff of the parent being unmerged
+  // Parent is now unmerged — fade IN its staff
   const nodeStaff = staffByUnit[node.id];
   if (nodeStaff) {
     for (const s of nodeStaff) {
       const se = entitiesById[s.id];
+      se.position = s.homePosition;
       anims.push({
         entity: se, from: s.homePosition, to: s.homePosition,
-        duration: ANIM_DURATION, fade: "out",
+        duration: ANIM_DURATION, fade: "in",
+        fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
         fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
-        onComplete: () => { se.show = false; se.position = s.homePosition; },
+        onComplete: () => { se.position = s.homePosition; },
       });
     }
   }
@@ -837,17 +845,10 @@ export function handleLeftClick(viewer, click) {
       fade: "in",
       onComplete: () => { e.position = desc.homePosition; },
     });
-    // Fade in staff of appearing children
+    // Children are merged — their staff stay hidden
     const staff = staffByUnit[desc.id];
     if (staff) {
-      for (const s of staff) {
-        const se = entitiesById[s.id];
-        anims.push({
-          entity: se, from: node.homePosition, to: s.homePosition,
-          duration: ANIM_DURATION, fade: "in",
-          onComplete: () => { se.position = s.homePosition; },
-        });
-      }
+      for (const s of staff) entitiesById[s.id].show = false;
     }
   });
   if (anims.length > 0) { manualMode = true; playBeep(UNMERGE_BEEP_FREQ); startAnimations(anims); }
@@ -902,7 +903,7 @@ export function handleKeydown(event, viewer) {
         const entity = entitiesById[node.id];
         if (militaryVisible) {
           if (node.isStaff) {
-            entity.show = node.staffOwner.type === LEVEL_ORDER[currentLevel];
+            entity.show = currentLevel < LEVEL_ORDER.indexOf(node.staffOwner.type);
           } else {
             entity.show = node.type === LEVEL_ORDER[currentLevel];
           }
