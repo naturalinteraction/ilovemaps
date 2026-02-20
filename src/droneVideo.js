@@ -9,7 +9,7 @@ const DRONE_POSE = {
   lon: 8.8,        // degrees
   alt: 2700,        // metres above ellipsoid
   heading: 0,       // degrees, 0 = North, clockwise
-  pitch: 0,       // degrees, 0 = horizontal, positive = looking down, 90 = straight down
+  pitch: 77,       // degrees, 0 = horizontal, positive = looking down, 90 = straight down
   roll: 0,          // degrees
   hFovDeg: 30,      // horizontal field of view
   aspectRatio: 16 / 9,
