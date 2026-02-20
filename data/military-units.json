@@ -2,57 +2,906 @@
   "id": "rgt1",
   "name": "1 Rgt",
   "type": "regiment",
-  "position": { "lat": 46.572, "lon": 8.01, "alt": 2000 },
+  "position": {
+    "lat": 46.572,
+    "lon": 8.01,
+    "alt": 2000
+  },
   "children": [
     {
       "id": "bn1",
       "name": "I Bn",
       "type": "battalion",
-      "position": { "lat": 46.560, "lon": 7.965, "alt": 1850 },
+      "position": {
+        "lat": 46.56,
+        "lon": 7.965,
+        "alt": 1850
+      },
       "children": [
         {
           "id": "co1",
           "name": "A Co",
           "type": "company",
-          "position": { "lat": 46.554, "lon": 7.965, "alt": 1800 },
+          "position": {
+            "lat": 46.554,
+            "lon": 7.965,
+            "alt": 1800
+          },
           "children": [
             {
               "id": "pl1",
               "name": "1 Plt",
               "type": "platoon",
-              "position": { "lat": 46.583, "lon": 7.965, "alt": 1700 },
+              "position": {
+                "lat": 46.583,
+                "lon": 7.965,
+                "alt": 1700
+              },
               "children": [
-                { "id": "sq1", "name": "1 Sqd", "type": "squad", "position": { "lat": 46.589, "lon": 7.948, "alt": 1650 }, "children": [] },
-                { "id": "sq2", "name": "2 Sqd", "type": "squad", "position": { "lat": 46.577, "lon": 7.974, "alt": 1750 }, "children": [] },
-                { "id": "sq3", "name": "3 Sqd", "type": "squad", "position": { "lat": 46.586, "lon": 7.959, "alt": 1680 }, "children": [] },
-                { "id": "sq4", "name": "4 Sqd", "type": "squad", "position": { "lat": 46.580, "lon": 7.982, "alt": 1720 }, "children": [] },
-                { "id": "sq5", "name": "5 Sqd", "type": "squad", "position": { "lat": 46.592, "lon": 7.969, "alt": 1690 }, "children": [] }
+                {
+                  "id": "sq1",
+                  "name": "1 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.589,
+                    "lon": 7.948,
+                    "alt": 1650
+                  },
+                  "children": [
+                    {
+                      "id": "ind1",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5902,
+                        "lon": 7.9465,
+                        "alt": 1630
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind2",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.588,
+                        "lon": 7.9498,
+                        "alt": 1660
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind3",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5905,
+                        "lon": 7.949,
+                        "alt": 1620
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind4",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5882,
+                        "lon": 7.9468,
+                        "alt": 1665
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq2",
+                  "name": "2 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.577,
+                    "lon": 7.974,
+                    "alt": 1750
+                  },
+                  "children": [
+                    {
+                      "id": "ind5",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5782,
+                        "lon": 7.9725,
+                        "alt": 1730
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind6",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.576,
+                        "lon": 7.9758,
+                        "alt": 1760
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind7",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5785,
+                        "lon": 7.975,
+                        "alt": 1720
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind8",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5762,
+                        "lon": 7.9728,
+                        "alt": 1765
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq3",
+                  "name": "3 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.586,
+                    "lon": 7.959,
+                    "alt": 1680
+                  },
+                  "children": [
+                    {
+                      "id": "ind9",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5872,
+                        "lon": 7.9575,
+                        "alt": 1660
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind10",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.585,
+                        "lon": 7.9608,
+                        "alt": 1690
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind11",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5875,
+                        "lon": 7.96,
+                        "alt": 1650
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind12",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5852,
+                        "lon": 7.9578,
+                        "alt": 1695
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq4",
+                  "name": "4 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.58,
+                    "lon": 7.982,
+                    "alt": 1720
+                  },
+                  "children": [
+                    {
+                      "id": "ind13",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5812,
+                        "lon": 7.9805,
+                        "alt": 1700
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind14",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.579,
+                        "lon": 7.9838,
+                        "alt": 1730
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind15",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5815,
+                        "lon": 7.983,
+                        "alt": 1690
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind16",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5792,
+                        "lon": 7.9808,
+                        "alt": 1735
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq5",
+                  "name": "5 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.592,
+                    "lon": 7.969,
+                    "alt": 1690
+                  },
+                  "children": [
+                    {
+                      "id": "ind17",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5932,
+                        "lon": 7.9675,
+                        "alt": 1670
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind18",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.591,
+                        "lon": 7.9708,
+                        "alt": 1700
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind19",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5935,
+                        "lon": 7.97,
+                        "alt": 1660
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind20",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5912,
+                        "lon": 7.9678,
+                        "alt": 1705
+                      },
+                      "children": []
+                    }
+                  ]
+                }
               ]
             },
             {
               "id": "pl2",
               "name": "2 Plt",
               "type": "platoon",
-              "position": { "lat": 46.539, "lon": 7.990, "alt": 1900 },
+              "position": {
+                "lat": 46.539,
+                "lon": 7.99,
+                "alt": 1900
+              },
               "children": [
-                { "id": "sq6", "name": "6 Sqd", "type": "squad", "position": { "lat": 46.545, "lon": 7.978, "alt": 1850 }, "children": [] },
-                { "id": "sq7", "name": "7 Sqd", "type": "squad", "position": { "lat": 46.532, "lon": 8.005, "alt": 1950 }, "children": [] },
-                { "id": "sq8", "name": "8 Sqd", "type": "squad", "position": { "lat": 46.542, "lon": 7.996, "alt": 1880 }, "children": [] },
-                { "id": "sq9", "name": "9 Sqd", "type": "squad", "position": { "lat": 46.536, "lon": 7.982, "alt": 1920 }, "children": [] },
-                { "id": "sq10", "name": "10 Sqd", "type": "squad", "position": { "lat": 46.529, "lon": 7.999, "alt": 1870 }, "children": [] }
+                {
+                  "id": "sq6",
+                  "name": "6 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.545,
+                    "lon": 7.978,
+                    "alt": 1850
+                  },
+                  "children": [
+                    {
+                      "id": "ind21",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5462,
+                        "lon": 7.9765,
+                        "alt": 1830
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind22",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.544,
+                        "lon": 7.9798,
+                        "alt": 1860
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind23",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5465,
+                        "lon": 7.979,
+                        "alt": 1820
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind24",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5442,
+                        "lon": 7.9768,
+                        "alt": 1865
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq7",
+                  "name": "7 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.532,
+                    "lon": 8.005,
+                    "alt": 1950
+                  },
+                  "children": [
+                    {
+                      "id": "ind25",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5332,
+                        "lon": 8.0035,
+                        "alt": 1930
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind26",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.531,
+                        "lon": 8.0068,
+                        "alt": 1960
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind27",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5335,
+                        "lon": 8.006,
+                        "alt": 1920
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind28",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5312,
+                        "lon": 8.0038,
+                        "alt": 1965
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq8",
+                  "name": "8 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.542,
+                    "lon": 7.996,
+                    "alt": 1880
+                  },
+                  "children": [
+                    {
+                      "id": "ind29",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5432,
+                        "lon": 7.9945,
+                        "alt": 1860
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind30",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.541,
+                        "lon": 7.9978,
+                        "alt": 1890
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind31",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5435,
+                        "lon": 7.997,
+                        "alt": 1850
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind32",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5412,
+                        "lon": 7.9948,
+                        "alt": 1895
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq9",
+                  "name": "9 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.536,
+                    "lon": 7.982,
+                    "alt": 1920
+                  },
+                  "children": [
+                    {
+                      "id": "ind33",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5372,
+                        "lon": 7.9805,
+                        "alt": 1900
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind34",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.535,
+                        "lon": 7.9838,
+                        "alt": 1930
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind35",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5375,
+                        "lon": 7.983,
+                        "alt": 1890
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind36",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5352,
+                        "lon": 7.9808,
+                        "alt": 1935
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq10",
+                  "name": "10 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.529,
+                    "lon": 7.999,
+                    "alt": 1870
+                  },
+                  "children": [
+                    {
+                      "id": "ind37",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5302,
+                        "lon": 7.9975,
+                        "alt": 1850
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind38",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.528,
+                        "lon": 8.0008,
+                        "alt": 1880
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind39",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5305,
+                        "lon": 8,
+                        "alt": 1840
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind40",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5282,
+                        "lon": 7.9978,
+                        "alt": 1885
+                      },
+                      "children": []
+                    }
+                  ]
+                }
               ]
             },
             {
               "id": "pl5",
               "name": "5 Plt",
               "type": "platoon",
-              "position": { "lat": 46.539, "lon": 7.940, "alt": 1800 },
+              "position": {
+                "lat": 46.539,
+                "lon": 7.94,
+                "alt": 1800
+              },
               "children": [
-                { "id": "sq21", "name": "21 Sqd", "type": "squad", "position": { "lat": 46.544, "lon": 7.930, "alt": 1770 }, "children": [] },
-                { "id": "sq22", "name": "22 Sqd", "type": "squad", "position": { "lat": 46.533, "lon": 7.947, "alt": 1830 }, "children": [] },
-                { "id": "sq23", "name": "23 Sqd", "type": "squad", "position": { "lat": 46.541, "lon": 7.935, "alt": 1790 }, "children": [] },
-                { "id": "sq24", "name": "24 Sqd", "type": "squad", "position": { "lat": 46.536, "lon": 7.952, "alt": 1810 }, "children": [] },
-                { "id": "sq25", "name": "25 Sqd", "type": "squad", "position": { "lat": 46.547, "lon": 7.942, "alt": 1760 }, "children": [] }
+                {
+                  "id": "sq21",
+                  "name": "21 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.544,
+                    "lon": 7.93,
+                    "alt": 1770
+                  },
+                  "children": [
+                    {
+                      "id": "ind41",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5452,
+                        "lon": 7.9285,
+                        "alt": 1750
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind42",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.543,
+                        "lon": 7.9318,
+                        "alt": 1780
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind43",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5455,
+                        "lon": 7.931,
+                        "alt": 1740
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind44",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5432,
+                        "lon": 7.9288,
+                        "alt": 1785
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq22",
+                  "name": "22 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.533,
+                    "lon": 7.947,
+                    "alt": 1830
+                  },
+                  "children": [
+                    {
+                      "id": "ind45",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5342,
+                        "lon": 7.9455,
+                        "alt": 1810
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind46",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.532,
+                        "lon": 7.9488,
+                        "alt": 1840
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind47",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5345,
+                        "lon": 7.948,
+                        "alt": 1800
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind48",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5322,
+                        "lon": 7.9458,
+                        "alt": 1845
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq23",
+                  "name": "23 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.541,
+                    "lon": 7.935,
+                    "alt": 1790
+                  },
+                  "children": [
+                    {
+                      "id": "ind49",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5422,
+                        "lon": 7.9335,
+                        "alt": 1770
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind50",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.54,
+                        "lon": 7.9368,
+                        "alt": 1800
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind51",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5425,
+                        "lon": 7.936,
+                        "alt": 1760
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind52",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5402,
+                        "lon": 7.9338,
+                        "alt": 1805
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq24",
+                  "name": "24 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.536,
+                    "lon": 7.952,
+                    "alt": 1810
+                  },
+                  "children": [
+                    {
+                      "id": "ind53",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5372,
+                        "lon": 7.9505,
+                        "alt": 1790
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind54",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.535,
+                        "lon": 7.9538,
+                        "alt": 1820
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind55",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5375,
+                        "lon": 7.953,
+                        "alt": 1780
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind56",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5352,
+                        "lon": 7.9508,
+                        "alt": 1825
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq25",
+                  "name": "25 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.547,
+                    "lon": 7.942,
+                    "alt": 1760
+                  },
+                  "children": [
+                    {
+                      "id": "ind57",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5482,
+                        "lon": 7.9405,
+                        "alt": 1740
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind58",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.546,
+                        "lon": 7.9438,
+                        "alt": 1770
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind59",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5485,
+                        "lon": 7.943,
+                        "alt": 1730
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind60",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5462,
+                        "lon": 7.9408,
+                        "alt": 1775
+                      },
+                      "children": []
+                    }
+                  ]
+                }
               ]
             }
           ]
@@ -63,51 +912,896 @@
       "id": "bn2",
       "name": "II Bn",
       "type": "battalion",
-      "position": { "lat": 46.591, "lon": 8.052, "alt": 2200 },
+      "position": {
+        "lat": 46.591,
+        "lon": 8.052,
+        "alt": 2200
+      },
       "children": [
         {
           "id": "co2",
           "name": "B Co",
           "type": "company",
-          "position": { "lat": 46.591, "lon": 8.052, "alt": 2200 },
+          "position": {
+            "lat": 46.591,
+            "lon": 8.052,
+            "alt": 2200
+          },
           "children": [
             {
               "id": "pl3",
               "name": "3 Plt",
               "type": "platoon",
-              "position": { "lat": 46.617, "lon": 8.052, "alt": 2100 },
+              "position": {
+                "lat": 46.617,
+                "lon": 8.052,
+                "alt": 2100
+              },
               "children": [
-                { "id": "sq11", "name": "11 Sqd", "type": "squad", "position": { "lat": 46.613, "lon": 8.039, "alt": 2050 }, "children": [] },
-                { "id": "sq12", "name": "12 Sqd", "type": "squad", "position": { "lat": 46.623, "lon": 8.063, "alt": 2150 }, "children": [] },
-                { "id": "sq13", "name": "13 Sqd", "type": "squad", "position": { "lat": 46.619, "lon": 8.046, "alt": 2080 }, "children": [] },
-                { "id": "sq14", "name": "14 Sqd", "type": "squad", "position": { "lat": 46.611, "lon": 8.059, "alt": 2120 }, "children": [] },
-                { "id": "sq15", "name": "15 Sqd", "type": "squad", "position": { "lat": 46.626, "lon": 8.042, "alt": 2060 }, "children": [] }
+                {
+                  "id": "sq11",
+                  "name": "11 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.613,
+                    "lon": 8.039,
+                    "alt": 2050
+                  },
+                  "children": [
+                    {
+                      "id": "ind61",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.6142,
+                        "lon": 8.0375,
+                        "alt": 2030
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind62",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.612,
+                        "lon": 8.0408,
+                        "alt": 2060
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind63",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.6145,
+                        "lon": 8.04,
+                        "alt": 2020
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind64",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.6122,
+                        "lon": 8.0378,
+                        "alt": 2065
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq12",
+                  "name": "12 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.623,
+                    "lon": 8.063,
+                    "alt": 2150
+                  },
+                  "children": [
+                    {
+                      "id": "ind65",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.6242,
+                        "lon": 8.0615,
+                        "alt": 2130
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind66",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.622,
+                        "lon": 8.0648,
+                        "alt": 2160
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind67",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.6245,
+                        "lon": 8.064,
+                        "alt": 2120
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind68",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.6222,
+                        "lon": 8.0618,
+                        "alt": 2165
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq13",
+                  "name": "13 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.619,
+                    "lon": 8.046,
+                    "alt": 2080
+                  },
+                  "children": [
+                    {
+                      "id": "ind69",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.6202,
+                        "lon": 8.0445,
+                        "alt": 2060
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind70",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.618,
+                        "lon": 8.0478,
+                        "alt": 2090
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind71",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.6205,
+                        "lon": 8.047,
+                        "alt": 2050
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind72",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.6182,
+                        "lon": 8.0448,
+                        "alt": 2095
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq14",
+                  "name": "14 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.611,
+                    "lon": 8.059,
+                    "alt": 2120
+                  },
+                  "children": [
+                    {
+                      "id": "ind73",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.6122,
+                        "lon": 8.0575,
+                        "alt": 2100
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind74",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.61,
+                        "lon": 8.0608,
+                        "alt": 2130
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind75",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.6125,
+                        "lon": 8.06,
+                        "alt": 2090
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind76",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.6102,
+                        "lon": 8.0578,
+                        "alt": 2135
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq15",
+                  "name": "15 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.626,
+                    "lon": 8.042,
+                    "alt": 2060
+                  },
+                  "children": [
+                    {
+                      "id": "ind77",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.6272,
+                        "lon": 8.0405,
+                        "alt": 2040
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind78",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.625,
+                        "lon": 8.0438,
+                        "alt": 2070
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind79",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.6275,
+                        "lon": 8.043,
+                        "alt": 2030
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind80",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.6252,
+                        "lon": 8.0408,
+                        "alt": 2075
+                      },
+                      "children": []
+                    }
+                  ]
+                }
               ]
             },
             {
               "id": "pl4",
               "name": "4 Plt",
               "type": "platoon",
-              "position": { "lat": 46.578, "lon": 8.074, "alt": 2300 },
+              "position": {
+                "lat": 46.578,
+                "lon": 8.074,
+                "alt": 2300
+              },
               "children": [
-                { "id": "sq16", "name": "16 Sqd", "type": "squad", "position": { "lat": 46.583, "lon": 8.061, "alt": 2250 }, "children": [] },
-                { "id": "sq17", "name": "17 Sqd", "type": "squad", "position": { "lat": 46.573, "lon": 8.089, "alt": 2350 }, "children": [] },
-                { "id": "sq18", "name": "18 Sqd", "type": "squad", "position": { "lat": 46.581, "lon": 8.078, "alt": 2280 }, "children": [] },
-                { "id": "sq19", "name": "19 Sqd", "type": "squad", "position": { "lat": 46.576, "lon": 8.066, "alt": 2310 }, "children": [] },
-                { "id": "sq20", "name": "20 Sqd", "type": "squad", "position": { "lat": 46.585, "lon": 8.084, "alt": 2270 }, "children": [] }
+                {
+                  "id": "sq16",
+                  "name": "16 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.583,
+                    "lon": 8.061,
+                    "alt": 2250
+                  },
+                  "children": [
+                    {
+                      "id": "ind81",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5842,
+                        "lon": 8.0595,
+                        "alt": 2230
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind82",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.582,
+                        "lon": 8.0628,
+                        "alt": 2260
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind83",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5845,
+                        "lon": 8.062,
+                        "alt": 2220
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind84",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5822,
+                        "lon": 8.0598,
+                        "alt": 2265
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq17",
+                  "name": "17 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.573,
+                    "lon": 8.089,
+                    "alt": 2350
+                  },
+                  "children": [
+                    {
+                      "id": "ind85",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5742,
+                        "lon": 8.0875,
+                        "alt": 2330
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind86",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.572,
+                        "lon": 8.0908,
+                        "alt": 2360
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind87",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5745,
+                        "lon": 8.09,
+                        "alt": 2320
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind88",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5722,
+                        "lon": 8.0878,
+                        "alt": 2365
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq18",
+                  "name": "18 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.581,
+                    "lon": 8.078,
+                    "alt": 2280
+                  },
+                  "children": [
+                    {
+                      "id": "ind89",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5822,
+                        "lon": 8.0765,
+                        "alt": 2260
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind90",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.58,
+                        "lon": 8.0798,
+                        "alt": 2290
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind91",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5825,
+                        "lon": 8.079,
+                        "alt": 2250
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind92",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5802,
+                        "lon": 8.0768,
+                        "alt": 2295
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq19",
+                  "name": "19 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.576,
+                    "lon": 8.066,
+                    "alt": 2310
+                  },
+                  "children": [
+                    {
+                      "id": "ind93",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5772,
+                        "lon": 8.0645,
+                        "alt": 2290
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind94",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.575,
+                        "lon": 8.0678,
+                        "alt": 2320
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind95",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5775,
+                        "lon": 8.067,
+                        "alt": 2280
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind96",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5752,
+                        "lon": 8.0648,
+                        "alt": 2325
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq20",
+                  "name": "20 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.585,
+                    "lon": 8.084,
+                    "alt": 2270
+                  },
+                  "children": [
+                    {
+                      "id": "ind97",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5862,
+                        "lon": 8.0825,
+                        "alt": 2250
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind98",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.584,
+                        "lon": 8.0858,
+                        "alt": 2280
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind99",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5865,
+                        "lon": 8.085,
+                        "alt": 2240
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind100",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5842,
+                        "lon": 8.0828,
+                        "alt": 2285
+                      },
+                      "children": []
+                    }
+                  ]
+                }
               ]
             },
             {
               "id": "pl6",
               "name": "6 Plt",
               "type": "platoon",
-              "position": { "lat": 46.578, "lon": 8.030, "alt": 2190 },
+              "position": {
+                "lat": 46.578,
+                "lon": 8.03,
+                "alt": 2190
+              },
               "children": [
-                { "id": "sq26", "name": "26 Sqd", "type": "squad", "position": { "lat": 46.583, "lon": 8.024, "alt": 2160 }, "children": [] },
-                { "id": "sq27", "name": "27 Sqd", "type": "squad", "position": { "lat": 46.574, "lon": 8.037, "alt": 2220 }, "children": [] },
-                { "id": "sq28", "name": "28 Sqd", "type": "squad", "position": { "lat": 46.580, "lon": 8.028, "alt": 2180 }, "children": [] },
-                { "id": "sq29", "name": "29 Sqd", "type": "squad", "position": { "lat": 46.576, "lon": 8.042, "alt": 2210 }, "children": [] },
-                { "id": "sq30", "name": "30 Sqd", "type": "squad", "position": { "lat": 46.585, "lon": 8.032, "alt": 2170 }, "children": [] }
+                {
+                  "id": "sq26",
+                  "name": "26 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.583,
+                    "lon": 8.024,
+                    "alt": 2160
+                  },
+                  "children": [
+                    {
+                      "id": "ind101",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5842,
+                        "lon": 8.0225,
+                        "alt": 2140
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind102",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.582,
+                        "lon": 8.0258,
+                        "alt": 2170
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind103",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5845,
+                        "lon": 8.025,
+                        "alt": 2130
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind104",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5822,
+                        "lon": 8.0228,
+                        "alt": 2175
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq27",
+                  "name": "27 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.574,
+                    "lon": 8.037,
+                    "alt": 2220
+                  },
+                  "children": [
+                    {
+                      "id": "ind105",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5752,
+                        "lon": 8.0355,
+                        "alt": 2200
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind106",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.573,
+                        "lon": 8.0388,
+                        "alt": 2230
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind107",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5755,
+                        "lon": 8.038,
+                        "alt": 2190
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind108",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5732,
+                        "lon": 8.0358,
+                        "alt": 2235
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq28",
+                  "name": "28 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.58,
+                    "lon": 8.028,
+                    "alt": 2180
+                  },
+                  "children": [
+                    {
+                      "id": "ind109",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5812,
+                        "lon": 8.0265,
+                        "alt": 2160
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind110",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.579,
+                        "lon": 8.0298,
+                        "alt": 2190
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind111",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5815,
+                        "lon": 8.029,
+                        "alt": 2150
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind112",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5792,
+                        "lon": 8.0268,
+                        "alt": 2195
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq29",
+                  "name": "29 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.576,
+                    "lon": 8.042,
+                    "alt": 2210
+                  },
+                  "children": [
+                    {
+                      "id": "ind113",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5772,
+                        "lon": 8.0405,
+                        "alt": 2190
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind114",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.575,
+                        "lon": 8.0438,
+                        "alt": 2220
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind115",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5775,
+                        "lon": 8.043,
+                        "alt": 2180
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind116",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5752,
+                        "lon": 8.0408,
+                        "alt": 2225
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "sq30",
+                  "name": "30 Sqd",
+                  "type": "squad",
+                  "position": {
+                    "lat": 46.585,
+                    "lon": 8.032,
+                    "alt": 2170
+                  },
+                  "children": [
+                    {
+                      "id": "ind117",
+                      "name": "Alpha",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5862,
+                        "lon": 8.0305,
+                        "alt": 2150
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind118",
+                      "name": "Bravo",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.584,
+                        "lon": 8.0338,
+                        "alt": 2180
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind119",
+                      "name": "Charlie",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5865,
+                        "lon": 8.033,
+                        "alt": 2140
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "ind120",
+                      "name": "Delta",
+                      "type": "individual",
+                      "position": {
+                        "lat": 46.5842,
+                        "lon": 8.0308,
+                        "alt": 2185
+                      },
+                      "children": []
+                    }
+                  ]
+                }
               ]
             }
           ]

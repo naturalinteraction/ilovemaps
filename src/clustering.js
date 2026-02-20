@@ -25,7 +25,9 @@ function drawMilitarySymbol(type) {
   ctx.strokeStyle = BLUE;
   ctx.lineWidth = 2;
 
-  if (type === "squad") {
+  if (type === "individual") {
+    // APP-6A: no echelon marker (bare rectangle)
+  } else if (type === "squad") {
     // APP-6A: single dot
     const y = ry - 6;
     ctx.beginPath();
@@ -73,7 +75,7 @@ function getSymbolImage(type) {
 
 // --- Data structures ---
 
-const LEVEL_ORDER = ["squad", "platoon", "company", "battalion", "regiment"];
+const LEVEL_ORDER = ["individual", "squad", "platoon", "company", "battalion", "regiment"];
 
 // All nodes indexed by id
 const nodesById = {};
@@ -94,7 +96,7 @@ const scratchEnd = new Cesium.Cartesian3();
 const ARC_SEGMENTS = 16;
 const ARC_BOW = 0.15; // perpendicular offset as fraction of distance
 
-// Current visible level index (0=squad, 4=regiment)
+// Current visible level index (0=individual, 5=regiment)
 let currentLevel = 0;
 let militaryVisible = true;
 let manualMode = false; // disables zoom-based auto-leveling after click merge/unmerge
@@ -273,7 +275,7 @@ export async function loadMilitaryUnits(viewer) {
 
 // --- Zoom-based level ---
 
-const ZOOM_THRESHOLDS = [10000, 30000, 70000, 150000]; // meters (distance to look-at point)
+const ZOOM_THRESHOLDS = [3000, 10000, 30000, 70000, 150000]; // meters (distance to look-at point)
 
 function levelForDist(dist) {
   for (let i = 0; i < ZOOM_THRESHOLDS.length; i++) {
@@ -728,7 +730,7 @@ export function handleKeydown(event, viewer) {
     return true;
   }
 
-  if (event.key >= "1" && event.key <= "5") {
+  if (event.key >= "1" && event.key <= "6") {
     manualMode = false;
     const level = parseInt(event.key) - 1;
     setLevel(level, viewer);
