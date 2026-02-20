@@ -67,18 +67,14 @@ Cesium.Matrix3.getColumn(rotMat, 2, up);
   // forward is the unit look-at direction in ECEF — exposed for the 3D indicator
 
   // View matrix: world → camera, no translation (RTC origin = drone position)
-  // Cesium.Matrix4 constructor args: column0Row0, column0Row1, ... (column-major)
-  // Row 0 = right, Row 1 = up, Row 2 = −forward
-  //   ↓ stored column by column:
-  //   col0 = (r.x, u.x, −f.x, 0)
-  //   col1 = (r.y, u.y, −f.y, 0)
-  //   col2 = (r.z, u.z, −f.z, 0)
-  //   col3 = (0,   0,   0,    1)
+  // OpenGL camera: +X = right, +Y = up, −Z = forward
+  // Each ROW is a camera axis (dot-product projects world coords onto that axis)
+  // Cesium.Matrix4 constructor args: column0Row0, column1Row0, ... (row by row)
   const viewMatrix = new Cesium.Matrix4(
-    right.x,      up.x,      -forward.x, 0,
-    right.y,      up.y,      -forward.y, 0,
-    right.z,      up.z,      -forward.z, 0,
-    0,            0,          0,          1,
+    right.x,      right.y,      right.z,      0,
+    up.x,         up.y,         up.z,         0,
+   -forward.x,   -forward.y,   -forward.z,    0,
+    0,            0,             0,            1,
   );
 
   // Projection matrix from horizontal FOV + aspect ratio
