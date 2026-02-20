@@ -2,9 +2,21 @@ import * as Cesium from "cesium";
 import drapeShaderGLSL from "./drapeShader.glsl?raw";
 
 // ---------------------------------------------------------------------------
-// Hardcoded 6-DOF pose (matches data/drone_pose.json)
+// Hardcoded 6-DOF pose 
 // ---------------------------------------------------------------------------
-const DRONE_POSE = {
+
+const DRONE_POSE_3 = {
+  lat: 46.3267,       // degrees
+  lon: 10.3244,        // degrees
+  alt: 1078.0,        // metres above ellipsoid
+  heading: 201,         // degrees, 0 = North, clockwise
+  pitch: 43,       // degrees, 0 = horizontal, positive = looking down, 90 = straight down
+  roll: -2,          // degrees
+  hFovDeg: 59.60,      // horizontal field of view
+  aspectRatio: 4 / 3,
+};
+
+const DRONE_POSE_2 = {
   lat: 46.3301,       // degrees
   lon: 10.3289,        // degrees
   alt: 1004.0,        // metres above ellipsoid
@@ -14,6 +26,9 @@ const DRONE_POSE = {
   hFovDeg: 59.60,      // horizontal field of view
   aspectRatio: 4 / 3,
 };
+
+const DRONE_POSE = DRONE_POSE_3
+const DRONE_FRAME_URL = "/data/drone_frame_3.png"
 
 // ---------------------------------------------------------------------------
 // Build drone camera matrix (projection * view) in RTC frame
@@ -116,7 +131,7 @@ const MOVE_STEP = 0.00009; // degrees ~10m at equator
 // Public API
 // ---------------------------------------------------------------------------
 export async function setupDroneVideoLayer(viewer) {
-  const image = await Cesium.Resource.fetchImage({ url: "/data/drone_frame_real.png" });
+  const image = await Cesium.Resource.fetchImage({ url: DRONE_FRAME_URL });
 
   const texture = new Cesium.Texture({
     context: viewer.scene.context,
@@ -278,7 +293,7 @@ export async function setupDroneVideoLayer(viewer) {
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
     } else if (e.key === "t" || e.key === "T") {
-      droneAlpha = droneAlpha > 0.3 ? 0.0 : 0.5;
+      droneAlpha = droneAlpha < 0.1 ? 0.5 : droneAlpha < 0.6 ? 1.0 : 0.0;
     }
   });
 
