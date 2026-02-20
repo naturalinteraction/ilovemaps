@@ -92,6 +92,26 @@
                       },
                       "children": []
                     }
+                  ],
+                  "commander": {
+                    "id": "cmd17",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5894,
+                      "lon": 7.9485,
+                      "alt": 1645
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf18",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5886,
+                        "lon": 7.9475,
+                        "alt": 1648
+                      }
+                    }
                   ]
                 },
                 {
@@ -147,6 +167,26 @@
                         "alt": 1765
                       },
                       "children": []
+                    }
+                  ],
+                  "commander": {
+                    "id": "cmd19",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5774,
+                      "lon": 7.9745,
+                      "alt": 1745
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf20",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5766,
+                        "lon": 7.9735,
+                        "alt": 1748
+                      }
                     }
                   ]
                 },
@@ -204,6 +244,26 @@
                       },
                       "children": []
                     }
+                  ],
+                  "commander": {
+                    "id": "cmd21",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5864,
+                      "lon": 7.9595,
+                      "alt": 1675
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf22",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5856,
+                        "lon": 7.9585,
+                        "alt": 1678
+                      }
+                    }
                   ]
                 },
                 {
@@ -259,6 +319,26 @@
                         "alt": 1735
                       },
                       "children": []
+                    }
+                  ],
+                  "commander": {
+                    "id": "cmd23",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5804,
+                      "lon": 7.9825,
+                      "alt": 1715
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf24",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5796,
+                        "lon": 7.9815,
+                        "alt": 1718
+                      }
                     }
                   ]
                 },
@@ -316,7 +396,56 @@
                       },
                       "children": []
                     }
+                  ],
+                  "commander": {
+                    "id": "cmd25",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5924,
+                      "lon": 7.9695,
+                      "alt": 1685
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf26",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5916,
+                        "lon": 7.9685,
+                        "alt": 1688
+                      }
+                    }
                   ]
+                }
+              ],
+              "commander": {
+                "id": "cmd14",
+                "name": "Plt Ldr",
+                "position": {
+                  "lat": 46.5834,
+                  "lon": 7.9655,
+                  "alt": 1695
+                }
+              },
+              "staff": [
+                {
+                  "id": "stf15",
+                  "name": "Plt Sgt",
+                  "position": {
+                    "lat": 46.5825,
+                    "lon": 7.9652,
+                    "alt": 1698
+                  }
+                },
+                {
+                  "id": "stf16",
+                  "name": "RTO",
+                  "position": {
+                    "lat": 46.5831,
+                    "lon": 7.9643,
+                    "alt": 1701
+                  }
                 }
               ]
             },
@@ -384,6 +513,26 @@
                       },
                       "children": []
                     }
+                  ],
+                  "commander": {
+                    "id": "cmd30",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5454,
+                      "lon": 7.9785,
+                      "alt": 1845
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf31",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5446,
+                        "lon": 7.9775,
+                        "alt": 1848
+                      }
+                    }
                   ]
                 },
                 {
@@ -439,6 +588,26 @@
                         "alt": 1965
                       },
                       "children": []
+                    }
+                  ],
+                  "commander": {
+                    "id": "cmd32",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5324,
+                      "lon": 8.0055,
+                      "alt": 1945
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf33",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5316,
+                        "lon": 8.0045,
+                        "alt": 1948
+                      }
                     }
                   ]
                 },
@@ -496,6 +665,26 @@
                       },
                       "children": []
                     }
+                  ],
+                  "commander": {
+                    "id": "cmd34",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5424,
+                      "lon": 7.9965,
+                      "alt": 1875
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf35",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5416,
+                        "lon": 7.9955,
+                        "alt": 1878
+                      }
+                    }
                   ]
                 },
                 {
@@ -551,6 +740,26 @@
                         "alt": 1935
                       },
                       "children": []
+                    }
+                  ],
+                  "commander": {
+                    "id": "cmd36",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5364,
+                      "lon": 7.9825,
+                      "alt": 1915
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf37",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5356,
+                        "lon": 7.9815,
+                        "alt": 1918
+                      }
                     }
                   ]
                 },
@@ -608,7 +817,56 @@
                       },
                       "children": []
                     }
+                  ],
+                  "commander": {
+                    "id": "cmd38",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5294,
+                      "lon": 7.9995,
+                      "alt": 1865
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf39",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5286,
+                        "lon": 7.9985,
+                        "alt": 1868
+                      }
+                    }
                   ]
+                }
+              ],
+              "commander": {
+                "id": "cmd27",
+                "name": "Plt Ldr",
+                "position": {
+                  "lat": 46.5394,
+                  "lon": 7.9905,
+                  "alt": 1895
+                }
+              },
+              "staff": [
+                {
+                  "id": "stf28",
+                  "name": "Plt Sgt",
+                  "position": {
+                    "lat": 46.5385,
+                    "lon": 7.9902,
+                    "alt": 1898
+                  }
+                },
+                {
+                  "id": "stf29",
+                  "name": "RTO",
+                  "position": {
+                    "lat": 46.5391,
+                    "lon": 7.9893,
+                    "alt": 1901
+                  }
                 }
               ]
             },
@@ -676,6 +934,26 @@
                       },
                       "children": []
                     }
+                  ],
+                  "commander": {
+                    "id": "cmd43",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5444,
+                      "lon": 7.9305,
+                      "alt": 1765
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf44",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5436,
+                        "lon": 7.9295,
+                        "alt": 1768
+                      }
+                    }
                   ]
                 },
                 {
@@ -731,6 +1009,26 @@
                         "alt": 1845
                       },
                       "children": []
+                    }
+                  ],
+                  "commander": {
+                    "id": "cmd45",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5334,
+                      "lon": 7.9475,
+                      "alt": 1825
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf46",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5326,
+                        "lon": 7.9465,
+                        "alt": 1828
+                      }
                     }
                   ]
                 },
@@ -788,6 +1086,26 @@
                       },
                       "children": []
                     }
+                  ],
+                  "commander": {
+                    "id": "cmd47",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5414,
+                      "lon": 7.9355,
+                      "alt": 1785
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf48",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5406,
+                        "lon": 7.9345,
+                        "alt": 1788
+                      }
+                    }
                   ]
                 },
                 {
@@ -843,6 +1161,26 @@
                         "alt": 1825
                       },
                       "children": []
+                    }
+                  ],
+                  "commander": {
+                    "id": "cmd49",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5364,
+                      "lon": 7.9525,
+                      "alt": 1805
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf50",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5356,
+                        "lon": 7.9515,
+                        "alt": 1808
+                      }
                     }
                   ]
                 },
@@ -900,11 +1238,136 @@
                       },
                       "children": []
                     }
+                  ],
+                  "commander": {
+                    "id": "cmd51",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5474,
+                      "lon": 7.9425,
+                      "alt": 1755
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf52",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5466,
+                        "lon": 7.9415,
+                        "alt": 1758
+                      }
+                    }
                   ]
+                }
+              ],
+              "commander": {
+                "id": "cmd40",
+                "name": "Plt Ldr",
+                "position": {
+                  "lat": 46.5394,
+                  "lon": 7.9405,
+                  "alt": 1795
+                }
+              },
+              "staff": [
+                {
+                  "id": "stf41",
+                  "name": "Plt Sgt",
+                  "position": {
+                    "lat": 46.5385,
+                    "lon": 7.9402,
+                    "alt": 1798
+                  }
+                },
+                {
+                  "id": "stf42",
+                  "name": "RTO",
+                  "position": {
+                    "lat": 46.5391,
+                    "lon": 7.9393,
+                    "alt": 1801
+                  }
                 }
               ]
             }
+          ],
+          "commander": {
+            "id": "cmd10",
+            "name": "Co Cmdr",
+            "position": {
+              "lat": 46.5544,
+              "lon": 7.9655,
+              "alt": 1795
+            }
+          },
+          "staff": [
+            {
+              "id": "stf11",
+              "name": "Co XO",
+              "position": {
+                "lat": 46.5536,
+                "lon": 7.9655,
+                "alt": 1798
+              }
+            },
+            {
+              "id": "stf12",
+              "name": "1st Sgt",
+              "position": {
+                "lat": 46.5536,
+                "lon": 7.9645,
+                "alt": 1801
+              }
+            },
+            {
+              "id": "stf13",
+              "name": "RTO",
+              "position": {
+                "lat": 46.5544,
+                "lon": 7.9645,
+                "alt": 1804
+              }
+            }
           ]
+        }
+      ],
+      "commander": {
+        "id": "cmd6",
+        "name": "Bn Cmdr",
+        "position": {
+          "lat": 46.5604,
+          "lon": 7.9655,
+          "alt": 1845
+        }
+      },
+      "staff": [
+        {
+          "id": "stf7",
+          "name": "Bn XO",
+          "position": {
+            "lat": 46.5596,
+            "lon": 7.9655,
+            "alt": 1848
+          }
+        },
+        {
+          "id": "stf8",
+          "name": "CSM",
+          "position": {
+            "lat": 46.5596,
+            "lon": 7.9645,
+            "alt": 1851
+          }
+        },
+        {
+          "id": "stf9",
+          "name": "S3",
+          "position": {
+            "lat": 46.5604,
+            "lon": 7.9645,
+            "alt": 1854
+          }
         }
       ]
     },
@@ -992,6 +1455,26 @@
                       },
                       "children": []
                     }
+                  ],
+                  "commander": {
+                    "id": "cmd64",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.6134,
+                      "lon": 8.0395,
+                      "alt": 2045
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf65",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.6126,
+                        "lon": 8.0385,
+                        "alt": 2048
+                      }
+                    }
                   ]
                 },
                 {
@@ -1047,6 +1530,26 @@
                         "alt": 2165
                       },
                       "children": []
+                    }
+                  ],
+                  "commander": {
+                    "id": "cmd66",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.6234,
+                      "lon": 8.0635,
+                      "alt": 2145
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf67",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.6226,
+                        "lon": 8.0625,
+                        "alt": 2148
+                      }
                     }
                   ]
                 },
@@ -1104,6 +1607,26 @@
                       },
                       "children": []
                     }
+                  ],
+                  "commander": {
+                    "id": "cmd68",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.6194,
+                      "lon": 8.0465,
+                      "alt": 2075
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf69",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.6186,
+                        "lon": 8.0455,
+                        "alt": 2078
+                      }
+                    }
                   ]
                 },
                 {
@@ -1159,6 +1682,26 @@
                         "alt": 2135
                       },
                       "children": []
+                    }
+                  ],
+                  "commander": {
+                    "id": "cmd70",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.6114,
+                      "lon": 8.0595,
+                      "alt": 2115
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf71",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.6106,
+                        "lon": 8.0585,
+                        "alt": 2118
+                      }
                     }
                   ]
                 },
@@ -1216,7 +1759,56 @@
                       },
                       "children": []
                     }
+                  ],
+                  "commander": {
+                    "id": "cmd72",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.6264,
+                      "lon": 8.0425,
+                      "alt": 2055
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf73",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.6256,
+                        "lon": 8.0415,
+                        "alt": 2058
+                      }
+                    }
                   ]
+                }
+              ],
+              "commander": {
+                "id": "cmd61",
+                "name": "Plt Ldr",
+                "position": {
+                  "lat": 46.6174,
+                  "lon": 8.0525,
+                  "alt": 2095
+                }
+              },
+              "staff": [
+                {
+                  "id": "stf62",
+                  "name": "Plt Sgt",
+                  "position": {
+                    "lat": 46.6165,
+                    "lon": 8.0522,
+                    "alt": 2098
+                  }
+                },
+                {
+                  "id": "stf63",
+                  "name": "RTO",
+                  "position": {
+                    "lat": 46.6171,
+                    "lon": 8.0513,
+                    "alt": 2101
+                  }
                 }
               ]
             },
@@ -1284,6 +1876,26 @@
                       },
                       "children": []
                     }
+                  ],
+                  "commander": {
+                    "id": "cmd77",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5834,
+                      "lon": 8.0615,
+                      "alt": 2245
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf78",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5826,
+                        "lon": 8.0605,
+                        "alt": 2248
+                      }
+                    }
                   ]
                 },
                 {
@@ -1339,6 +1951,26 @@
                         "alt": 2365
                       },
                       "children": []
+                    }
+                  ],
+                  "commander": {
+                    "id": "cmd79",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5734,
+                      "lon": 8.0895,
+                      "alt": 2345
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf80",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5726,
+                        "lon": 8.0885,
+                        "alt": 2348
+                      }
                     }
                   ]
                 },
@@ -1396,6 +2028,26 @@
                       },
                       "children": []
                     }
+                  ],
+                  "commander": {
+                    "id": "cmd81",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5814,
+                      "lon": 8.0785,
+                      "alt": 2275
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf82",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5806,
+                        "lon": 8.0775,
+                        "alt": 2278
+                      }
+                    }
                   ]
                 },
                 {
@@ -1451,6 +2103,26 @@
                         "alt": 2325
                       },
                       "children": []
+                    }
+                  ],
+                  "commander": {
+                    "id": "cmd83",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5764,
+                      "lon": 8.0665,
+                      "alt": 2305
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf84",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5756,
+                        "lon": 8.0655,
+                        "alt": 2308
+                      }
                     }
                   ]
                 },
@@ -1508,7 +2180,56 @@
                       },
                       "children": []
                     }
+                  ],
+                  "commander": {
+                    "id": "cmd85",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5854,
+                      "lon": 8.0845,
+                      "alt": 2265
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf86",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5846,
+                        "lon": 8.0835,
+                        "alt": 2268
+                      }
+                    }
                   ]
+                }
+              ],
+              "commander": {
+                "id": "cmd74",
+                "name": "Plt Ldr",
+                "position": {
+                  "lat": 46.5784,
+                  "lon": 8.0745,
+                  "alt": 2295
+                }
+              },
+              "staff": [
+                {
+                  "id": "stf75",
+                  "name": "Plt Sgt",
+                  "position": {
+                    "lat": 46.5775,
+                    "lon": 8.0742,
+                    "alt": 2298
+                  }
+                },
+                {
+                  "id": "stf76",
+                  "name": "RTO",
+                  "position": {
+                    "lat": 46.5781,
+                    "lon": 8.0733,
+                    "alt": 2301
+                  }
                 }
               ]
             },
@@ -1576,6 +2297,26 @@
                       },
                       "children": []
                     }
+                  ],
+                  "commander": {
+                    "id": "cmd90",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5834,
+                      "lon": 8.0245,
+                      "alt": 2155
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf91",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5826,
+                        "lon": 8.0235,
+                        "alt": 2158
+                      }
+                    }
                   ]
                 },
                 {
@@ -1631,6 +2372,26 @@
                         "alt": 2235
                       },
                       "children": []
+                    }
+                  ],
+                  "commander": {
+                    "id": "cmd92",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5744,
+                      "lon": 8.0375,
+                      "alt": 2215
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf93",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5736,
+                        "lon": 8.0365,
+                        "alt": 2218
+                      }
                     }
                   ]
                 },
@@ -1688,6 +2449,26 @@
                       },
                       "children": []
                     }
+                  ],
+                  "commander": {
+                    "id": "cmd94",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5804,
+                      "lon": 8.0285,
+                      "alt": 2175
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf95",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5796,
+                        "lon": 8.0275,
+                        "alt": 2178
+                      }
+                    }
                   ]
                 },
                 {
@@ -1743,6 +2524,26 @@
                         "alt": 2225
                       },
                       "children": []
+                    }
+                  ],
+                  "commander": {
+                    "id": "cmd96",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5764,
+                      "lon": 8.0425,
+                      "alt": 2205
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf97",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5756,
+                        "lon": 8.0415,
+                        "alt": 2208
+                      }
                     }
                   ]
                 },
@@ -1800,13 +2601,185 @@
                       },
                       "children": []
                     }
+                  ],
+                  "commander": {
+                    "id": "cmd98",
+                    "name": "Sqd Ldr",
+                    "position": {
+                      "lat": 46.5854,
+                      "lon": 8.0325,
+                      "alt": 2165
+                    }
+                  },
+                  "staff": [
+                    {
+                      "id": "stf99",
+                      "name": "RTO",
+                      "position": {
+                        "lat": 46.5846,
+                        "lon": 8.0315,
+                        "alt": 2168
+                      }
+                    }
                   ]
+                }
+              ],
+              "commander": {
+                "id": "cmd87",
+                "name": "Plt Ldr",
+                "position": {
+                  "lat": 46.5784,
+                  "lon": 8.0305,
+                  "alt": 2185
+                }
+              },
+              "staff": [
+                {
+                  "id": "stf88",
+                  "name": "Plt Sgt",
+                  "position": {
+                    "lat": 46.5775,
+                    "lon": 8.0302,
+                    "alt": 2188
+                  }
+                },
+                {
+                  "id": "stf89",
+                  "name": "RTO",
+                  "position": {
+                    "lat": 46.5781,
+                    "lon": 8.0293,
+                    "alt": 2191
+                  }
                 }
               ]
             }
+          ],
+          "commander": {
+            "id": "cmd57",
+            "name": "Co Cmdr",
+            "position": {
+              "lat": 46.5914,
+              "lon": 8.0525,
+              "alt": 2195
+            }
+          },
+          "staff": [
+            {
+              "id": "stf58",
+              "name": "Co XO",
+              "position": {
+                "lat": 46.5906,
+                "lon": 8.0525,
+                "alt": 2198
+              }
+            },
+            {
+              "id": "stf59",
+              "name": "1st Sgt",
+              "position": {
+                "lat": 46.5906,
+                "lon": 8.0515,
+                "alt": 2201
+              }
+            },
+            {
+              "id": "stf60",
+              "name": "RTO",
+              "position": {
+                "lat": 46.5914,
+                "lon": 8.0515,
+                "alt": 2204
+              }
+            }
           ]
         }
+      ],
+      "commander": {
+        "id": "cmd53",
+        "name": "Bn Cmdr",
+        "position": {
+          "lat": 46.5914,
+          "lon": 8.0525,
+          "alt": 2195
+        }
+      },
+      "staff": [
+        {
+          "id": "stf54",
+          "name": "Bn XO",
+          "position": {
+            "lat": 46.5906,
+            "lon": 8.0525,
+            "alt": 2198
+          }
+        },
+        {
+          "id": "stf55",
+          "name": "CSM",
+          "position": {
+            "lat": 46.5906,
+            "lon": 8.0515,
+            "alt": 2201
+          }
+        },
+        {
+          "id": "stf56",
+          "name": "S3",
+          "position": {
+            "lat": 46.5914,
+            "lon": 8.0515,
+            "alt": 2204
+          }
+        }
       ]
+    }
+  ],
+  "commander": {
+    "id": "cmd1",
+    "name": "Rgt Cmdr",
+    "position": {
+      "lat": 46.5724,
+      "lon": 8.0105,
+      "alt": 1995
+    }
+  },
+  "staff": [
+    {
+      "id": "stf2",
+      "name": "Rgt XO",
+      "position": {
+        "lat": 46.5718,
+        "lon": 8.0106,
+        "alt": 1998
+      }
+    },
+    {
+      "id": "stf3",
+      "name": "RSM",
+      "position": {
+        "lat": 46.5715,
+        "lon": 8.0099,
+        "alt": 2001
+      }
+    },
+    {
+      "id": "stf4",
+      "name": "S3",
+      "position": {
+        "lat": 46.5719,
+        "lon": 8.0093,
+        "alt": 2004
+      }
+    },
+    {
+      "id": "stf5",
+      "name": "S2",
+      "position": {
+        "lat": 46.5724,
+        "lon": 8.0097,
+        "alt": 2007
+      }
     }
   ]
 }

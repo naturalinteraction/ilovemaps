@@ -148,6 +148,9 @@ function setEntityScale(entity, scale) {
 
 // --- Loading ---
 
+// Staff/commander nodes indexed by owning unit id
+const staffByUnit = {};
+
 function flattenTree(node, parent) {
   node.parent = parent;
   nodesById[node.id] = node;
@@ -155,6 +158,40 @@ function flattenTree(node, parent) {
   node.homePosition = Cesium.Cartesian3.fromDegrees(
     node.position.lon, node.position.lat, node.position.alt + 50
   );
+
+  // Flatten commander and staff as individual-type nodes attached to this unit
+  const unitStaff = [];
+  if (node.commander) {
+    const cmd = node.commander;
+    cmd.type = "individual";
+    cmd.isStaff = true;
+    cmd.staffOwner = node;
+    cmd.children = [];
+    cmd.parent = node;
+    cmd.homePosition = Cesium.Cartesian3.fromDegrees(
+      cmd.position.lon, cmd.position.lat, cmd.position.alt + 50
+    );
+    nodesById[cmd.id] = cmd;
+    allNodes.push(cmd);
+    unitStaff.push(cmd);
+  }
+  if (node.staff) {
+    for (const s of node.staff) {
+      s.type = "individual";
+      s.isStaff = true;
+      s.staffOwner = node;
+      s.children = [];
+      s.parent = node;
+      s.homePosition = Cesium.Cartesian3.fromDegrees(
+        s.position.lon, s.position.lat, s.position.alt + 50
+      );
+      nodesById[s.id] = s;
+      allNodes.push(s);
+      unitStaff.push(s);
+    }
+  }
+  if (unitStaff.length > 0) staffByUnit[node.id] = unitStaff;
+
   for (const child of node.children) {
     flattenTree(child, node);
   }
@@ -168,8 +205,11 @@ export async function loadMilitaryUnits(viewer) {
   flattenTree(tree, null);
 
   for (const node of allNodes) {
-    const levelIdx = LEVEL_ORDER.indexOf(node.type);
     const image = getSymbolImage(node.type);
+    // Staff show when their owning unit's level is current
+    const initShow = node.isStaff
+      ? LEVEL_ORDER.indexOf(node.staffOwner.type) === currentLevel
+      : LEVEL_ORDER.indexOf(node.type) === currentLevel;
 
     const entity = viewer.entities.add({
       name: node.name,
@@ -192,7 +232,7 @@ export async function loadMilitaryUnits(viewer) {
         heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
-      show: levelIdx === currentLevel,
+      show: initShow,
     });
 
     entity._milNode = node;
@@ -419,7 +459,7 @@ const PARENT_FADE_RELATIVE_DURATION = 0.5; // parent fade duration relative to A
 
 function getNodesAtLevel(levelIdx) {
   const type = LEVEL_ORDER[levelIdx];
-  return allNodes.filter(n => n.type === type);
+  return allNodes.filter(n => n.type === type && !n.isStaff);
 }
 
 function setLevel(newLevel, viewer) {
@@ -439,12 +479,17 @@ function setLevel(newLevel, viewer) {
   }
 }
 
+function effectiveLevel(node) {
+  if (node.isStaff) return LEVEL_ORDER.indexOf(node.staffOwner.type);
+  return LEVEL_ORDER.indexOf(node.type);
+}
+
 function mergeStep(fromLevel, toLevel) {
   const anims = [];
 
-  // Hide all levels except what's animating
+  // Hide all levels except what's animating (staff follow their owner's level)
   for (const node of allNodes) {
-    const lvl = LEVEL_ORDER.indexOf(node.type);
+    const lvl = effectiveLevel(node);
     if (lvl < fromLevel || lvl > toLevel) {
       entitiesById[node.id].show = false;
     }
@@ -475,12 +520,30 @@ function mergeStep(fromLevel, toLevel) {
         entity.position = node.homePosition; // reset
       },
     });
+
+    // Fade out staff of this node
+    const staff = staffByUnit[node.id];
+    if (staff) {
+      for (const s of staff) {
+        const se = entitiesById[s.id];
+        anims.push({
+          entity: se,
+          from: s.homePosition,
+          to: toPos,
+          duration: ANIM_DURATION,
+          fade: "out",
+          onComplete: () => { se.show = false; se.position = s.homePosition; },
+        });
+      }
+    }
   }
 
   // Also animate intermediate levels if jumping multiple levels
   for (let lvl = fromLevel + 1; lvl < toLevel; lvl++) {
     for (const node of getNodesAtLevel(lvl)) {
       entitiesById[node.id].show = false;
+      const staff = staffByUnit[node.id];
+      if (staff) for (const s of staff) entitiesById[s.id].show = false;
     }
   }
 
@@ -501,6 +564,25 @@ function mergeStep(fromLevel, toLevel) {
         pe.position = node.homePosition;
       },
     });
+
+    // Fade in staff of the parent unit
+    const staff = staffByUnit[node.id];
+    if (staff) {
+      for (const s of staff) {
+        const se = entitiesById[s.id];
+        se.position = s.homePosition;
+        anims.push({
+          entity: se,
+          from: s.homePosition,
+          to: s.homePosition,
+          duration: ANIM_DURATION,
+          fade: "in",
+          fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
+          fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+          onComplete: () => { se.position = s.homePosition; },
+        });
+      }
+    }
   }
 
   if (anims.length > 0) {
@@ -515,9 +597,9 @@ function mergeStep(fromLevel, toLevel) {
 function unmergeStep(fromLevel, toLevel) {
   const anims = [];
 
-  // Hide levels not involved in the animation
+  // Hide levels not involved in the animation (staff follow their owner)
   for (const node of allNodes) {
-    const lvl = LEVEL_ORDER.indexOf(node.type);
+    const lvl = effectiveLevel(node);
     if (lvl !== fromLevel && lvl !== toLevel) {
       entitiesById[node.id].show = false;
     }
@@ -547,6 +629,22 @@ function unmergeStep(fromLevel, toLevel) {
         entity.position = node.homePosition;
       },
     });
+
+    // Fade in staff of this node
+    const staff = staffByUnit[node.id];
+    if (staff) {
+      for (const s of staff) {
+        const se = entitiesById[s.id];
+        anims.push({
+          entity: se,
+          from: fromPos,
+          to: s.homePosition,
+          duration: ANIM_DURATION,
+          fade: "in",
+          onComplete: () => { se.position = s.homePosition; },
+        });
+      }
+    }
   }
 
   // Fade out the old parent entities (twice as fast)
@@ -566,6 +664,23 @@ function unmergeStep(fromLevel, toLevel) {
         pe.position = node.homePosition;
       },
     });
+
+    // Fade out staff of the old parent
+    const staff = staffByUnit[node.id];
+    if (staff) {
+      for (const s of staff) {
+        const se = entitiesById[s.id];
+        anims.push({
+          entity: se,
+          from: s.homePosition,
+          to: s.homePosition,
+          duration: ANIM_DURATION,
+          fade: "out",
+          fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+          onComplete: () => { se.show = false; se.position = s.homePosition; },
+        });
+      }
+    }
   }
 
   if (anims.length > 0) {
@@ -580,7 +695,12 @@ function showLevel(levelIdx) {
   const type = LEVEL_ORDER[levelIdx];
   for (const node of allNodes) {
     const entity = entitiesById[node.id];
-    entity.show = militaryVisible && node.type === type;
+    if (node.isStaff) {
+      // Staff show when their owning unit is visible
+      entity.show = militaryVisible && node.staffOwner.type === type;
+    } else {
+      entity.show = militaryVisible && node.type === type;
+    }
     entity.position = node.homePosition;
   }
 }
@@ -620,11 +740,23 @@ export function handleRightClick(viewer, click) {
       to: parent.homePosition,
       duration: ANIM_DURATION,
       fade: "out",
-      onComplete: () => {
-        e.show = false;
-        e.position = desc.homePosition;
-      },
+      onComplete: () => { e.show = false; e.position = desc.homePosition; },
     });
+    // Fade out staff of merging children
+    const staff = staffByUnit[desc.id];
+    if (staff) {
+      for (const s of staff) {
+        const se = entitiesById[s.id];
+        anims.push({
+          entity: se,
+          from: s.homePosition,
+          to: parent.homePosition,
+          duration: ANIM_DURATION,
+          fade: "out",
+          onComplete: () => { se.show = false; se.position = s.homePosition; },
+        });
+      }
+    }
   });
   parentEntity.position = parent.homePosition;
   anims.push({
@@ -638,6 +770,21 @@ export function handleRightClick(viewer, click) {
     fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
     onComplete: () => { parentEntity.position = parent.homePosition; },
   });
+  // Fade in staff of the parent
+  const parentStaff = staffByUnit[parent.id];
+  if (parentStaff) {
+    for (const s of parentStaff) {
+      const se = entitiesById[s.id];
+      se.position = s.homePosition;
+      anims.push({
+        entity: se, from: s.homePosition, to: s.homePosition,
+        duration: ANIM_DURATION, fade: "in",
+        fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
+        fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+        onComplete: () => { se.position = s.homePosition; },
+      });
+    }
+  }
   if (anims.length > 0) { manualMode = true; playBeep(MERGE_BEEP_FREQ); startAnimations(anims); }
   return true;
 }
@@ -665,6 +812,19 @@ export function handleLeftClick(viewer, click) {
       entity.position = node.homePosition;
     },
   });
+  // Fade out staff of the parent being unmerged
+  const nodeStaff = staffByUnit[node.id];
+  if (nodeStaff) {
+    for (const s of nodeStaff) {
+      const se = entitiesById[s.id];
+      anims.push({
+        entity: se, from: s.homePosition, to: s.homePosition,
+        duration: ANIM_DURATION, fade: "out",
+        fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+        onComplete: () => { se.show = false; se.position = s.homePosition; },
+      });
+    }
+  }
   forEachDescendantAtLevel(node, childType, (desc) => {
     const e = entitiesById[desc.id];
     anims.push({
@@ -673,10 +833,20 @@ export function handleLeftClick(viewer, click) {
       to: desc.homePosition,
       duration: ANIM_DURATION,
       fade: "in",
-      onComplete: () => {
-        e.position = desc.homePosition;
-      },
+      onComplete: () => { e.position = desc.homePosition; },
     });
+    // Fade in staff of appearing children
+    const staff = staffByUnit[desc.id];
+    if (staff) {
+      for (const s of staff) {
+        const se = entitiesById[s.id];
+        anims.push({
+          entity: se, from: node.homePosition, to: s.homePosition,
+          duration: ANIM_DURATION, fade: "in",
+          onComplete: () => { se.position = s.homePosition; },
+        });
+      }
+    }
   });
   if (anims.length > 0) { manualMode = true; playBeep(UNMERGE_BEEP_FREQ); startAnimations(anims); }
   return true;
@@ -729,7 +899,11 @@ export function handleKeydown(event, viewer) {
       for (const node of allNodes) {
         const entity = entitiesById[node.id];
         if (militaryVisible) {
-          entity.show = node.type === LEVEL_ORDER[currentLevel];
+          if (node.isStaff) {
+            entity.show = node.staffOwner.type === LEVEL_ORDER[currentLevel];
+          } else {
+            entity.show = node.type === LEVEL_ORDER[currentLevel];
+          }
         } else {
           entity.show = false;
         }
