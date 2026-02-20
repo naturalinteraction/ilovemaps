@@ -29,42 +29,45 @@ function computeDroneCameraMatrix(pose) {
   const droneEcef = Cesium.Cartesian3.fromDegrees(pose.lon, pose.lat, pose.alt);
 
 
-  const hpr = Cesium.HeadingPitchRoll.fromDegrees(pose.heading, pose.pitch, pose.roll)
-  //const hpr = new Cesium.HeadingPitchRoll(
-  //  Cesium.Math.toRadians(pose.heading),
-  //  Cesium.Math.toRadians(pose.pitch),
-  //  Cesium.Math.toRadians(pose.roll),
-  //);
+  // Build body rotation manually in ENU frame (East-North-Up).
+  // ENU axes: X = East (right), Y = North (forward), Z = Up.
+  //
+  // Cesium's fromHeadingPitchRoll uses order Z·Y·X which couples roll into
+  // the forward direction.  We need Z·X·Y (heading · pitch · roll) so that
+  // roll — the innermost rotation about the forward/Y axis — never changes
+  // where the camera points.
+  //
+  // Sign conventions:
+  //   heading: 0 = North, positive = clockwise  →  −heading about Z
+  //   pitch:   positive = looking down           →  −pitch about X
+  //   roll:    standard right-hand about Y
+  const headRad  = Cesium.Math.toRadians(pose.heading);
+  const pitchRad = Cesium.Math.toRadians(pose.pitch);
+  const rollRad  = Cesium.Math.toRadians(pose.roll);
 
+  const rollQ  = Cesium.Quaternion.fromAxisAngle(Cesium.Cartesian3.UNIT_Y, rollRad);
+  const pitchQ = Cesium.Quaternion.fromAxisAngle(Cesium.Cartesian3.UNIT_X, -pitchRad);
+  const headQ  = Cesium.Quaternion.fromAxisAngle(Cesium.Cartesian3.UNIT_Z, -headRad);
 
-var quaternion = Cesium.Transforms.headingPitchRollQuaternion(droneEcef, hpr);
+  // Combined in ENU: heading * pitch * roll  (applied right-to-left)
+  let bodyQ = Cesium.Quaternion.multiply(pitchQ, rollQ, new Cesium.Quaternion());
+  bodyQ = Cesium.Quaternion.multiply(headQ, bodyQ, bodyQ);
 
-// 3. Convert Quaternion to a 3x3 Rotation Matrix
-var rotMat = Cesium.Matrix3.fromQuaternion(quaternion);
+  const bodyRot = Cesium.Matrix3.fromQuaternion(bodyQ);
 
-// 4. Extract Local Axis Vectors
-// Column 0: Right (X)
-// Column 1: Forward (Y) - Depends on convention, often used as Right
-// Column 2: Up (Z)
-var right = new Cesium.Cartesian3();
-var forward = new Cesium.Cartesian3();
-var up = new Cesium.Cartesian3();
+  // ENU-to-ECEF rotation (from the local frame at the drone position)
+  const enuToEcef4 = Cesium.Transforms.eastNorthUpToFixedFrame(droneEcef);
+  const enuRot = Cesium.Matrix4.getMatrix3(enuToEcef4, new Cesium.Matrix3());
 
-Cesium.Matrix3.getColumn(rotMat, 0, right);
-Cesium.Matrix3.getColumn(rotMat, 1, forward);
-Cesium.Matrix3.getColumn(rotMat, 2, up);
+  // Full rotation: ENU-to-ECEF * body-in-ENU  →  body axes in ECEF
+  const fullRot = Cesium.Matrix3.multiply(enuRot, bodyRot, new Cesium.Matrix3());
 
+  // Extract axes (columns of the body-to-ECEF rotation)
+  // Column 0: right (East), Column 1: forward (North), Column 2: up
+  const right   = Cesium.Matrix3.getColumn(fullRot, 0, new Cesium.Cartesian3());
+  const forward = Cesium.Matrix3.getColumn(fullRot, 1, new Cesium.Cartesian3());
+  const up      = Cesium.Matrix3.getColumn(fullRot, 2, new Cesium.Cartesian3());
 
-
-  // localFrame columns: [right | forward | up | pos]  (4×4, column-major)
-  //const localFrame = Cesium.Transforms.headingPitchRollToFixedFrame(droneEcef, hpr);
-
-  // Extract the three axes from the column-major flat array
-  //const right   = new Cesium.Cartesian3(localFrame[0], localFrame[1], localFrame[2]);
-  //const forward = new Cesium.Cartesian3(localFrame[4], localFrame[5], localFrame[6]);
-  //const up      = new Cesium.Cartesian3(localFrame[8], localFrame[9], localFrame[10]);
-
-  // forward is the unit look-at direction in ECEF — exposed for the 3D indicator
 
   // View matrix: world → camera, no translation (RTC origin = drone position)
   // OpenGL camera: +X = right, +Y = up, −Z = forward
