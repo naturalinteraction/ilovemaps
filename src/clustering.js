@@ -5,19 +5,30 @@ import * as Cesium from "cesium";
 const SYMBOL_SIZE = 64;
 const BLUE = "#2040FF";
 
-function drawMilitarySymbol(type) {
+function drawMilitarySymbol(type, hq) {
   const canvas = document.createElement("canvas");
   canvas.width = SYMBOL_SIZE;
   canvas.height = SYMBOL_SIZE;
   const ctx = canvas.getContext("2d");
 
   // Rectangle body
-  const rx = 10, ry = 20, rw = 44, rh = 24;
+  const rx = 10, ry = 16, rw = 44, rh = 24;
   ctx.strokeStyle = BLUE;
   ctx.fillStyle = "rgba(30,60,255,0.6)";
   ctx.lineWidth = 2;
   ctx.fillRect(rx, ry, rw, rh);
   ctx.strokeRect(rx, ry, rw, rh);
+
+  // HQ staff line below rectangle (APP-6 HQ indicator)
+  if (hq) {
+    const cx = SYMBOL_SIZE / 2;
+    ctx.strokeStyle = BLUE;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, ry + rh);
+    ctx.lineTo(cx, ry + rh + 14);
+    ctx.stroke();
+  }
 
   // Echelon marker above rectangle
   const cx = SYMBOL_SIZE / 2;
@@ -25,7 +36,9 @@ function drawMilitarySymbol(type) {
   ctx.strokeStyle = BLUE;
   ctx.lineWidth = 2;
 
-  if (type === "squad") {
+  if (type === "individual") {
+    // APP-6: no echelon marker for individual — just the rectangle frame
+  } else if (type === "squad") {
     // × (cross)
     const y = ry - 4;
     ctx.beginPath();
@@ -58,16 +71,17 @@ function drawMilitarySymbol(type) {
 
 // Cache billboard images
 const symbolImages = {};
-function getSymbolImage(type) {
-  if (!symbolImages[type]) {
-    symbolImages[type] = drawMilitarySymbol(type);
+function getSymbolImage(type, hq) {
+  const key = hq ? type + "_hq" : type;
+  if (!symbolImages[key]) {
+    symbolImages[key] = drawMilitarySymbol(type, hq);
   }
-  return symbolImages[type];
+  return symbolImages[key];
 }
 
 // --- Data structures ---
 
-const LEVEL_ORDER = ["squad", "platoon", "company", "battalion"];
+const LEVEL_ORDER = ["individual", "squad", "platoon", "company", "battalion"];
 
 // All nodes indexed by id
 const nodesById = {};
@@ -78,6 +92,10 @@ let rootNode = null;
 
 // Cesium entities indexed by node id
 const entitiesById = {};
+// Commander entities indexed by node id
+const cmdEntitiesById = {};
+// Staff entities indexed by node id → [staff1, staff2]
+const staffEntitiesById = {};
 // Polyline entities connecting each node to its parent
 const linesById = {};
 // Scratch variables for polyline position computation
@@ -89,7 +107,7 @@ const ARC_SEGMENTS = 16;
 const ARC_BOW = 0.15; // perpendicular offset as fraction of distance
 
 // Current visible level index (0=squad, 3=battalion)
-let currentLevel = 0;
+let currentLevel = 1; // start at squad level
 let militaryVisible = true;
 let manualMode = false; // disables zoom-based auto-leveling after click merge/unmerge
 
@@ -147,6 +165,14 @@ function flattenTree(node, parent) {
   node.homePosition = Cesium.Cartesian3.fromDegrees(
     node.position.lon, node.position.lat, node.position.alt + 50
   );
+  // Commander uses same position as unit
+  node.cmdHomePosition = node.homePosition;
+  // Staff positions from JSON data
+  if (node.staff && node.staff.length >= 2) {
+    node.staffHomePositions = node.staff.map(s =>
+      Cesium.Cartesian3.fromDegrees(s.position.lon, s.position.lat, s.position.alt + 50)
+    );
+  }
   for (const child of node.children) {
     flattenTree(child, node);
   }
@@ -162,25 +188,27 @@ export async function loadMilitaryUnits(viewer) {
   for (const node of allNodes) {
     const levelIdx = LEVEL_ORDER.indexOf(node.type);
     const image = getSymbolImage(node.type);
+    const isIndividual = node.type === "individual";
+    const size = isIndividual ? 40 : SYMBOL_SIZE;
 
     const entity = viewer.entities.add({
       name: node.name,
       position: node.homePosition,
       billboard: {
         image,
-        width: SYMBOL_SIZE,
-        height: SYMBOL_SIZE,
+        width: size,
+        height: size,
         verticalOrigin: Cesium.VerticalOrigin.CENTER,
         heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
       label: {
         text: node.name,
-        font: "20px sans-serif",
+        font: isIndividual ? "14px sans-serif" : "20px sans-serif",
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         outlineWidth: 2,
         verticalOrigin: Cesium.VerticalOrigin.TOP,
-        pixelOffset: new Cesium.Cartesian2(0, SYMBOL_SIZE / 2 + 4),
+        pixelOffset: new Cesium.Cartesian2(0, size / 2 + 4),
         heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
@@ -189,6 +217,74 @@ export async function loadMilitaryUnits(viewer) {
 
     entity._milNode = node;
     entitiesById[node.id] = entity;
+  }
+
+  // Create commander and staff entities for non-individual nodes
+  for (const node of allNodes) {
+    if (node.type === "individual" || !node.commander) continue;
+
+    // Commander entity: HQ symbol of node's type, at node's position
+    const cmdImage = getSymbolImage(node.type, true);
+    const cmdEntity = viewer.entities.add({
+      name: node.commander.name,
+      position: node.cmdHomePosition,
+      billboard: {
+        image: cmdImage,
+        width: SYMBOL_SIZE,
+        height: SYMBOL_SIZE,
+        verticalOrigin: Cesium.VerticalOrigin.CENTER,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      },
+      label: {
+        text: node.commander.name,
+        font: "18px sans-serif",
+        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        outlineWidth: 2,
+        verticalOrigin: Cesium.VerticalOrigin.TOP,
+        pixelOffset: new Cesium.Cartesian2(0, SYMBOL_SIZE / 2 + 4),
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      },
+      show: false,
+    });
+    cmdEntity._milCmdOf = node;
+    cmdEntitiesById[node.id] = cmdEntity;
+
+    // Staff entities: individual HQ symbol, at staff positions
+    if (node.staff && node.staffHomePositions) {
+      const staffImage = getSymbolImage("individual", true);
+      const staffEnts = [];
+      for (let si = 0; si < node.staff.length; si++) {
+        const s = node.staff[si];
+        const staffEntity = viewer.entities.add({
+          name: s.name,
+          position: node.staffHomePositions[si],
+          billboard: {
+            image: staffImage,
+            width: 48,
+            height: 48,
+            verticalOrigin: Cesium.VerticalOrigin.CENTER,
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          },
+          label: {
+            text: s.name,
+            font: "14px sans-serif",
+            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+            outlineWidth: 2,
+            verticalOrigin: Cesium.VerticalOrigin.TOP,
+            pixelOffset: new Cesium.Cartesian2(0, 28),
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          },
+          show: false,
+        });
+        staffEntity._milStaffOf = node;
+        staffEnts.push(staffEntity);
+      }
+      staffEntitiesById[node.id] = staffEnts;
+    }
   }
 
   // Create polylines connecting each node to its parent
@@ -267,7 +363,7 @@ export async function loadMilitaryUnits(viewer) {
 
 // --- Zoom-based level ---
 
-const ZOOM_THRESHOLDS = [10000, 30000, 70000]; // meters (distance to look-at point)
+const ZOOM_THRESHOLDS = [3000, 10000, 30000, 70000]; // meters (distance to look-at point)
 
 function levelForDist(dist) {
   for (let i = 0; i < ZOOM_THRESHOLDS.length; i++) {
@@ -442,6 +538,9 @@ function mergeStep(fromLevel, toLevel) {
     }
   }
 
+  // Hide all commander/staff initially
+  hideAllCmdStaff();
+
   // Animate nodes at fromLevel → their ancestor at toLevel
   const fromNodes = getNodesAtLevel(fromLevel);
   for (const node of fromNodes) {
@@ -476,6 +575,41 @@ function mergeStep(fromLevel, toLevel) {
     }
   }
 
+  // Fade OUT commander/staff of toLevel nodes (unit symbol replacing commander)
+  for (const node of getNodesAtLevel(toLevel)) {
+    const cmdE = cmdEntitiesById[node.id];
+    if (cmdE) {
+      cmdE.show = true;
+      cmdE.position = node.cmdHomePosition;
+      anims.push({
+        entity: cmdE,
+        from: node.cmdHomePosition,
+        to: node.cmdHomePosition,
+        duration: ANIM_DURATION,
+        fade: "out",
+        fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+        onComplete: () => { cmdE.show = false; },
+      });
+    }
+    const staffEs = staffEntitiesById[node.id];
+    if (staffEs && node.staffHomePositions) {
+      for (let si = 0; si < staffEs.length; si++) {
+        const se = staffEs[si];
+        se.show = true;
+        se.position = node.staffHomePositions[si];
+        anims.push({
+          entity: se,
+          from: node.staffHomePositions[si],
+          to: node.staffHomePositions[si],
+          duration: ANIM_DURATION,
+          fade: "out",
+          fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+          onComplete: () => { se.show = false; },
+        });
+      }
+    }
+  }
+
   // Fade in parent entities at toLevel (twice as fast, delayed by half)
   for (const node of getNodesAtLevel(toLevel)) {
     const pe = entitiesById[node.id];
@@ -493,6 +627,47 @@ function mergeStep(fromLevel, toLevel) {
         pe.position = node.homePosition;
       },
     });
+  }
+
+  // After merge, show cmd/staff for the NEW parent level (toLevel+1) if exists
+  if (toLevel + 1 < LEVEL_ORDER.length) {
+    const newParentType = LEVEL_ORDER[toLevel + 1];
+    for (const node of allNodes) {
+      if (node.type === newParentType) {
+        // Fade IN these cmd/staff
+        const cmdE = cmdEntitiesById[node.id];
+        if (cmdE) {
+          cmdE.position = node.cmdHomePosition;
+          anims.push({
+            entity: cmdE,
+            from: node.cmdHomePosition,
+            to: node.cmdHomePosition,
+            duration: ANIM_DURATION,
+            fade: "in",
+            fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
+            fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+            onComplete: () => { cmdE.position = node.cmdHomePosition; },
+          });
+        }
+        const staffEs = staffEntitiesById[node.id];
+        if (staffEs && node.staffHomePositions) {
+          for (let si = 0; si < staffEs.length; si++) {
+            const se = staffEs[si];
+            se.position = node.staffHomePositions[si];
+            anims.push({
+              entity: se,
+              from: node.staffHomePositions[si],
+              to: node.staffHomePositions[si],
+              duration: ANIM_DURATION,
+              fade: "in",
+              fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
+              fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+              onComplete: () => { se.position = node.staffHomePositions[si]; },
+            });
+          }
+        }
+      }
+    }
   }
 
   if (anims.length > 0) {
@@ -514,6 +689,9 @@ function unmergeStep(fromLevel, toLevel) {
       entitiesById[node.id].show = false;
     }
   }
+
+  // Hide all commander/staff initially
+  hideAllCmdStaff();
 
   // Animate nodes at toLevel from their ancestor at fromLevel
   const toNodes = getNodesAtLevel(toLevel);
@@ -560,11 +738,116 @@ function unmergeStep(fromLevel, toLevel) {
     });
   }
 
+  // Fade OUT commander/staff of the old parent level (fromLevel+1) — those units no longer have visible children at fromLevel
+  if (fromLevel + 1 < LEVEL_ORDER.length) {
+    const oldParentType = LEVEL_ORDER[fromLevel + 1];
+    for (const node of allNodes) {
+      if (node.type === oldParentType) {
+        const cmdE = cmdEntitiesById[node.id];
+        if (cmdE) {
+          cmdE.show = true;
+          cmdE.position = node.cmdHomePosition;
+          anims.push({
+            entity: cmdE,
+            from: node.cmdHomePosition,
+            to: node.cmdHomePosition,
+            duration: ANIM_DURATION,
+            fade: "out",
+            fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+            onComplete: () => { cmdE.show = false; },
+          });
+        }
+        const staffEs = staffEntitiesById[node.id];
+        if (staffEs && node.staffHomePositions) {
+          for (let si = 0; si < staffEs.length; si++) {
+            const se = staffEs[si];
+            se.show = true;
+            se.position = node.staffHomePositions[si];
+            anims.push({
+              entity: se,
+              from: node.staffHomePositions[si],
+              to: node.staffHomePositions[si],
+              duration: ANIM_DURATION,
+              fade: "out",
+              fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+              onComplete: () => { se.show = false; },
+            });
+          }
+        }
+      }
+    }
+  }
+
+  // Fade IN commander/staff of fromLevel nodes (commander replacing unit symbol)
+  for (const node of getNodesAtLevel(fromLevel)) {
+    const cmdE = cmdEntitiesById[node.id];
+    if (cmdE) {
+      cmdE.position = node.cmdHomePosition;
+      anims.push({
+        entity: cmdE,
+        from: node.cmdHomePosition,
+        to: node.cmdHomePosition,
+        duration: ANIM_DURATION,
+        fade: "in",
+        fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
+        fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+        onComplete: () => { cmdE.position = node.cmdHomePosition; },
+      });
+    }
+    const staffEs = staffEntitiesById[node.id];
+    if (staffEs && node.staffHomePositions) {
+      for (let si = 0; si < staffEs.length; si++) {
+        const se = staffEs[si];
+        se.position = node.staffHomePositions[si];
+        anims.push({
+          entity: se,
+          from: node.staffHomePositions[si],
+          to: node.staffHomePositions[si],
+          duration: ANIM_DURATION,
+          fade: "in",
+          fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
+          fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+          onComplete: () => { se.position = node.staffHomePositions[si]; },
+        });
+      }
+    }
+  }
+
   if (anims.length > 0) {
     playBeep(UNMERGE_BEEP_FREQ);
     startAnimations(anims);
   } else {
     showLevel(toLevel);
+  }
+}
+
+function setCmdStaffShow(node, show) {
+  const cmdE = cmdEntitiesById[node.id];
+  if (cmdE) {
+    cmdE.show = show;
+    cmdE.position = node.cmdHomePosition;
+    if (show) setEntityAlpha(cmdE, 1, 1);
+  }
+  const staffEs = staffEntitiesById[node.id];
+  if (staffEs) {
+    for (const se of staffEs) {
+      se.show = show;
+      if (show) setEntityAlpha(se, 1, 1);
+    }
+    // Reset staff positions
+    if (node.staffHomePositions) {
+      for (let i = 0; i < staffEs.length; i++) {
+        staffEs[i].position = node.staffHomePositions[i];
+      }
+    }
+  }
+}
+
+function hideAllCmdStaff() {
+  for (const node of allNodes) {
+    if (cmdEntitiesById[node.id]) cmdEntitiesById[node.id].show = false;
+    const staffEs = staffEntitiesById[node.id];
+    if (staffEs) for (const se of staffEs) se.show = false;
   }
 }
 
@@ -575,6 +858,17 @@ function showLevel(levelIdx) {
     entity.show = militaryVisible && node.type === type;
     entity.position = node.homePosition;
   }
+  // Commander/staff: visible for units one level ABOVE the visible level
+  // (those units are "unmerged" — their symbol is hidden, children are visible)
+  hideAllCmdStaff();
+  if (militaryVisible && levelIdx + 1 < LEVEL_ORDER.length) {
+    const parentType = LEVEL_ORDER[levelIdx + 1];
+    for (const node of allNodes) {
+      if (node.type === parentType) {
+        setCmdStaffShow(node, true);
+      }
+    }
+  }
 }
 
 // --- Click toggle ---
@@ -584,6 +878,8 @@ function pickMilNode(viewer, click) {
   const picked = viewer.scene.pick(click.position);
   if (!picked || !(picked.id instanceof Cesium.Entity)) return null;
   const entity = picked.id;
+  // Commander click: already unmerged, no-op for left click
+  if (entity._milCmdOf || entity._milStaffOf) return null;
   const node = entity._milNode;
   if (!node || node.children.length === 0) return null;
   const childType = LEVEL_ORDER[LEVEL_ORDER.indexOf(node.type) - 1];
@@ -596,7 +892,86 @@ export function handleRightClick(viewer, click) {
   const picked = viewer.scene.pick(click.position);
   if (!picked || !(picked.id instanceof Cesium.Entity)) return false;
   const entity = picked.id;
-  const node = entity._milNode;
+
+  // Support right-clicking a commander entity to merge its children
+  let node = entity._milNode;
+  let cmdOfNode = entity._milCmdOf;
+  if (cmdOfNode) {
+    // Right-clicked a commander — treat as merging this unit's children
+    // We need to find what child type is visible and merge into the commander's unit
+    const parentNode = cmdOfNode;
+    const parentEntity = entitiesById[parentNode.id];
+    // Find visible child type
+    let childType = null;
+    for (const child of parentNode.children) {
+      if (entitiesById[child.id].show) {
+        childType = child.type;
+        break;
+      }
+    }
+    if (!childType) return false;
+
+    const anims = [];
+    forEachDescendantAtLevel(parentNode, childType, (desc) => {
+      const e = entitiesById[desc.id];
+      anims.push({
+        entity: e,
+        from: desc.homePosition,
+        to: parentNode.homePosition,
+        duration: ANIM_DURATION,
+        fade: "out",
+        onComplete: () => {
+          e.show = false;
+          e.position = desc.homePosition;
+        },
+      });
+    });
+    parentEntity.position = parentNode.homePosition;
+    anims.push({
+      entity: parentEntity,
+      from: parentNode.homePosition,
+      to: parentNode.homePosition,
+      duration: ANIM_DURATION,
+      fade: "in",
+      popScale: true,
+      fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
+      fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+      onComplete: () => { parentEntity.position = parentNode.homePosition; },
+    });
+
+    // Fade OUT commander/staff
+    const cmdE = cmdEntitiesById[parentNode.id];
+    if (cmdE) {
+      anims.push({
+        entity: cmdE,
+        from: parentNode.cmdHomePosition,
+        to: parentNode.cmdHomePosition,
+        duration: ANIM_DURATION,
+        fade: "out",
+        fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+        onComplete: () => { cmdE.show = false; },
+      });
+    }
+    const staffEs = staffEntitiesById[parentNode.id];
+    if (staffEs && parentNode.staffHomePositions) {
+      for (let si = 0; si < staffEs.length; si++) {
+        const se = staffEs[si];
+        anims.push({
+          entity: se,
+          from: parentNode.staffHomePositions[si],
+          to: parentNode.staffHomePositions[si],
+          duration: ANIM_DURATION,
+          fade: "out",
+          fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+          onComplete: () => { se.show = false; },
+        });
+      }
+    }
+
+    if (anims.length > 0) { manualMode = true; playBeep(MERGE_BEEP_FREQ); startAnimations(anims); }
+    return true;
+  }
+
   if (!node || !node.parent) return false; // need a parent to merge into
 
   const parent = node.parent;
@@ -630,6 +1005,36 @@ export function handleRightClick(viewer, click) {
     fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
     onComplete: () => { parentEntity.position = parent.homePosition; },
   });
+
+  // Fade OUT commander/staff of parent (commander disappears, unit symbol returns)
+  const cmdE = cmdEntitiesById[parent.id];
+  if (cmdE) {
+    anims.push({
+      entity: cmdE,
+      from: parent.cmdHomePosition,
+      to: parent.cmdHomePosition,
+      duration: ANIM_DURATION,
+      fade: "out",
+      fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+      onComplete: () => { cmdE.show = false; },
+    });
+  }
+  const staffEs = staffEntitiesById[parent.id];
+  if (staffEs && parent.staffHomePositions) {
+    for (let si = 0; si < staffEs.length; si++) {
+      const se = staffEs[si];
+      anims.push({
+        entity: se,
+        from: parent.staffHomePositions[si],
+        to: parent.staffHomePositions[si],
+        duration: ANIM_DURATION,
+        fade: "out",
+        fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+        onComplete: () => { se.show = false; },
+      });
+    }
+  }
+
   if (anims.length > 0) { manualMode = true; playBeep(MERGE_BEEP_FREQ); startAnimations(anims); }
   return true;
 }
@@ -670,6 +1075,40 @@ export function handleLeftClick(viewer, click) {
       },
     });
   });
+
+  // Fade IN commander/staff for this node (commander replaces unit symbol)
+  const cmdE = cmdEntitiesById[node.id];
+  if (cmdE) {
+    cmdE.position = node.cmdHomePosition;
+    anims.push({
+      entity: cmdE,
+      from: node.cmdHomePosition,
+      to: node.cmdHomePosition,
+      duration: ANIM_DURATION,
+      fade: "in",
+      fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
+      fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+      onComplete: () => { cmdE.position = node.cmdHomePosition; },
+    });
+  }
+  const staffEs = staffEntitiesById[node.id];
+  if (staffEs && node.staffHomePositions) {
+    for (let si = 0; si < staffEs.length; si++) {
+      const se = staffEs[si];
+      se.position = node.staffHomePositions[si];
+      anims.push({
+        entity: se,
+        from: node.staffHomePositions[si],
+        to: node.staffHomePositions[si],
+        duration: ANIM_DURATION,
+        fade: "in",
+        fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
+        fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+        onComplete: () => { se.position = node.staffHomePositions[si]; },
+      });
+    }
+  }
+
   if (anims.length > 0) { manualMode = true; playBeep(UNMERGE_BEEP_FREQ); startAnimations(anims); }
   return true;
 }
@@ -710,19 +1149,19 @@ export function handleKeydown(event, viewer) {
   if (event.key === "m" || event.key === "M") {
     militaryVisible = !militaryVisible;
     if (!animating) {
-      for (const node of allNodes) {
-        const entity = entitiesById[node.id];
-        if (militaryVisible) {
-          entity.show = node.type === LEVEL_ORDER[currentLevel];
-        } else {
-          entity.show = false;
+      if (militaryVisible) {
+        showLevel(currentLevel);
+      } else {
+        for (const node of allNodes) {
+          entitiesById[node.id].show = false;
         }
+        hideAllCmdStaff();
       }
     }
     return true;
   }
 
-  if (event.key >= "1" && event.key <= "4") {
+  if (event.key >= "1" && event.key <= "5") {
     manualMode = false;
     const level = parseInt(event.key) - 1;
     setLevel(level, viewer);

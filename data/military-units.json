@@ -2,52 +2,1518 @@
   "id": "bn1",
   "name": "1 Bn",
   "type": "battalion",
-  "position": { "lat": 46.572, "lon": 8.01, "alt": 2000 },
+  "position": {
+    "lat": 46.572,
+    "lon": 8.01,
+    "alt": 2000
+  },
   "children": [
     {
       "id": "co1",
       "name": "A Co",
       "type": "company",
-      "position": { "lat": 46.554, "lon": 7.965, "alt": 1800 },
+      "position": {
+        "lat": 46.554,
+        "lon": 7.965,
+        "alt": 1800
+      },
       "children": [
         {
           "id": "pl1",
           "name": "1 Plt",
           "type": "platoon",
-          "position": { "lat": 46.583, "lon": 7.965, "alt": 1700 },
+          "position": {
+            "lat": 46.583,
+            "lon": 7.965,
+            "alt": 1700
+          },
           "children": [
-            { "id": "sq1", "name": "1 Sqd", "type": "squad", "position": { "lat": 46.589, "lon": 7.948, "alt": 1650 }, "children": [] },
-            { "id": "sq2", "name": "2 Sqd", "type": "squad", "position": { "lat": 46.577, "lon": 7.974, "alt": 1750 }, "children": [] },
-            { "id": "sq3", "name": "3 Sqd", "type": "squad", "position": { "lat": 46.586, "lon": 7.959, "alt": 1680 }, "children": [] },
-            { "id": "sq4", "name": "4 Sqd", "type": "squad", "position": { "lat": 46.580, "lon": 7.982, "alt": 1720 }, "children": [] },
-            { "id": "sq5", "name": "5 Sqd", "type": "squad", "position": { "lat": 46.592, "lon": 7.969, "alt": 1690 }, "children": [] }
+            {
+              "id": "sq1",
+              "name": "1 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.589,
+                "lon": 7.948,
+                "alt": 1650
+              },
+              "children": [
+                {
+                  "id": "ind1",
+                  "name": "Sgt Sabatini",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.589562,
+                    "lon": 7.948163,
+                    "alt": 1652
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind2",
+                  "name": "C.M. Giuliani",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.590401,
+                    "lon": 7.949453,
+                    "alt": 1661
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind3",
+                  "name": "Cpl Marchetti",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.588426,
+                    "lon": 7.948395,
+                    "alt": 1657
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind4",
+                  "name": "Sdt Molteni",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.590094,
+                    "lon": 7.947661,
+                    "alt": 1665
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind5",
+                  "name": "Sdt Galli",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.588451,
+                    "lon": 7.94914,
+                    "alt": 1647
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd10",
+                "name": "Sgt. Pirovano"
+              },
+              "staff": [
+                {
+                  "id": "staff11",
+                  "name": "C.M. Mancuso",
+                  "position": {
+                    "lat": 46.588722,
+                    "lon": 7.946754,
+                    "alt": 1652
+                  }
+                },
+                {
+                  "id": "staff12",
+                  "name": "Cpl. Ruocco",
+                  "position": {
+                    "lat": 46.589031,
+                    "lon": 7.946691,
+                    "alt": 1645
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq2",
+              "name": "2 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.577,
+                "lon": 7.974,
+                "alt": 1750
+              },
+              "children": [
+                {
+                  "id": "ind6",
+                  "name": "Sgt Parisi",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.576519,
+                    "lon": 7.974099,
+                    "alt": 1763
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind7",
+                  "name": "C.M. Donati",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.577354,
+                    "lon": 7.975103,
+                    "alt": 1758
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind8",
+                  "name": "Cpl Ruggiero",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.575953,
+                    "lon": 7.97336,
+                    "alt": 1768
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind9",
+                  "name": "Sdt De Santis",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.57696,
+                    "lon": 7.973324,
+                    "alt": 1755
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind10",
+                  "name": "Sdt Spadaro",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.577814,
+                    "lon": 7.974715,
+                    "alt": 1759
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd13",
+                "name": "Sgt. Cremonesi"
+              },
+              "staff": [
+                {
+                  "id": "staff14",
+                  "name": "C.M. Baldi",
+                  "position": {
+                    "lat": 46.57751,
+                    "lon": 7.972921,
+                    "alt": 1746
+                  }
+                },
+                {
+                  "id": "staff15",
+                  "name": "Cpl. Castelli",
+                  "position": {
+                    "lat": 46.577733,
+                    "lon": 7.97324,
+                    "alt": 1749
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq3",
+              "name": "3 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.586,
+                "lon": 7.959,
+                "alt": 1680
+              },
+              "children": [
+                {
+                  "id": "ind11",
+                  "name": "Sgt Aiello",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.585058,
+                    "lon": 7.96004,
+                    "alt": 1696
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind12",
+                  "name": "C.M. Rizzi",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.586134,
+                    "lon": 7.958914,
+                    "alt": 1663
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind13",
+                  "name": "Cpl Santoro",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.586,
+                    "lon": 7.96018,
+                    "alt": 1687
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind14",
+                  "name": "Sdt Damiani",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.585763,
+                    "lon": 7.958828,
+                    "alt": 1685
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind15",
+                  "name": "Sdt Piras",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.586652,
+                    "lon": 7.959054,
+                    "alt": 1662
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd16",
+                "name": "Sgt. Venturini"
+              },
+              "staff": [
+                {
+                  "id": "staff17",
+                  "name": "C.M. Pastore",
+                  "position": {
+                    "lat": 46.586899,
+                    "lon": 7.958931,
+                    "alt": 1677
+                  }
+                },
+                {
+                  "id": "staff18",
+                  "name": "Cpl. Spada",
+                  "position": {
+                    "lat": 46.586861,
+                    "lon": 7.959383,
+                    "alt": 1685
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq4",
+              "name": "4 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.58,
+                "lon": 7.982,
+                "alt": 1720
+              },
+              "children": [
+                {
+                  "id": "ind16",
+                  "name": "Sgt Romagnoli",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.579003,
+                    "lon": 7.980793,
+                    "alt": 1705
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind17",
+                  "name": "C.M. Mancini",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.579626,
+                    "lon": 7.982985,
+                    "alt": 1734
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind18",
+                  "name": "Cpl Cattaneo",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.58055,
+                    "lon": 7.980754,
+                    "alt": 1701
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind19",
+                  "name": "Sdt Presti",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.579311,
+                    "lon": 7.9826,
+                    "alt": 1711
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind20",
+                  "name": "Sdt Capodieci",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.581068,
+                    "lon": 7.982378,
+                    "alt": 1736
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd19",
+                "name": "Sgt. Amodio"
+              },
+              "staff": [
+                {
+                  "id": "staff20",
+                  "name": "C.M. Cornetti",
+                  "position": {
+                    "lat": 46.580585,
+                    "lon": 7.982996,
+                    "alt": 1724
+                  }
+                },
+                {
+                  "id": "staff21",
+                  "name": "Cpl. Gargiulo",
+                  "position": {
+                    "lat": 46.580315,
+                    "lon": 7.983226,
+                    "alt": 1722
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq5",
+              "name": "5 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.592,
+                "lon": 7.969,
+                "alt": 1690
+              },
+              "children": [
+                {
+                  "id": "ind21",
+                  "name": "Sgt Cosentino",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.593164,
+                    "lon": 7.968535,
+                    "alt": 1674
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind22",
+                  "name": "C.M. Serra",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.592382,
+                    "lon": 7.968219,
+                    "alt": 1689
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind23",
+                  "name": "Cpl Conti",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.591336,
+                    "lon": 7.96828,
+                    "alt": 1699
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind24",
+                  "name": "Sdt Capasso",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.592057,
+                    "lon": 7.968964,
+                    "alt": 1694
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind25",
+                  "name": "Sdt Ruggeri",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.590827,
+                    "lon": 7.969846,
+                    "alt": 1698
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd22",
+                "name": "Sgt. Tarantino"
+              },
+              "staff": [
+                {
+                  "id": "staff23",
+                  "name": "C.M. Napoli",
+                  "position": {
+                    "lat": 46.591813,
+                    "lon": 7.970281,
+                    "alt": 1694
+                  }
+                },
+                {
+                  "id": "staff24",
+                  "name": "Cpl. Calabrese",
+                  "position": {
+                    "lat": 46.591523,
+                    "lon": 7.970111,
+                    "alt": 1686
+                  }
+                }
+              ]
+            }
+          ],
+          "commander": {
+            "id": "cmd7",
+            "name": "S.Ten. Casella"
+          },
+          "staff": [
+            {
+              "id": "staff8",
+              "name": "Sgt.Magg. Zanella",
+              "position": {
+                "lat": 46.582152,
+                "lon": 7.964563,
+                "alt": 1705
+              }
+            },
+            {
+              "id": "staff9",
+              "name": "Sgt. Marra",
+              "position": {
+                "lat": 46.582306,
+                "lon": 7.964167,
+                "alt": 1700
+              }
+            }
           ]
         },
         {
           "id": "pl2",
           "name": "2 Plt",
           "type": "platoon",
-          "position": { "lat": 46.539, "lon": 7.990, "alt": 1900 },
+          "position": {
+            "lat": 46.539,
+            "lon": 7.99,
+            "alt": 1900
+          },
           "children": [
-            { "id": "sq6", "name": "6 Sqd", "type": "squad", "position": { "lat": 46.545, "lon": 7.978, "alt": 1850 }, "children": [] },
-            { "id": "sq7", "name": "7 Sqd", "type": "squad", "position": { "lat": 46.532, "lon": 8.005, "alt": 1950 }, "children": [] },
-            { "id": "sq8", "name": "8 Sqd", "type": "squad", "position": { "lat": 46.542, "lon": 7.996, "alt": 1880 }, "children": [] },
-            { "id": "sq9", "name": "9 Sqd", "type": "squad", "position": { "lat": 46.536, "lon": 7.982, "alt": 1920 }, "children": [] },
-            { "id": "sq10", "name": "10 Sqd", "type": "squad", "position": { "lat": 46.529, "lon": 7.999, "alt": 1870 }, "children": [] }
+            {
+              "id": "sq6",
+              "name": "6 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.545,
+                "lon": 7.978,
+                "alt": 1850
+              },
+              "children": [
+                {
+                  "id": "ind26",
+                  "name": "Sgt Colombo",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.546256,
+                    "lon": 7.97685,
+                    "alt": 1832
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind27",
+                  "name": "C.M. Sartori",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.543599,
+                    "lon": 7.977522,
+                    "alt": 1840
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind28",
+                  "name": "Cpl Coppola",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.54419,
+                    "lon": 7.979471,
+                    "alt": 1853
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind29",
+                  "name": "Sdt Raimondi",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.54602,
+                    "lon": 7.977525,
+                    "alt": 1856
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind30",
+                  "name": "Sdt Marchesini",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.543596,
+                    "lon": 7.978704,
+                    "alt": 1862
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd28",
+                "name": "Sgt. Fiorentino"
+              },
+              "staff": [
+                {
+                  "id": "staff29",
+                  "name": "C.M. Genovese",
+                  "position": {
+                    "lat": 46.544198,
+                    "lon": 7.977406,
+                    "alt": 1846
+                  }
+                },
+                {
+                  "id": "staff30",
+                  "name": "Cpl. Pisani",
+                  "position": {
+                    "lat": 46.544386,
+                    "lon": 7.977043,
+                    "alt": 1853
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq7",
+              "name": "7 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.532,
+                "lon": 8.005,
+                "alt": 1950
+              },
+              "children": [
+                {
+                  "id": "ind31",
+                  "name": "Sgt Giordano",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.531628,
+                    "lon": 8.004113,
+                    "alt": 1961
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind32",
+                  "name": "C.M. Caruso",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.532015,
+                    "lon": 8.003914,
+                    "alt": 1933
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind33",
+                  "name": "Cpl Neri",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.532818,
+                    "lon": 8.004795,
+                    "alt": 1965
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind34",
+                  "name": "Sdt Agostini",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.532876,
+                    "lon": 8.004981,
+                    "alt": 1968
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind35",
+                  "name": "Sdt Fiore",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.531026,
+                    "lon": 8.003936,
+                    "alt": 1952
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd31",
+                "name": "Sgt. Luciani"
+              },
+              "staff": [
+                {
+                  "id": "staff32",
+                  "name": "C.M. Mantovani",
+                  "position": {
+                    "lat": 46.531836,
+                    "lon": 8.003714,
+                    "alt": 1952
+                  }
+                },
+                {
+                  "id": "staff33",
+                  "name": "Cpl. Padovani",
+                  "position": {
+                    "lat": 46.532149,
+                    "lon": 8.00371,
+                    "alt": 1954
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq8",
+              "name": "8 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.542,
+                "lon": 7.996,
+                "alt": 1880
+              },
+              "children": [
+                {
+                  "id": "ind36",
+                  "name": "Sgt De Simone",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.542524,
+                    "lon": 7.99512,
+                    "alt": 1891
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind37",
+                  "name": "C.M. D'Amico",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.541224,
+                    "lon": 7.994905,
+                    "alt": 1886
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind38",
+                  "name": "Cpl Benedetti",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.542308,
+                    "lon": 7.996166,
+                    "alt": 1868
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind39",
+                  "name": "Sdt Scognamiglio",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.543266,
+                    "lon": 7.996065,
+                    "alt": 1890
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind40",
+                  "name": "Sdt Pellegrini",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.54065,
+                    "lon": 7.997373,
+                    "alt": 1883
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd34",
+                "name": "Sgt. Bolognese"
+              },
+              "staff": [
+                {
+                  "id": "staff35",
+                  "name": "C.M. Ravenna",
+                  "position": {
+                    "lat": 46.542602,
+                    "lon": 7.995028,
+                    "alt": 1885
+                  }
+                },
+                {
+                  "id": "staff36",
+                  "name": "Cpl. Salerno",
+                  "position": {
+                    "lat": 46.542795,
+                    "lon": 7.995386,
+                    "alt": 1877
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq9",
+              "name": "9 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.536,
+                "lon": 7.982,
+                "alt": 1920
+              },
+              "children": [
+                {
+                  "id": "ind41",
+                  "name": "Sgt Greco",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.535352,
+                    "lon": 7.980641,
+                    "alt": 1913
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind42",
+                  "name": "C.M. Pappalardo",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.536636,
+                    "lon": 7.982783,
+                    "alt": 1910
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind43",
+                  "name": "Cpl Ferrari",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.537088,
+                    "lon": 7.981867,
+                    "alt": 1907
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind44",
+                  "name": "Sdt Vitale",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.536428,
+                    "lon": 7.982023,
+                    "alt": 1908
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind45",
+                  "name": "Sdt Bianchi",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.537057,
+                    "lon": 7.980762,
+                    "alt": 1905
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd37",
+                "name": "Sgt. Catania"
+              },
+              "staff": [
+                {
+                  "id": "staff38",
+                  "name": "C.M. Messini",
+                  "position": {
+                    "lat": 46.536897,
+                    "lon": 7.982103,
+                    "alt": 1919
+                  }
+                },
+                {
+                  "id": "staff39",
+                  "name": "Cpl. Ragusa",
+                  "position": {
+                    "lat": 46.536819,
+                    "lon": 7.982543,
+                    "alt": 1916
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq10",
+              "name": "10 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.529,
+                "lon": 7.999,
+                "alt": 1870
+              },
+              "children": [
+                {
+                  "id": "ind46",
+                  "name": "Sgt Testa",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.530485,
+                    "lon": 7.998135,
+                    "alt": 1869
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind47",
+                  "name": "C.M. Basile",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.529026,
+                    "lon": 7.999359,
+                    "alt": 1869
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind48",
+                  "name": "Cpl Nardi",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.529523,
+                    "lon": 7.997975,
+                    "alt": 1889
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind49",
+                  "name": "Sdt Sorrentino",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.529988,
+                    "lon": 7.998539,
+                    "alt": 1858
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind50",
+                  "name": "Sdt Pugliese",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.529054,
+                    "lon": 7.999787,
+                    "alt": 1868
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd40",
+                "name": "Sgt. Trapani"
+              },
+              "staff": [
+                {
+                  "id": "staff41",
+                  "name": "C.M. Aquila",
+                  "position": {
+                    "lat": 46.52949,
+                    "lon": 8.000097,
+                    "alt": 1865
+                  }
+                },
+                {
+                  "id": "staff42",
+                  "name": "Cpl. Ancona",
+                  "position": {
+                    "lat": 46.529202,
+                    "lon": 8.000275,
+                    "alt": 1872
+                  }
+                }
+              ]
+            }
+          ],
+          "commander": {
+            "id": "cmd25",
+            "name": "S.Ten. Siciliano"
+          },
+          "staff": [
+            {
+              "id": "staff26",
+              "name": "Sgt.Magg. Vitali",
+              "position": {
+                "lat": 46.538188,
+                "lon": 7.990563,
+                "alt": 1897
+              }
+            },
+            {
+              "id": "staff27",
+              "name": "Sgt. Pellegrino",
+              "position": {
+                "lat": 46.538104,
+                "lon": 7.990125,
+                "alt": 1897
+              }
+            }
           ]
         },
         {
           "id": "pl5",
           "name": "5 Plt",
           "type": "platoon",
-          "position": { "lat": 46.539, "lon": 7.940, "alt": 1800 },
+          "position": {
+            "lat": 46.539,
+            "lon": 7.94,
+            "alt": 1800
+          },
           "children": [
-            { "id": "sq21", "name": "21 Sqd", "type": "squad", "position": { "lat": 46.544, "lon": 7.930, "alt": 1770 }, "children": [] },
-            { "id": "sq22", "name": "22 Sqd", "type": "squad", "position": { "lat": 46.533, "lon": 7.947, "alt": 1830 }, "children": [] },
-            { "id": "sq23", "name": "23 Sqd", "type": "squad", "position": { "lat": 46.541, "lon": 7.935, "alt": 1790 }, "children": [] },
-            { "id": "sq24", "name": "24 Sqd", "type": "squad", "position": { "lat": 46.536, "lon": 7.952, "alt": 1810 }, "children": [] },
-            { "id": "sq25", "name": "25 Sqd", "type": "squad", "position": { "lat": 46.547, "lon": 7.942, "alt": 1760 }, "children": [] }
+            {
+              "id": "sq21",
+              "name": "21 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.544,
+                "lon": 7.93,
+                "alt": 1770
+              },
+              "children": [
+                {
+                  "id": "ind51",
+                  "name": "Sgt Mazza",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.543956,
+                    "lon": 7.929257,
+                    "alt": 1770
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind52",
+                  "name": "C.M. Rossi",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.542604,
+                    "lon": 7.931085,
+                    "alt": 1765
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind53",
+                  "name": "Cpl Cozzolino",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.543778,
+                    "lon": 7.929255,
+                    "alt": 1770
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind54",
+                  "name": "Sdt Basso",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.542623,
+                    "lon": 7.930498,
+                    "alt": 1753
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind55",
+                  "name": "Sdt Gentile",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.545203,
+                    "lon": 7.93079,
+                    "alt": 1776
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd46",
+                "name": "Sgt. Savona"
+              },
+              "staff": [
+                {
+                  "id": "staff47",
+                  "name": "C.M. Imperia",
+                  "position": {
+                    "lat": 46.543144,
+                    "lon": 7.930404,
+                    "alt": 1775
+                  }
+                },
+                {
+                  "id": "staff48",
+                  "name": "Cpl. Sanremo",
+                  "position": {
+                    "lat": 46.543101,
+                    "lon": 7.929954,
+                    "alt": 1769
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq22",
+              "name": "22 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.533,
+                "lon": 7.947,
+                "alt": 1830
+              },
+              "children": [
+                {
+                  "id": "ind56",
+                  "name": "Sgt Orlando",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.53393,
+                    "lon": 7.945661,
+                    "alt": 1833
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind57",
+                  "name": "C.M. Priore",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.533147,
+                    "lon": 7.946945,
+                    "alt": 1830
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind58",
+                  "name": "Cpl Costa",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.532926,
+                    "lon": 7.946852,
+                    "alt": 1833
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind59",
+                  "name": "Sdt Ferretti",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.531549,
+                    "lon": 7.947625,
+                    "alt": 1810
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind60",
+                  "name": "Sdt Marino",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.533573,
+                    "lon": 7.94605,
+                    "alt": 1825
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd49",
+                "name": "Sgt. Bordighera"
+              },
+              "staff": [
+                {
+                  "id": "staff50",
+                  "name": "C.M. Ventimiglia",
+                  "position": {
+                    "lat": 46.532258,
+                    "lon": 7.946259,
+                    "alt": 1831
+                  }
+                },
+                {
+                  "id": "staff51",
+                  "name": "Cpl. Ferretti",
+                  "position": {
+                    "lat": 46.532477,
+                    "lon": 7.945935,
+                    "alt": 1825
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq23",
+              "name": "23 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.541,
+                "lon": 7.935,
+                "alt": 1790
+              },
+              "children": [
+                {
+                  "id": "ind61",
+                  "name": "Sgt Mele",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.541677,
+                    "lon": 7.936293,
+                    "alt": 1781
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind62",
+                  "name": "C.M. Barbieri",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.541354,
+                    "lon": 7.936208,
+                    "alt": 1788
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind63",
+                  "name": "Cpl Ferrara",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.539637,
+                    "lon": 7.935202,
+                    "alt": 1790
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind64",
+                  "name": "Sdt Maggi",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.540826,
+                    "lon": 7.934905,
+                    "alt": 1800
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind65",
+                  "name": "Sdt Sanna",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.539864,
+                    "lon": 7.935645,
+                    "alt": 1794
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd52",
+                "name": "Sgt. Capobianco"
+              },
+              "staff": [
+                {
+                  "id": "staff53",
+                  "name": "C.M. Gravina",
+                  "position": {
+                    "lat": 46.540953,
+                    "lon": 7.933693,
+                    "alt": 1785
+                  }
+                },
+                {
+                  "id": "staff54",
+                  "name": "Cpl. Poletti",
+                  "position": {
+                    "lat": 46.541263,
+                    "lon": 7.933749,
+                    "alt": 1790
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq24",
+              "name": "24 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.536,
+                "lon": 7.952,
+                "alt": 1810
+              },
+              "children": [
+                {
+                  "id": "ind66",
+                  "name": "Sgt Pinna",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.537337,
+                    "lon": 7.952999,
+                    "alt": 1809
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind67",
+                  "name": "C.M. Ventura",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.534525,
+                    "lon": 7.953231,
+                    "alt": 1792
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind68",
+                  "name": "Cpl Costanzo",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.536048,
+                    "lon": 7.95196,
+                    "alt": 1817
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind69",
+                  "name": "Sdt Battaglia",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.536165,
+                    "lon": 7.95233,
+                    "alt": 1824
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind70",
+                  "name": "Sdt Volpe",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.536493,
+                    "lon": 7.953453,
+                    "alt": 1829
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd55",
+                "name": "Sgt. Vianello"
+              },
+              "staff": [
+                {
+                  "id": "staff56",
+                  "name": "C.M. Terzi",
+                  "position": {
+                    "lat": 46.536684,
+                    "lon": 7.95115,
+                    "alt": 1808
+                  }
+                },
+                {
+                  "id": "staff57",
+                  "name": "Cpl. Casella",
+                  "position": {
+                    "lat": 46.536843,
+                    "lon": 7.951542,
+                    "alt": 1815
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq25",
+              "name": "25 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.547,
+                "lon": 7.942,
+                "alt": 1760
+              },
+              "children": [
+                {
+                  "id": "ind71",
+                  "name": "Sgt Colucci",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.548401,
+                    "lon": 7.942935,
+                    "alt": 1778
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind72",
+                  "name": "C.M. Bernardi",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.547934,
+                    "lon": 7.940978,
+                    "alt": 1744
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind73",
+                  "name": "Cpl D'Angelo",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.548479,
+                    "lon": 7.940604,
+                    "alt": 1760
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind74",
+                  "name": "Sdt Olivieri",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.548123,
+                    "lon": 7.942538,
+                    "alt": 1771
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind75",
+                  "name": "Sdt Maffei",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.546483,
+                    "lon": 7.943022,
+                    "alt": 1758
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd58",
+                "name": "Sgt. Zanella"
+              },
+              "staff": [
+                {
+                  "id": "staff59",
+                  "name": "C.M. Marra",
+                  "position": {
+                    "lat": 46.54788,
+                    "lon": 7.942272,
+                    "alt": 1764
+                  }
+                },
+                {
+                  "id": "staff60",
+                  "name": "Cpl. Pirovano",
+                  "position": {
+                    "lat": 46.547763,
+                    "lon": 7.942693,
+                    "alt": 1761
+                  }
+                }
+              ]
+            }
+          ],
+          "commander": {
+            "id": "cmd43",
+            "name": "S.Ten. Perugia"
+          },
+          "staff": [
+            {
+              "id": "staff44",
+              "name": "Sgt.Magg. Urbino",
+              "position": {
+                "lat": 46.5387,
+                "lon": 7.941233,
+                "alt": 1800
+              }
+            },
+            {
+              "id": "staff45",
+              "name": "Sgt. Livorno",
+              "position": {
+                "lat": 46.538428,
+                "lon": 7.94101,
+                "alt": 1805
+              }
+            }
           ]
+        }
+      ],
+      "commander": {
+        "id": "cmd4",
+        "name": "Cap. Poletti"
+      },
+      "staff": [
+        {
+          "id": "staff5",
+          "name": "Ten. Vianello",
+          "position": {
+            "lat": 46.553245,
+            "lon": 7.965713,
+            "alt": 1799
+          }
+        },
+        {
+          "id": "staff6",
+          "name": "M.llo Terzi",
+          "position": {
+            "lat": 46.553123,
+            "lon": 7.965294,
+            "alt": 1805
+          }
         }
       ]
     },
@@ -55,48 +1521,1534 @@
       "id": "co2",
       "name": "B Co",
       "type": "company",
-      "position": { "lat": 46.591, "lon": 8.052, "alt": 2200 },
+      "position": {
+        "lat": 46.591,
+        "lon": 8.052,
+        "alt": 2200
+      },
       "children": [
         {
           "id": "pl3",
           "name": "3 Plt",
           "type": "platoon",
-          "position": { "lat": 46.617, "lon": 8.052, "alt": 2100 },
+          "position": {
+            "lat": 46.617,
+            "lon": 8.052,
+            "alt": 2100
+          },
           "children": [
-            { "id": "sq11", "name": "11 Sqd", "type": "squad", "position": { "lat": 46.613, "lon": 8.039, "alt": 2050 }, "children": [] },
-            { "id": "sq12", "name": "12 Sqd", "type": "squad", "position": { "lat": 46.623, "lon": 8.063, "alt": 2150 }, "children": [] },
-            { "id": "sq13", "name": "13 Sqd", "type": "squad", "position": { "lat": 46.619, "lon": 8.046, "alt": 2080 }, "children": [] },
-            { "id": "sq14", "name": "14 Sqd", "type": "squad", "position": { "lat": 46.611, "lon": 8.059, "alt": 2120 }, "children": [] },
-            { "id": "sq15", "name": "15 Sqd", "type": "squad", "position": { "lat": 46.626, "lon": 8.042, "alt": 2060 }, "children": [] }
+            {
+              "id": "sq11",
+              "name": "11 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.613,
+                "lon": 8.039,
+                "alt": 2050
+              },
+              "children": [
+                {
+                  "id": "ind76",
+                  "name": "Sgt Esposito",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.614269,
+                    "lon": 8.039467,
+                    "alt": 2040
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind77",
+                  "name": "C.M. Bruno",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.611968,
+                    "lon": 8.038623,
+                    "alt": 2059
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind78",
+                  "name": "Cpl Fontana",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.611651,
+                    "lon": 8.037914,
+                    "alt": 2040
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind79",
+                  "name": "Sdt Gallo",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.613363,
+                    "lon": 8.038623,
+                    "alt": 2055
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind80",
+                  "name": "Sdt Lucchese",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.614423,
+                    "lon": 8.038729,
+                    "alt": 2062
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd67",
+                "name": "Sgt. Pastore"
+              },
+              "staff": [
+                {
+                  "id": "staff68",
+                  "name": "C.M. Spada",
+                  "position": {
+                    "lat": 46.612115,
+                    "lon": 8.039239,
+                    "alt": 2046
+                  }
+                },
+                {
+                  "id": "staff69",
+                  "name": "Cpl. Amodio",
+                  "position": {
+                    "lat": 46.612112,
+                    "lon": 8.038784,
+                    "alt": 2054
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq12",
+              "name": "12 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.623,
+                "lon": 8.063,
+                "alt": 2150
+              },
+              "children": [
+                {
+                  "id": "ind81",
+                  "name": "Sgt Longo",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.623718,
+                    "lon": 8.061548,
+                    "alt": 2157
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind82",
+                  "name": "C.M. Bianco",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.624126,
+                    "lon": 8.062263,
+                    "alt": 2154
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind83",
+                  "name": "Cpl Guglielmo",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.624198,
+                    "lon": 8.062901,
+                    "alt": 2145
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind84",
+                  "name": "Sdt Monti",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.624026,
+                    "lon": 8.063394,
+                    "alt": 2143
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind85",
+                  "name": "Sdt Messina",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.622894,
+                    "lon": 8.063088,
+                    "alt": 2170
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd70",
+                "name": "Sgt. Cornetti"
+              },
+              "staff": [
+                {
+                  "id": "staff71",
+                  "name": "C.M. Gargiulo",
+                  "position": {
+                    "lat": 46.622331,
+                    "lon": 8.062123,
+                    "alt": 2153
+                  }
+                },
+                {
+                  "id": "staff72",
+                  "name": "Cpl. Tarantino",
+                  "position": {
+                    "lat": 46.622577,
+                    "lon": 8.061843,
+                    "alt": 2153
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq13",
+              "name": "13 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.619,
+                "lon": 8.046,
+                "alt": 2080
+              },
+              "children": [
+                {
+                  "id": "ind86",
+                  "name": "Sgt Locatelli",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.618018,
+                    "lon": 8.046284,
+                    "alt": 2063
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind87",
+                  "name": "C.M. Russo",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.619432,
+                    "lon": 8.046886,
+                    "alt": 2077
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind88",
+                  "name": "Cpl Trevisan",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.619289,
+                    "lon": 8.047004,
+                    "alt": 2076
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind89",
+                  "name": "Sdt De Luca",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.619267,
+                    "lon": 8.045007,
+                    "alt": 2099
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind90",
+                  "name": "Sdt Piazza",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.618044,
+                    "lon": 8.046538,
+                    "alt": 2088
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd73",
+                "name": "Sgt. Napoli"
+              },
+              "staff": [
+                {
+                  "id": "staff74",
+                  "name": "C.M. Calabrese",
+                  "position": {
+                    "lat": 46.619071,
+                    "lon": 8.044694,
+                    "alt": 2084
+                  }
+                },
+                {
+                  "id": "staff75",
+                  "name": "Cpl. Siciliano",
+                  "position": {
+                    "lat": 46.619373,
+                    "lon": 8.044808,
+                    "alt": 2076
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq14",
+              "name": "14 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.611,
+                "lon": 8.059,
+                "alt": 2120
+              },
+              "children": [
+                {
+                  "id": "ind91",
+                  "name": "Sgt Palumbo",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.6112,
+                    "lon": 8.05914,
+                    "alt": 2125
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind92",
+                  "name": "C.M. Amato",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.612188,
+                    "lon": 8.059815,
+                    "alt": 2100
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind93",
+                  "name": "Cpl Motta",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.609681,
+                    "lon": 8.057787,
+                    "alt": 2136
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind94",
+                  "name": "Sdt Leone",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.6095,
+                    "lon": 8.057604,
+                    "alt": 2121
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind95",
+                  "name": "Sdt Ferrante",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.609672,
+                    "lon": 8.059735,
+                    "alt": 2125
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd76",
+                "name": "Sgt. Vitali"
+              },
+              "staff": [
+                {
+                  "id": "staff77",
+                  "name": "C.M. Pellegrino",
+                  "position": {
+                    "lat": 46.611755,
+                    "lon": 8.058286,
+                    "alt": 2118
+                  }
+                },
+                {
+                  "id": "staff78",
+                  "name": "Cpl. Fiorentino",
+                  "position": {
+                    "lat": 46.611877,
+                    "lon": 8.058705,
+                    "alt": 2116
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq15",
+              "name": "15 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.626,
+                "lon": 8.042,
+                "alt": 2060
+              },
+              "children": [
+                {
+                  "id": "ind96",
+                  "name": "Sgt Lorusso",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.624505,
+                    "lon": 8.041717,
+                    "alt": 2073
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind97",
+                  "name": "C.M. Zambon",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.625537,
+                    "lon": 8.041095,
+                    "alt": 2070
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind98",
+                  "name": "Cpl Liguori",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.626458,
+                    "lon": 8.04065,
+                    "alt": 2065
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind99",
+                  "name": "Sdt Farina",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.626269,
+                    "lon": 8.043053,
+                    "alt": 2063
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind100",
+                  "name": "Sdt Guerra",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.625745,
+                    "lon": 8.042264,
+                    "alt": 2056
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd79",
+                "name": "Sgt. Genovese"
+              },
+              "staff": [
+                {
+                  "id": "staff80",
+                  "name": "C.M. Pisani",
+                  "position": {
+                    "lat": 46.626848,
+                    "lon": 8.042437,
+                    "alt": 2055
+                  }
+                },
+                {
+                  "id": "staff81",
+                  "name": "Cpl. Luciani",
+                  "position": {
+                    "lat": 46.626694,
+                    "lon": 8.042834,
+                    "alt": 2063
+                  }
+                }
+              ]
+            }
+          ],
+          "commander": {
+            "id": "cmd64",
+            "name": "S.Ten. Baldi"
+          },
+          "staff": [
+            {
+              "id": "staff65",
+              "name": "Sgt.Magg. Castelli",
+              "position": {
+                "lat": 46.616591,
+                "lon": 8.053167,
+                "alt": 2096
+              }
+            },
+            {
+              "id": "staff66",
+              "name": "Sgt. Venturini",
+              "position": {
+                "lat": 46.616342,
+                "lon": 8.052894,
+                "alt": 2098
+              }
+            }
           ]
         },
         {
           "id": "pl4",
           "name": "4 Plt",
           "type": "platoon",
-          "position": { "lat": 46.578, "lon": 8.074, "alt": 2300 },
+          "position": {
+            "lat": 46.578,
+            "lon": 8.074,
+            "alt": 2300
+          },
           "children": [
-            { "id": "sq16", "name": "16 Sqd", "type": "squad", "position": { "lat": 46.583, "lon": 8.061, "alt": 2250 }, "children": [] },
-            { "id": "sq17", "name": "17 Sqd", "type": "squad", "position": { "lat": 46.573, "lon": 8.089, "alt": 2350 }, "children": [] },
-            { "id": "sq18", "name": "18 Sqd", "type": "squad", "position": { "lat": 46.581, "lon": 8.078, "alt": 2280 }, "children": [] },
-            { "id": "sq19", "name": "19 Sqd", "type": "squad", "position": { "lat": 46.576, "lon": 8.066, "alt": 2310 }, "children": [] },
-            { "id": "sq20", "name": "20 Sqd", "type": "squad", "position": { "lat": 46.585, "lon": 8.084, "alt": 2270 }, "children": [] }
+            {
+              "id": "sq16",
+              "name": "16 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.583,
+                "lon": 8.061,
+                "alt": 2250
+              },
+              "children": [
+                {
+                  "id": "ind101",
+                  "name": "Sgt Pisano",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.583271,
+                    "lon": 8.060084,
+                    "alt": 2235
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind102",
+                  "name": "C.M. Bonetti",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.583622,
+                    "lon": 8.061698,
+                    "alt": 2241
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind103",
+                  "name": "Cpl Riva",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.58427,
+                    "lon": 8.06233,
+                    "alt": 2247
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind104",
+                  "name": "Sdt Catalano",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.583289,
+                    "lon": 8.060515,
+                    "alt": 2257
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind105",
+                  "name": "Sdt Moro",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.584437,
+                    "lon": 8.062174,
+                    "alt": 2258
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd85",
+                "name": "Sgt. Ravenna"
+              },
+              "staff": [
+                {
+                  "id": "staff86",
+                  "name": "C.M. Salerno",
+                  "position": {
+                    "lat": 46.58249,
+                    "lon": 8.062079,
+                    "alt": 2255
+                  }
+                },
+                {
+                  "id": "staff87",
+                  "name": "Cpl. Catania",
+                  "position": {
+                    "lat": 46.582267,
+                    "lon": 8.06176,
+                    "alt": 2248
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq17",
+              "name": "17 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.573,
+                "lon": 8.089,
+                "alt": 2350
+              },
+              "children": [
+                {
+                  "id": "ind106",
+                  "name": "Sgt Pagano",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.57253,
+                    "lon": 8.090228,
+                    "alt": 2350
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind107",
+                  "name": "C.M. Perrone",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.574252,
+                    "lon": 8.0882,
+                    "alt": 2336
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind108",
+                  "name": "Cpl Lombardi",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.57246,
+                    "lon": 8.090448,
+                    "alt": 2350
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind109",
+                  "name": "Sdt Ricci",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.574428,
+                    "lon": 8.087564,
+                    "alt": 2356
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind110",
+                  "name": "Sdt Fumagalli",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.57331,
+                    "lon": 8.090466,
+                    "alt": 2340
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd88",
+                "name": "Sgt. Messini"
+              },
+              "staff": [
+                {
+                  "id": "staff89",
+                  "name": "C.M. Ragusa",
+                  "position": {
+                    "lat": 46.572101,
+                    "lon": 8.089069,
+                    "alt": 2350
+                  }
+                },
+                {
+                  "id": "staff90",
+                  "name": "Cpl. Trapani",
+                  "position": {
+                    "lat": 46.572139,
+                    "lon": 8.088617,
+                    "alt": 2345
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq18",
+              "name": "18 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.581,
+                "lon": 8.078,
+                "alt": 2280
+              },
+              "children": [
+                {
+                  "id": "ind111",
+                  "name": "Sgt De Rosa",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.58239,
+                    "lon": 8.077172,
+                    "alt": 2298
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind112",
+                  "name": "C.M. De Angelis",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.580419,
+                    "lon": 8.078037,
+                    "alt": 2276
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind113",
+                  "name": "Cpl Scarpa",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.580151,
+                    "lon": 8.077363,
+                    "alt": 2298
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind114",
+                  "name": "Sdt Zanetti",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.581381,
+                    "lon": 8.077448,
+                    "alt": 2280
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind115",
+                  "name": "Sdt Maggio",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.580594,
+                    "lon": 8.077838,
+                    "alt": 2267
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd91",
+                "name": "Sgt. Aquila"
+              },
+              "staff": [
+                {
+                  "id": "staff92",
+                  "name": "C.M. Ancona",
+                  "position": {
+                    "lat": 46.580415,
+                    "lon": 8.077004,
+                    "alt": 2275
+                  }
+                },
+                {
+                  "id": "staff93",
+                  "name": "Cpl. Perugia",
+                  "position": {
+                    "lat": 46.580685,
+                    "lon": 8.076774,
+                    "alt": 2281
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq19",
+              "name": "19 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.576,
+                "lon": 8.066,
+                "alt": 2310
+              },
+              "children": [
+                {
+                  "id": "ind116",
+                  "name": "Sgt Barone",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.576211,
+                    "lon": 8.067199,
+                    "alt": 2316
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind117",
+                  "name": "C.M. Villa",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.576122,
+                    "lon": 8.067166,
+                    "alt": 2313
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind118",
+                  "name": "Cpl Rinaldi",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.577063,
+                    "lon": 8.065831,
+                    "alt": 2315
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind119",
+                  "name": "Sdt Poli",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.575865,
+                    "lon": 8.066264,
+                    "alt": 2316
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind120",
+                  "name": "Sdt Rosetti",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.576377,
+                    "lon": 8.065726,
+                    "alt": 2297
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd94",
+                "name": "Sgt. Urbino"
+              },
+              "staff": [
+                {
+                  "id": "staff95",
+                  "name": "C.M. Livorno",
+                  "position": {
+                    "lat": 46.576187,
+                    "lon": 8.064719,
+                    "alt": 2309
+                  }
+                },
+                {
+                  "id": "staff96",
+                  "name": "Cpl. Savona",
+                  "position": {
+                    "lat": 46.576477,
+                    "lon": 8.06489,
+                    "alt": 2315
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq20",
+              "name": "20 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.585,
+                "lon": 8.084,
+                "alt": 2270
+              },
+              "children": [
+                {
+                  "id": "ind121",
+                  "name": "Sgt Quaranta",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.583516,
+                    "lon": 8.08463,
+                    "alt": 2265
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind122",
+                  "name": "C.M. Grassi",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.58448,
+                    "lon": 8.082557,
+                    "alt": 2255
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind123",
+                  "name": "Cpl Falcone",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.585447,
+                    "lon": 8.083343,
+                    "alt": 2252
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind124",
+                  "name": "Sdt Franchi",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.584879,
+                    "lon": 8.084599,
+                    "alt": 2255
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind125",
+                  "name": "Sdt Palmieri",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.585625,
+                    "lon": 8.083146,
+                    "alt": 2261
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd97",
+                "name": "Sgt. Imperia"
+              },
+              "staff": [
+                {
+                  "id": "staff98",
+                  "name": "C.M. Sanremo",
+                  "position": {
+                    "lat": 46.585812,
+                    "lon": 8.083436,
+                    "alt": 2275
+                  }
+                },
+                {
+                  "id": "staff99",
+                  "name": "Cpl. Bordighera",
+                  "position": {
+                    "lat": 46.585896,
+                    "lon": 8.083874,
+                    "alt": 2270
+                  }
+                }
+              ]
+            }
+          ],
+          "commander": {
+            "id": "cmd82",
+            "name": "S.Ten. Mantovani"
+          },
+          "staff": [
+            {
+              "id": "staff83",
+              "name": "Sgt.Magg. Padovani",
+              "position": {
+                "lat": 46.578278,
+                "lon": 8.075245,
+                "alt": 2301
+              }
+            },
+            {
+              "id": "staff84",
+              "name": "Sgt. Bolognese",
+              "position": {
+                "lat": 46.577969,
+                "lon": 8.075309,
+                "alt": 2304
+              }
+            }
           ]
         },
         {
           "id": "pl6",
           "name": "6 Plt",
           "type": "platoon",
-          "position": { "lat": 46.578, "lon": 8.030, "alt": 2190 },
+          "position": {
+            "lat": 46.578,
+            "lon": 8.03,
+            "alt": 2190
+          },
           "children": [
-            { "id": "sq26", "name": "26 Sqd", "type": "squad", "position": { "lat": 46.583, "lon": 8.024, "alt": 2160 }, "children": [] },
-            { "id": "sq27", "name": "27 Sqd", "type": "squad", "position": { "lat": 46.574, "lon": 8.037, "alt": 2220 }, "children": [] },
-            { "id": "sq28", "name": "28 Sqd", "type": "squad", "position": { "lat": 46.580, "lon": 8.028, "alt": 2180 }, "children": [] },
-            { "id": "sq29", "name": "29 Sqd", "type": "squad", "position": { "lat": 46.576, "lon": 8.042, "alt": 2210 }, "children": [] },
-            { "id": "sq30", "name": "30 Sqd", "type": "squad", "position": { "lat": 46.585, "lon": 8.032, "alt": 2170 }, "children": [] }
+            {
+              "id": "sq26",
+              "name": "26 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.583,
+                "lon": 8.024,
+                "alt": 2160
+              },
+              "children": [
+                {
+                  "id": "ind126",
+                  "name": "Sgt Masi",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.583362,
+                    "lon": 8.023521,
+                    "alt": 2154
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind127",
+                  "name": "C.M. Moretti",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.583348,
+                    "lon": 8.023903,
+                    "alt": 2173
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind128",
+                  "name": "Cpl Valenti",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.581753,
+                    "lon": 8.023098,
+                    "alt": 2154
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind129",
+                  "name": "Sdt Pozzi",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.584154,
+                    "lon": 8.025075,
+                    "alt": 2178
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind130",
+                  "name": "Sdt Albanese",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.582897,
+                    "lon": 8.023023,
+                    "alt": 2166
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd103",
+                "name": "Sgt. Gravina"
+              },
+              "staff": [
+                {
+                  "id": "staff104",
+                  "name": "C.M. Poletti",
+                  "position": {
+                    "lat": 46.583164,
+                    "lon": 8.025288,
+                    "alt": 2156
+                  }
+                },
+                {
+                  "id": "staff105",
+                  "name": "Cpl. Vianello",
+                  "position": {
+                    "lat": 46.582851,
+                    "lon": 8.025292,
+                    "alt": 2159
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq27",
+              "name": "27 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.574,
+                "lon": 8.037,
+                "alt": 2220
+              },
+              "children": [
+                {
+                  "id": "ind131",
+                  "name": "Sgt Morelli",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.574336,
+                    "lon": 8.037756,
+                    "alt": 2238
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind132",
+                  "name": "C.M. Silvestri",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.573716,
+                    "lon": 8.036628,
+                    "alt": 2206
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind133",
+                  "name": "Cpl Martinelli",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.575205,
+                    "lon": 8.03722,
+                    "alt": 2207
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind134",
+                  "name": "Sdt Gatti",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.572604,
+                    "lon": 8.038072,
+                    "alt": 2204
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind135",
+                  "name": "Sdt Montanari",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.574104,
+                    "lon": 8.037068,
+                    "alt": 2224
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd106",
+                "name": "Sgt. Terzi"
+              },
+              "staff": [
+                {
+                  "id": "staff107",
+                  "name": "C.M. Casella",
+                  "position": {
+                    "lat": 46.573398,
+                    "lon": 8.037973,
+                    "alt": 2217
+                  }
+                },
+                {
+                  "id": "staff108",
+                  "name": "Cpl. Zanella",
+                  "position": {
+                    "lat": 46.573205,
+                    "lon": 8.037615,
+                    "alt": 2225
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq28",
+              "name": "28 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.58,
+                "lon": 8.028,
+                "alt": 2180
+              },
+              "children": [
+                {
+                  "id": "ind136",
+                  "name": "Sgt Romano",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.581428,
+                    "lon": 8.028078,
+                    "alt": 2187
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind137",
+                  "name": "C.M. Marchese",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.580073,
+                    "lon": 8.029202,
+                    "alt": 2195
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind138",
+                  "name": "Cpl Rizzo",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.578764,
+                    "lon": 8.027176,
+                    "alt": 2197
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind139",
+                  "name": "Sdt De Marco",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.579664,
+                    "lon": 8.02861,
+                    "alt": 2181
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind140",
+                  "name": "Sdt Ceccarelli",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.579822,
+                    "lon": 8.027473,
+                    "alt": 2175
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd109",
+                "name": "Sgt. Marra"
+              },
+              "staff": [
+                {
+                  "id": "staff110",
+                  "name": "C.M. Pirovano",
+                  "position": {
+                    "lat": 46.579103,
+                    "lon": 8.027897,
+                    "alt": 2184
+                  }
+                },
+                {
+                  "id": "staff111",
+                  "name": "Cpl. Mancuso",
+                  "position": {
+                    "lat": 46.579181,
+                    "lon": 8.027457,
+                    "alt": 2182
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq29",
+              "name": "29 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.576,
+                "lon": 8.042,
+                "alt": 2210
+              },
+              "children": [
+                {
+                  "id": "ind141",
+                  "name": "Sgt Mariani",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.575508,
+                    "lon": 8.042435,
+                    "alt": 2225
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind142",
+                  "name": "C.M. Fabbri",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.577144,
+                    "lon": 8.041215,
+                    "alt": 2214
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind143",
+                  "name": "Cpl Landi",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.575977,
+                    "lon": 8.04205,
+                    "alt": 2219
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind144",
+                  "name": "Sdt Conte",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.576215,
+                    "lon": 8.041726,
+                    "alt": 2230
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind145",
+                  "name": "Sdt Ferraro",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.575165,
+                    "lon": 8.041787,
+                    "alt": 2192
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd112",
+                "name": "Sgt. Ruocco"
+              },
+              "staff": [
+                {
+                  "id": "staff113",
+                  "name": "C.M. Cremonesi",
+                  "position": {
+                    "lat": 46.57551,
+                    "lon": 8.040902,
+                    "alt": 2214
+                  }
+                },
+                {
+                  "id": "staff114",
+                  "name": "Cpl. Baldi",
+                  "position": {
+                    "lat": 46.575798,
+                    "lon": 8.040724,
+                    "alt": 2206
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sq30",
+              "name": "30 Sqd",
+              "type": "squad",
+              "position": {
+                "lat": 46.585,
+                "lon": 8.032,
+                "alt": 2170
+              },
+              "children": [
+                {
+                  "id": "ind146",
+                  "name": "Sgt Ferri",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.583964,
+                    "lon": 8.030645,
+                    "alt": 2155
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind147",
+                  "name": "C.M. Martini",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.584517,
+                    "lon": 8.032797,
+                    "alt": 2171
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind148",
+                  "name": "Cpl Grasso",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.584854,
+                    "lon": 8.031637,
+                    "alt": 2190
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind149",
+                  "name": "Sdt Bellini",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.585678,
+                    "lon": 8.031816,
+                    "alt": 2164
+                  },
+                  "children": []
+                },
+                {
+                  "id": "ind150",
+                  "name": "Sdt Caputo",
+                  "type": "individual",
+                  "position": {
+                    "lat": 46.585748,
+                    "lon": 8.031375,
+                    "alt": 2173
+                  },
+                  "children": []
+                }
+              ],
+              "commander": {
+                "id": "cmd115",
+                "name": "Sgt. Castelli"
+              },
+              "staff": [
+                {
+                  "id": "staff116",
+                  "name": "C.M. Venturini",
+                  "position": {
+                    "lat": 46.5853,
+                    "lon": 8.030766,
+                    "alt": 2167
+                  }
+                },
+                {
+                  "id": "staff117",
+                  "name": "Cpl. Pastore",
+                  "position": {
+                    "lat": 46.585572,
+                    "lon": 8.03099,
+                    "alt": 2167
+                  }
+                }
+              ]
+            }
+          ],
+          "commander": {
+            "id": "cmd100",
+            "name": "S.Ten. Ventimiglia"
+          },
+          "staff": [
+            {
+              "id": "staff101",
+              "name": "Sgt.Magg. Ferretti",
+              "position": {
+                "lat": 46.578802,
+                "lon": 8.030594,
+                "alt": 2192
+              }
+            },
+            {
+              "id": "staff102",
+              "name": "Sgt. Capobianco",
+              "position": {
+                "lat": 46.578614,
+                "lon": 8.030958,
+                "alt": 2185
+              }
+            }
           ]
         }
+      ],
+      "commander": {
+        "id": "cmd61",
+        "name": "Cap. Mancuso"
+      },
+      "staff": [
+        {
+          "id": "staff62",
+          "name": "Ten. Ruocco",
+          "position": {
+            "lat": 46.591387,
+            "lon": 8.053182,
+            "alt": 2203
+          }
+        },
+        {
+          "id": "staff63",
+          "name": "M.llo Cremonesi",
+          "position": {
+            "lat": 46.591086,
+            "lon": 8.053304,
+            "alt": 2195
+          }
+        }
       ]
+    }
+  ],
+  "commander": {
+    "id": "cmd1",
+    "name": "Ten.Col. Ferretti"
+  },
+  "staff": [
+    {
+      "id": "staff2",
+      "name": "Magg. Capobianco",
+      "position": {
+        "lat": 46.571929,
+        "lon": 8.011305,
+        "alt": 1995
+      }
+    },
+    {
+      "id": "staff3",
+      "name": "Cap. Gravina",
+      "position": {
+        "lat": 46.571627,
+        "lon": 8.011191,
+        "alt": 2001
+      }
     }
   ]
 }
