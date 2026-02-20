@@ -50,7 +50,13 @@ void main() {
         return;
     }
 
+    // Fade out distant terrain where the video texture is overly stretched.
+    // Use distance from drone rather than screen-space derivatives to avoid
+    // dithering artifacts from depth-buffer precision at close zoom.
+    float dist = length(rtcPos);
+    float stretchFade = 1.0 - smoothstep(800.0, 1200.0, dist);
+
     vec4 video = texture(videoTexture, droneUV);
     vec4 scene = texture(colorTexture, v_textureCoordinates);
-    out_FragColor = mix(scene, video, videoAlpha);
+    out_FragColor = mix(scene, video, videoAlpha * stretchFade);
 }
