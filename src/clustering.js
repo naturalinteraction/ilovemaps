@@ -26,30 +26,36 @@ function drawMilitarySymbol(type) {
   ctx.lineWidth = 2;
 
   if (type === "squad") {
-    // × (cross)
-    const y = ry - 4;
-    ctx.beginPath();
-    ctx.moveTo(cx - 5, y - 5); ctx.lineTo(cx + 5, y + 5);
-    ctx.moveTo(cx + 5, y - 5); ctx.lineTo(cx - 5, y + 5);
-    ctx.stroke();
-  } else if (type === "platoon") {
-    // • • •
+    // APP-6A: single dot
     const y = ry - 6;
-    for (const dx of [-8, 0, 8]) {
+    ctx.beginPath();
+    ctx.arc(cx, y, 3, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (type === "platoon") {
+    // APP-6A: • • (two dots)
+    const y = ry - 6;
+    for (const dx of [-6, 6]) {
       ctx.beginPath();
       ctx.arc(cx + dx, y, 3, 0, Math.PI * 2);
       ctx.fill();
     }
   } else if (type === "company") {
-    // |
+    // APP-6A: | (one vertical line)
     ctx.beginPath();
     ctx.moveTo(cx, ry - 2); ctx.lineTo(cx, ry - 12);
     ctx.stroke();
   } else if (type === "battalion") {
-    // | |
+    // APP-6A: | | (two vertical lines)
     ctx.beginPath();
     ctx.moveTo(cx - 5, ry - 2); ctx.lineTo(cx - 5, ry - 12);
     ctx.moveTo(cx + 5, ry - 2); ctx.lineTo(cx + 5, ry - 12);
+    ctx.stroke();
+  } else if (type === "regiment") {
+    // APP-6A: | | | (three vertical lines)
+    ctx.beginPath();
+    ctx.moveTo(cx - 8, ry - 2); ctx.lineTo(cx - 8, ry - 12);
+    ctx.moveTo(cx, ry - 2); ctx.lineTo(cx, ry - 12);
+    ctx.moveTo(cx + 8, ry - 2); ctx.lineTo(cx + 8, ry - 12);
     ctx.stroke();
   }
 
@@ -67,7 +73,7 @@ function getSymbolImage(type) {
 
 // --- Data structures ---
 
-const LEVEL_ORDER = ["squad", "platoon", "company", "battalion"];
+const LEVEL_ORDER = ["squad", "platoon", "company", "battalion", "regiment"];
 
 // All nodes indexed by id
 const nodesById = {};
@@ -88,7 +94,7 @@ const scratchEnd = new Cesium.Cartesian3();
 const ARC_SEGMENTS = 16;
 const ARC_BOW = 0.15; // perpendicular offset as fraction of distance
 
-// Current visible level index (0=squad, 3=battalion)
+// Current visible level index (0=squad, 4=regiment)
 let currentLevel = 0;
 let militaryVisible = true;
 let manualMode = false; // disables zoom-based auto-leveling after click merge/unmerge
@@ -267,13 +273,13 @@ export async function loadMilitaryUnits(viewer) {
 
 // --- Zoom-based level ---
 
-const ZOOM_THRESHOLDS = [10000, 30000, 70000]; // meters (distance to look-at point)
+const ZOOM_THRESHOLDS = [10000, 30000, 70000, 150000]; // meters (distance to look-at point)
 
 function levelForDist(dist) {
   for (let i = 0; i < ZOOM_THRESHOLDS.length; i++) {
     if (dist < ZOOM_THRESHOLDS[i]) return i;
   }
-  return ZOOM_THRESHOLDS.length; // battalion
+  return ZOOM_THRESHOLDS.length; // regiment
 }
 
 function cameraZoomDist(viewer) {
@@ -722,7 +728,7 @@ export function handleKeydown(event, viewer) {
     return true;
   }
 
-  if (event.key >= "1" && event.key <= "4") {
+  if (event.key >= "1" && event.key <= "5") {
     manualMode = false;
     const level = parseInt(event.key) - 1;
     setLevel(level, viewer);
