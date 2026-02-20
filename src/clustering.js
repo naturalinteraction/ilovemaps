@@ -697,6 +697,13 @@ function forEachDescendantAtLevel(node, type, fn) {
 let zoomDebounceTimer = null;
 
 export function setupZoomListener(viewer) {
+  // Set initial level from camera distance (no animation)
+  const initDist = cameraZoomDist(viewer);
+  if (initDist !== null) {
+    currentLevel = levelForDist(initDist);
+    showLevel(currentLevel);
+  }
+
   viewer.camera.changed.addEventListener(() => {
     if (zoomDebounceTimer) clearTimeout(zoomDebounceTimer);
     zoomDebounceTimer = setTimeout(() => {
@@ -704,7 +711,8 @@ export function setupZoomListener(viewer) {
       const dist = cameraZoomDist(viewer);
       if (dist === null) return;
       const newLevel = levelForDist(dist);
-      if (newLevel !== currentLevel) {
+      if (newLevel > currentLevel) {
+        // Only auto-merge when zooming out; never auto-unmerge
         setLevel(newLevel, viewer);
       }
     }, 50);
