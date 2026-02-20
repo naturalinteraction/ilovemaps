@@ -116,7 +116,7 @@ const MOVE_STEP = 0.00009; // degrees ~10m at equator
 // Public API
 // ---------------------------------------------------------------------------
 export async function setupDroneVideoLayer(viewer) {
-  const image = await Cesium.Resource.fetchImage({ url: "/data/drone_frame_real2.png" });
+  const image = await Cesium.Resource.fetchImage({ url: "/data/drone_frame_real.png" });
 
   const texture = new Cesium.Texture({
     context: viewer.scene.context,
