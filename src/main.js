@@ -20,6 +20,12 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
   infoBox: false,
   animation: false,
   timeline: false,
+  geocoder: false,
+  baseLayerPicker: false,
+  sceneModePicker: false,
+  homeButton: false,
+  navigationHelpButton: false,
+  fullscreenButton: false,
 });
 viewer.scene.globe.depthTestAgainstTerrain = true;
 
@@ -280,10 +286,11 @@ let colorPickerCache = { level: -1, tileX: -1, tileY: -1, ctx: null, rect: null 
 let colorPickerPending = false;
 
 handler.setInputAction(async (movement) => {
+  if (!TILE_PREVIEW_ENABLED) return;
   if (colorPickerPending) return;
   const ray = viewer.camera.getPickRay(movement.endPosition);
   const cartesian = ray && viewer.scene.globe.pick(ray, viewer.scene);
-  if (!cartesian) { colorTooltip.style.display = "none"; if (TILE_PREVIEW_ENABLED) tilePreview.style.display = "none"; return; }
+  if (!cartesian) { if (TILE_PREVIEW_ENABLED) colorTooltip.style.display = "none"; if (TILE_PREVIEW_ENABLED) tilePreview.style.display = "none"; return; }
   const carto = Cesium.Cartographic.fromCartesian(cartesian);
 
   const layer = viewer.imageryLayers.get(0);
@@ -295,7 +302,7 @@ handler.setInputAction(async (movement) => {
   const level = Math.max(0, Math.min(maxLevel, Math.round(Math.log2(40075016 / (camHeight * 2)))));
 
   const tileXY = tilingScheme.positionToTileXY(carto, level);
-  if (!tileXY) { colorTooltip.style.display = "none"; return; }
+  if (!tileXY) { if (TILE_PREVIEW_ENABLED) colorTooltip.style.display = "none"; return; }
 
   // Reuse cached tile if same tile
   let ctx = colorPickerCache.ctx;
@@ -304,7 +311,7 @@ handler.setInputAction(async (movement) => {
     colorPickerPending = true;
     const image = await provider.requestImage(tileXY.x, tileXY.y, level);
     colorPickerPending = false;
-    if (!image) { colorTooltip.style.display = "none"; return; }
+    if (!image) { if (TILE_PREVIEW_ENABLED) colorTooltip.style.display = "none"; return; }
     const offscreen = document.createElement("canvas");
     offscreen.width = image.width;
     offscreen.height = image.height;
@@ -324,10 +331,10 @@ handler.setInputAction(async (movement) => {
   }
   const px = Math.min(Math.max(0, Math.floor(u * ctx.canvas.width)), ctx.canvas.width - 1);
   const py = Math.min(Math.max(0, Math.floor(v * ctx.canvas.height)), ctx.canvas.height - 1);
-  const [r, g, b] = ctx.getImageData(px, py, 1, 1).data;
 
   // Draw tile preview with crosshair
   if (TILE_PREVIEW_ENABLED) {
+    const [r, g, b] = ctx.getImageData(px, py, 1, 1).data;
     tilePreview.width = ctx.canvas.width;
     tilePreview.height = ctx.canvas.height;
     tilePreview.style.display = "block";
@@ -339,13 +346,13 @@ handler.setInputAction(async (movement) => {
     tilePreviewCtx.moveTo(px, 0); tilePreviewCtx.lineTo(px, ctx.canvas.height);
     tilePreviewCtx.moveTo(0, crossY); tilePreviewCtx.lineTo(ctx.canvas.width, crossY);
     tilePreviewCtx.stroke();
-  }
 
-  const hex = `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
-  colorTooltip.innerHTML = `<span style="display:inline-block;width:14px;height:14px;background:${hex};border:1px solid #fff;vertical-align:middle;margin-right:6px"></span>RGB(${r}, ${g}, ${b}) ${hex}`;
-  colorTooltip.style.left = (movement.endPosition.x + 15) + "px";
-  colorTooltip.style.top = (movement.endPosition.y - 10) + "px";
-  colorTooltip.style.display = "block";
+    const hex = `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+    colorTooltip.innerHTML = `<span style="display:inline-block;width:14px;height:14px;background:${hex};border:1px solid #fff;vertical-align:middle;margin-right:6px"></span>RGB(${r}, ${g}, ${b}) ${hex}`;
+    colorTooltip.style.left = (movement.endPosition.x + 15) + "px";
+    colorTooltip.style.top = (movement.endPosition.y - 10) + "px";
+    colorTooltip.style.display = "block";
+  }
 }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 
 const gridEntities = [];

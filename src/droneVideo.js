@@ -110,6 +110,7 @@ function computeDroneCameraMatrix(pose) {
 
 // Length of the look-direction arrow in metres
 const ARROW_LENGTH = 400;
+const MOVE_STEP = 0.001; // degrees ~111m at equator
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -161,7 +162,7 @@ export async function setupDroneVideoLayer(viewer) {
   });
 
   function poseLabel() {
-    return `H:${DRONE_POSE.heading.toFixed(1)}° P:${DRONE_POSE.pitch.toFixed(1)}° R:${DRONE_POSE.roll.toFixed(1)}°`;
+    return `${DRONE_POSE.lat.toFixed(4)}, ${DRONE_POSE.lon.toFixed(4)}\nH:${DRONE_POSE.heading.toFixed(1)}° P:${DRONE_POSE.pitch.toFixed(1)}° R:${DRONE_POSE.roll.toFixed(1)}°`;
   }
 
   // Always-visible point + label at the drone location.
@@ -209,7 +210,28 @@ export async function setupDroneVideoLayer(viewer) {
   // -------------------------------------------------------------------------
 
   window.addEventListener("keydown", (e) => {
-    if (e.key === "a") {
+    const headRad = Cesium.Math.toRadians(DRONE_POSE.heading);
+    if (e.key === "ArrowUp") {
+      DRONE_POSE.lat += MOVE_STEP * Math.cos(headRad);
+      DRONE_POSE.lon += MOVE_STEP * Math.sin(headRad);
+      drone = computeDroneCameraMatrix(DRONE_POSE);
+      refreshIndicator();
+    } else if (e.key === "ArrowDown") {
+      DRONE_POSE.lat -= MOVE_STEP * Math.cos(headRad);
+      DRONE_POSE.lon -= MOVE_STEP * Math.sin(headRad);
+      drone = computeDroneCameraMatrix(DRONE_POSE);
+      refreshIndicator();
+    } else if (e.key === "ArrowLeft") {
+      DRONE_POSE.lat += MOVE_STEP * Math.sin(headRad);
+      DRONE_POSE.lon -= MOVE_STEP * Math.cos(headRad);
+      drone = computeDroneCameraMatrix(DRONE_POSE);
+      refreshIndicator();
+    } else if (e.key === "ArrowRight") {
+      DRONE_POSE.lat -= MOVE_STEP * Math.sin(headRad);
+      DRONE_POSE.lon += MOVE_STEP * Math.cos(headRad);
+      drone = computeDroneCameraMatrix(DRONE_POSE);
+      refreshIndicator();
+    } else if (e.key === "a") {
       DRONE_POSE.heading -= 2;
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
