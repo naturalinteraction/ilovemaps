@@ -5,14 +5,14 @@ import drapeShaderGLSL from "./drapeShader.glsl?raw";
 // Hardcoded 6-DOF pose (matches data/drone_pose.json)
 // ---------------------------------------------------------------------------
 const DRONE_POSE = {
-  lat: 46.4,       // degrees
-  lon: 8.42,        // degrees
-  alt: 2700,        // metres above ellipsoid
-  heading: 0,       // degrees, 0 = North, clockwise
-  pitch: 77,       // degrees, 0 = horizontal, positive = looking down, 90 = straight down
+  lat: 46.3301,       // degrees
+  lon: 10.3289,        // degrees
+  alt: 1004.0,        // metres above ellipsoid
+  heading: 208,       // degrees, 0 = North, clockwise
+  pitch: 51,       // degrees, 0 = horizontal, positive = looking down, 90 = straight down
   roll: 0,          // degrees
-  hFovDeg: 30,      // horizontal field of view
-  aspectRatio: 16 / 9,
+  hFovDeg: 59.60,      // horizontal field of view
+  aspectRatio: 4 / 3,
 };
 
 // ---------------------------------------------------------------------------
@@ -109,14 +109,14 @@ function computeDroneCameraMatrix(pose) {
 }
 
 // Length of the look-direction arrow in metres
-const ARROW_LENGTH = 400;
-const MOVE_STEP = 0.001; // degrees ~111m at equator
+const ARROW_LENGTH = 20;
+const MOVE_STEP = 0.00009; // degrees ~10m at equator
 
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 export async function setupDroneVideoLayer(viewer) {
-  const image = await Cesium.Resource.fetchImage({ url: "/data/drone_frame.jpg" });
+  const image = await Cesium.Resource.fetchImage({ url: "/data/drone_frame_real2.png" });
 
   const texture = new Cesium.Texture({
     context: viewer.scene.context,
@@ -124,6 +124,7 @@ export async function setupDroneVideoLayer(viewer) {
   });
 
   let drone = computeDroneCameraMatrix(DRONE_POSE);
+  let droneAlpha = 0.7;
 
   const stage = new Cesium.PostProcessStage({
     fragmentShader: drapeShaderGLSL,
@@ -131,7 +132,7 @@ export async function setupDroneVideoLayer(viewer) {
       videoTexture:      () => texture,
       droneEcefPosition: () => drone.ecef,
       droneCameraMatrix: () => drone.matrix,
-      videoAlpha:        () => 0.8,
+      videoAlpha:        () => droneAlpha,
     },
   });
 
@@ -153,7 +154,7 @@ export async function setupDroneVideoLayer(viewer) {
   const sphereEntity = viewer.entities.add({
     position: drone.ecef,
     ellipsoid: {
-      radii: new Cesium.Cartesian3(200, 200, 200),
+      radii: new Cesium.Cartesian3(2, 2, 2),
       material: Cesium.Color.YELLOW,
       outline: true,
       outlineColor: Cesium.Color.ORANGE,
@@ -162,7 +163,7 @@ export async function setupDroneVideoLayer(viewer) {
   });
 
   function poseLabel() {
-    return `${DRONE_POSE.lat.toFixed(4)}, ${DRONE_POSE.lon.toFixed(4)}\nH:${DRONE_POSE.heading.toFixed(1)}° P:${DRONE_POSE.pitch.toFixed(1)}° R:${DRONE_POSE.roll.toFixed(1)}°`;
+    return `${DRONE_POSE.lat.toFixed(4)}, ${DRONE_POSE.lon.toFixed(4)}, ${DRONE_POSE.alt.toFixed(1)}m\nH:${DRONE_POSE.heading.toFixed(1)}° P:${DRONE_POSE.pitch.toFixed(1)}° R:${DRONE_POSE.roll.toFixed(1)}°`;
   }
 
   // Always-visible point + label at the drone location.
@@ -268,6 +269,16 @@ export async function setupDroneVideoLayer(viewer) {
       DRONE_POSE.roll -= 2;
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
+    } else if (e.key === "i") {
+      DRONE_POSE.alt += 2;
+      drone = computeDroneCameraMatrix(DRONE_POSE);
+      refreshIndicator();
+    } else if (e.key === "k") {
+      DRONE_POSE.alt -= 2;
+      drone = computeDroneCameraMatrix(DRONE_POSE);
+      refreshIndicator();
+    } else if (e.key === "t" || e.key === "T") {
+      droneAlpha = droneAlpha > 0.3 ? 0.0 : 0.5;
     }
   });
 
