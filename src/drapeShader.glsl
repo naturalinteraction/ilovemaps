@@ -25,6 +25,12 @@ void main() {
     // Relative-to-center: shift origin to drone ECEF position
     vec3 rtcPos = worldPos.xyz - droneEcefPosition;
 
+    // Don't project onto the drone indicator geometry (sphere + arrow) was 350
+    if (length(rtcPos) < 0.0) {
+        out_FragColor = texture(colorTexture, v_textureCoordinates);
+        return;
+    }
+
     // Project through drone camera (proj * view in RTC frame)
     vec4 droneClip = droneCameraMatrix * vec4(rtcPos, 1.0);
 

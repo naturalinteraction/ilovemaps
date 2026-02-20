@@ -7,11 +7,11 @@ import drapeShaderGLSL from "./drapeShader.glsl?raw";
 const DRONE_POSE = {
   lat: 46.22,       // degrees
   lon: 8.8,        // degrees
-  alt: 1500,        // metres above ellipsoid
+  alt: 2700,        // metres above ellipsoid
   heading: 0,       // degrees, 0 = North, clockwise
-  pitch: -45,       // degrees, 0 = horizontal, negative = looking down
+  pitch: 0,       // degrees, 0 = horizontal, positive = looking down, 90 = straight down
   roll: 0,          // degrees
-  hFovDeg: 60,      // horizontal field of view
+  hFovDeg: 30,      // horizontal field of view
   aspectRatio: 16 / 9,
 };
 
@@ -42,6 +42,8 @@ function computeDroneCameraMatrix(pose) {
   const forward = new Cesium.Cartesian3(localFrame[4], localFrame[5], localFrame[6]);
   const up      = new Cesium.Cartesian3(localFrame[8], localFrame[9], localFrame[10]);
 
+  // forward is the unit look-at direction in ECEF — exposed for the 3D indicator
+
   // View matrix: world → camera, no translation (RTC origin = drone position)
   // Cesium.Matrix4 constructor args: column0Row0, column0Row1, ... (column-major)
   // Row 0 = right, Row 1 = up, Row 2 = −forward
@@ -62,7 +64,7 @@ function computeDroneCameraMatrix(pose) {
   const aspect  = pose.aspectRatio;
   const vFovRad = 2.0 * Math.atan(Math.tan(hFovRad / 2.0) / aspect);
   const near    = 1.0;
-  const far     = 50000.0;
+  const far     = 5000.0;
   const f       = 1.0 / Math.tan(vFovRad / 2.0);
   const nf      = 1.0 / (near - far);
 
@@ -80,9 +82,13 @@ function computeDroneCameraMatrix(pose) {
 
   return {
     ecef: droneEcef,
+    forward,
     matrix: Cesium.Matrix4.multiply(projMatrix, viewMatrix, new Cesium.Matrix4()),
   };
 }
+
+// Length of the look-direction arrow in metres
+const ARROW_LENGTH = 300;
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -109,19 +115,95 @@ export async function setupDroneVideoLayer(viewer) {
 
   viewer.scene.postProcessStages.add(stage);
 
+  // --- 3D drone indicator: sphere + look-direction arrow -------------------
+
+  function arrowTip(ecef, fwd) {
+    return Cesium.Cartesian3.add(
+      ecef,
+      Cesium.Cartesian3.multiplyByScalar(fwd, ARROW_LENGTH, new Cesium.Cartesian3()),
+      new Cesium.Cartesian3(),
+    );
+  }
+
+  // Sphere: store entity ref so we can reassign .position when pose changes.
+  // Use a direct Cartesian3 (wrapped to ConstantPositionProperty internally)
+  // rather than CallbackProperty, which can have issues with ellipsoid graphics.
+  const sphereEntity = viewer.entities.add({
+    position: drone.ecef,
+    ellipsoid: {
+      radii: new Cesium.Cartesian3(200, 200, 200),
+      material: Cesium.Color.YELLOW,
+      outline: true,
+      outlineColor: Cesium.Color.ORANGE,
+      outlineWidth: 2,
+    },
+  });
+
+  function poseLabel() {
+    return `H:${DRONE_POSE.heading.toFixed(1)}° P:${DRONE_POSE.pitch.toFixed(1)}° R:${DRONE_POSE.roll.toFixed(1)}°`;
+  }
+
+  // Always-visible point + label at the drone location.
+  const dotEntity = viewer.entities.add({
+    position: drone.ecef,
+    point: {
+      pixelSize: 14,
+      color: Cesium.Color.YELLOW,
+      outlineColor: Cesium.Color.ORANGE,
+      outlineWidth: 2,
+      disableDepthTestDistance: Number.POSITIVE_INFINITY,
+    },
+    label: {
+      text: poseLabel(),
+      font: "14px monospace",
+      style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+      outlineWidth: 2,
+      fillColor: Cesium.Color.WHITE,
+      outlineColor: Cesium.Color.BLACK,
+      verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+      pixelOffset: new Cesium.Cartesian2(0, -20),
+      disableDepthTestDistance: Number.POSITIVE_INFINITY,
+    },
+  });
+
+  // Arrow positions are mutable; CallbackProperty is fine for polyline positions.
+  let arrowPositions = [drone.ecef, arrowTip(drone.ecef, drone.forward)];
+
+  const arrowEntity = viewer.entities.add({
+    polyline: {
+      positions: new Cesium.CallbackProperty(() => arrowPositions, false),
+      width: 6,
+      material: new Cesium.PolylineArrowMaterialProperty(Cesium.Color.RED),
+      arcType: Cesium.ArcType.NONE,
+    },
+  });
+
+  function refreshIndicator() {
+    sphereEntity.position = drone.ecef;
+    dotEntity.position = drone.ecef;
+    dotEntity.label.text = poseLabel();
+    arrowPositions = [drone.ecef, arrowTip(drone.ecef, drone.forward)];
+  }
+
+  // -------------------------------------------------------------------------
+
   window.addEventListener("keydown", (e) => {
     if (e.key === "a") {
-      DRONE_POSE.heading -= 0.2;
+      DRONE_POSE.heading -= 2;
       drone = computeDroneCameraMatrix(DRONE_POSE);
+      refreshIndicator();
     } else if (e.key === "d") {
-      DRONE_POSE.heading += 0.2;
+      DRONE_POSE.heading += 2;
       drone = computeDroneCameraMatrix(DRONE_POSE);
+      refreshIndicator();
     } else if (e.key === "w") {
-      DRONE_POSE.pitch += 0.2;
+      DRONE_POSE.pitch += 2;
       drone = computeDroneCameraMatrix(DRONE_POSE);
+      refreshIndicator();
     } else if (e.key === "s") {
-      DRONE_POSE.pitch -= 0.2;
+      DRONE_POSE.pitch -= 2;
       drone = computeDroneCameraMatrix(DRONE_POSE);
+      refreshIndicator();
     }
   });
 

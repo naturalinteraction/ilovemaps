@@ -18,14 +18,8 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
   }),
   selectionIndicator: false,
   infoBox: false,
-  geocoder: false,
-  homeButton: false,
-  sceneModePicker: false,
-  baseLayerPicker: false,
-  navigationHelpButton: false,
   animation: false,
   timeline: false,
-  fullscreenButton: false,
 });
 viewer.scene.globe.depthTestAgainstTerrain = true;
 
@@ -122,14 +116,14 @@ loadCameraView();
 
 // Military unit clustering
 loadMilitaryUnits(viewer).then(({ allNodes }) => {
-  const battalion = allNodes.find(n => n.type === "battalion");
-  if (battalion) {
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(
-        battalion.position.lon, battalion.position.lat, 100000
-      ),
-    });
-  }
+  // const battalion = allNodes.find(n => n.type === "battalion");
+  // if (battalion) {
+  //   viewer.camera.flyTo({
+  //     destination: Cesium.Cartesian3.fromDegrees(
+  //       battalion.position.lon, battalion.position.lat, 100000
+  //     ),
+  //   });
+  // }
 });
 setupZoomListener(viewer);
 setupPreRender(viewer);
