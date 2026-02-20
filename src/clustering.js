@@ -174,6 +174,8 @@ function flattenTree(node, parent) {
     nodesById[cmd.id] = cmd;
     allNodes.push(cmd);
     unitStaff.push(cmd);
+    // Unit's merged position is its commander's position
+    node.homePosition = cmd.homePosition;
   }
   if (node.staff) {
     for (const s of node.staff) {
