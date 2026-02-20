@@ -28,19 +28,41 @@ const DRONE_POSE = {
 function computeDroneCameraMatrix(pose) {
   const droneEcef = Cesium.Cartesian3.fromDegrees(pose.lon, pose.lat, pose.alt);
 
-  const hpr = new Cesium.HeadingPitchRoll(
-    Cesium.Math.toRadians(pose.heading),
-    Cesium.Math.toRadians(pose.pitch),
-    Cesium.Math.toRadians(pose.roll),
-  );
+
+  const hpr = Cesium.HeadingPitchRoll.fromDegrees(pose.heading, pose.pitch, pose.roll)
+  //const hpr = new Cesium.HeadingPitchRoll(
+  //  Cesium.Math.toRadians(pose.heading),
+  //  Cesium.Math.toRadians(pose.pitch),
+  //  Cesium.Math.toRadians(pose.roll),
+  //);
+
+
+var quaternion = Cesium.Transforms.headingPitchRollQuaternion(droneEcef, hpr);
+
+// 3. Convert Quaternion to a 3x3 Rotation Matrix
+var rotMat = Cesium.Matrix3.fromQuaternion(quaternion);
+
+// 4. Extract Local Axis Vectors
+// Column 0: Right (X)
+// Column 1: Forward (Y) - Depends on convention, often used as Right
+// Column 2: Up (Z)
+var right = new Cesium.Cartesian3();
+var forward = new Cesium.Cartesian3();
+var up = new Cesium.Cartesian3();
+
+Cesium.Matrix3.getColumn(rotMat, 0, right);
+Cesium.Matrix3.getColumn(rotMat, 1, forward);
+Cesium.Matrix3.getColumn(rotMat, 2, up);
+
+
 
   // localFrame columns: [right | forward | up | pos]  (4×4, column-major)
-  const localFrame = Cesium.Transforms.headingPitchRollToFixedFrame(droneEcef, hpr);
+  //const localFrame = Cesium.Transforms.headingPitchRollToFixedFrame(droneEcef, hpr);
 
   // Extract the three axes from the column-major flat array
-  const right   = new Cesium.Cartesian3(localFrame[0], localFrame[1], localFrame[2]);
-  const forward = new Cesium.Cartesian3(localFrame[4], localFrame[5], localFrame[6]);
-  const up      = new Cesium.Cartesian3(localFrame[8], localFrame[9], localFrame[10]);
+  //const right   = new Cesium.Cartesian3(localFrame[0], localFrame[1], localFrame[2]);
+  //const forward = new Cesium.Cartesian3(localFrame[4], localFrame[5], localFrame[6]);
+  //const up      = new Cesium.Cartesian3(localFrame[8], localFrame[9], localFrame[10]);
 
   // forward is the unit look-at direction in ECEF — exposed for the 3D indicator
 
@@ -88,7 +110,7 @@ function computeDroneCameraMatrix(pose) {
 }
 
 // Length of the look-direction arrow in metres
-const ARROW_LENGTH = 300;
+const ARROW_LENGTH = 400;
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -155,7 +177,7 @@ export async function setupDroneVideoLayer(viewer) {
     },
     label: {
       text: poseLabel(),
-      font: "14px monospace",
+      font: "28px monospace",
       style: Cesium.LabelStyle.FILL_AND_OUTLINE,
       outlineWidth: 2,
       fillColor: Cesium.Color.WHITE,
@@ -172,7 +194,7 @@ export async function setupDroneVideoLayer(viewer) {
   const arrowEntity = viewer.entities.add({
     polyline: {
       positions: new Cesium.CallbackProperty(() => arrowPositions, false),
-      width: 6,
+      width: 16,
       material: new Cesium.PolylineArrowMaterialProperty(Cesium.Color.RED),
       arcType: Cesium.ArcType.NONE,
     },
@@ -202,6 +224,14 @@ export async function setupDroneVideoLayer(viewer) {
       refreshIndicator();
     } else if (e.key === "s") {
       DRONE_POSE.pitch -= 2;
+      drone = computeDroneCameraMatrix(DRONE_POSE);
+      refreshIndicator();
+    } else if (e.key === "q") {
+      DRONE_POSE.roll += 2;
+      drone = computeDroneCameraMatrix(DRONE_POSE);
+      refreshIndicator();
+    } else if (e.key === "e") {
+      DRONE_POSE.roll -= 2;
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
     }
