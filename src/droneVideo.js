@@ -5,8 +5,8 @@ import drapeShaderGLSL from "./drapeShader.glsl?raw";
 // Hardcoded 6-DOF pose (matches data/drone_pose.json)
 // ---------------------------------------------------------------------------
 const DRONE_POSE = {
-  lat: 46.22,       // degrees
-  lon: 8.8,        // degrees
+  lat: 46.4,       // degrees
+  lon: 8.42,        // degrees
   alt: 2700,        // metres above ellipsoid
   heading: 0,       // degrees, 0 = North, clockwise
   pitch: 77,       // degrees, 0 = horizontal, positive = looking down, 90 = straight down
@@ -211,7 +211,20 @@ export async function setupDroneVideoLayer(viewer) {
 
   window.addEventListener("keydown", (e) => {
     const headRad = Cesium.Math.toRadians(DRONE_POSE.heading);
-    if (e.key === "ArrowUp") {
+    if (e.key === "v" || e.key === "V") {
+      viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(DRONE_POSE.lon, DRONE_POSE.lat, DRONE_POSE.alt + 500),
+        orientation: {
+          heading: Cesium.Math.toRadians(DRONE_POSE.heading),
+          pitch: Cesium.Math.toRadians(-DRONE_POSE.pitch),
+          roll: 0,
+        },
+      });
+    } else if (e.key === "r" || e.key === "R") {
+      viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(8.82, 46.23, 5000) });
+    } else if (e.key === "u" || e.key === "U") {
+      viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(7.97, 46.55, 8000) });
+    } else if (e.key === "ArrowUp") {
       DRONE_POSE.lat += MOVE_STEP * Math.cos(headRad);
       DRONE_POSE.lon += MOVE_STEP * Math.sin(headRad);
       drone = computeDroneCameraMatrix(DRONE_POSE);
