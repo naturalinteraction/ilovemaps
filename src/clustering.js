@@ -886,7 +886,7 @@ export function handleRightClick(viewer, click) {
 
   // Support right-clicking a commander entity to merge its children
   let node = entity._milNode;
-  let cmdOfNode = entity._milCmdOf;
+  let cmdOfNode = entity._milCmdOf || entity._milStaffOf;
   if (cmdOfNode) {
     // Right-clicked a commander — treat as merging this unit's children
     // We need to find what child type is visible and merge into the commander's unit
