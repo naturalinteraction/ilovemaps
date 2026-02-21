@@ -108,9 +108,11 @@ const ARC_BOW = 0.15; // perpendicular offset as fraction of distance
 const HEIGHT_ABOVE_TERRAIN = 150; // meters above terrain surface
 
 // Current visible level index (0=squad, 3=battalion)
-let currentLevel = 1; // start at squad level
+let currentLevel = 4; // start at battalion level
 let militaryVisible = true;
 let manualMode = false; // disables zoom-based auto-leveling after click merge/unmerge
+let zoomLevelingDisabled = true; // when true, zoom/camera movement never triggers merge/unmerge
+let parentLinesEnabled = false; // when true, polylines connect units to their parent
 
 // --- Sound effects ---
 
@@ -342,7 +344,7 @@ export async function loadMilitaryUnits(viewer) {
         ),
         clampToGround: true,
       },
-      show: entity.show,
+      show: parentLinesEnabled && entity.show,
     });
     linesById[node.id] = lineEntity;
   }
@@ -1120,7 +1122,7 @@ export function setupZoomListener(viewer) {
   viewer.camera.changed.addEventListener(() => {
     if (zoomDebounceTimer) clearTimeout(zoomDebounceTimer);
     zoomDebounceTimer = setTimeout(() => {
-      if (!militaryVisible || manualMode) return;
+      if (!militaryVisible || manualMode || zoomLevelingDisabled) return;
       const dist = cameraZoomDist(viewer);
       if (dist === null) return;
       const newLevel = levelForDist(dist);
@@ -1168,7 +1170,7 @@ export function setupPreRender(viewer) {
     // Sync line visibility with entity visibility
     for (const node of allNodes) {
       const line = linesById[node.id];
-      if (line) line.show = entitiesById[node.id].show;
+      if (line) line.show = parentLinesEnabled && entitiesById[node.id].show;
     }
   });
 }
