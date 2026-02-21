@@ -105,6 +105,7 @@ const scratchStart = new Cesium.Cartesian3();
 const scratchEnd = new Cesium.Cartesian3();
 const ARC_SEGMENTS = 16;
 const ARC_BOW = 0.15; // perpendicular offset as fraction of distance
+const HEIGHT_ABOVE_TERRAIN = 150; // meters above terrain surface
 
 // Current visible level index (0=squad, 3=battalion)
 let currentLevel = 1; // start at squad level
@@ -163,14 +164,14 @@ function flattenTree(node, parent) {
   nodesById[node.id] = node;
   allNodes.push(node);
   node.homePosition = Cesium.Cartesian3.fromDegrees(
-    node.position.lon, node.position.lat, node.position.alt + 50
+    node.position.lon, node.position.lat, node.position.alt + HEIGHT_ABOVE_TERRAIN
   );
   // Commander uses same position as unit
   node.cmdHomePosition = node.homePosition;
   // Staff positions from JSON data
   if (node.staff && node.staff.length >= 2) {
     node.staffHomePositions = node.staff.map(s =>
-      Cesium.Cartesian3.fromDegrees(s.position.lon, s.position.lat, s.position.alt + 50)
+      Cesium.Cartesian3.fromDegrees(s.position.lon, s.position.lat, s.position.alt + HEIGHT_ABOVE_TERRAIN)
     );
   }
   for (const child of node.children) {
