@@ -199,7 +199,6 @@ export async function loadMilitaryUnits(viewer) {
         width: size,
         height: size,
         verticalOrigin: Cesium.VerticalOrigin.CENTER,
-        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
       },
       label: {
         text: node.name,
@@ -208,7 +207,6 @@ export async function loadMilitaryUnits(viewer) {
         outlineWidth: 2,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
         pixelOffset: new Cesium.Cartesian2(0, -(size / 2 + 4)),
-        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
       },
       show: levelIdx === currentLevel,
     });
@@ -231,7 +229,6 @@ export async function loadMilitaryUnits(viewer) {
         width: SYMBOL_SIZE,
         height: SYMBOL_SIZE,
         verticalOrigin: Cesium.VerticalOrigin.CENTER,
-        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
       },
       label: {
         text: node.commander.name,
@@ -240,7 +237,6 @@ export async function loadMilitaryUnits(viewer) {
         outlineWidth: 2,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
         pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE / 2 + 4)),
-        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
       },
       show: false,
     });
@@ -261,7 +257,6 @@ export async function loadMilitaryUnits(viewer) {
             width: 48,
             height: 48,
             verticalOrigin: Cesium.VerticalOrigin.CENTER,
-            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
               },
           label: {
             text: s.name,
@@ -270,7 +265,6 @@ export async function loadMilitaryUnits(viewer) {
             outlineWidth: 2,
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
             pixelOffset: new Cesium.Cartesian2(0, -28),
-            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
               },
           show: false,
         });
