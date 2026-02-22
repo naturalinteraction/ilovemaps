@@ -1042,8 +1042,8 @@ function getHeatmapPositions() {
   return results;
 }
 
-const DOT_SIZE  = 100;  // 10
-const DOT_ALPHA = 0.1;  // 1.0
+const DOT_SIZE  = 10;  // 10
+const DOT_ALPHA = 0.8;  // 1.0
 
 function getOrCreateLine(viewer, index, lineColor) {
   if (index < dotLinePool.length) return dotLinePool[index];
