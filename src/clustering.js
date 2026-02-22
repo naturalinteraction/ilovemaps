@@ -116,7 +116,9 @@ let parentLinesEnabled = false; // when true, polylines connect units to their p
 let labelsEnabled = false; // when true, text labels are shown on military entities
 
 // Dot overlay state (replaces heatmap)
+const DOT_USE_ELLIPSE = false; // false: pixel-sized point; true: 9m semi-transparent circle
 const dotPool = [];
+const dotLinePool = [];          // polylines connecting parent billboard to child dot
 let activeDots = 0;
 let moduleViewer = null;          // viewer reference for dot updates
 
@@ -997,8 +999,9 @@ function updateVisualClusters(viewer) {
 const DOTS_DIRECT_CHILDREN_ONLY = true; // true: dots only for direct child level; false: all hidden people
 
 function getHeatmapPositions() {
+  // Returns array of { position, parentPosition } for each dot
   if (DOTS_DIRECT_CHILDREN_ONLY) {
-    const positions = [];
+    const results = [];
     for (const node of allNodes) {
       if (node.children.length === 0) continue; // leaf nodes don't have children to dot
       const entity = entitiesById[node.id];
@@ -1009,64 +1012,93 @@ function getHeatmapPositions() {
         // Skip if child's commander is visible (child is unmerged, not collapsed)
         const cmdE = cmdEntitiesById[child.id];
         if (cmdE && cmdE.show) continue;
-        positions.push(child.position);
+        results.push({ position: child.position, parentPosition: node.position });
       }
     }
-    return positions;
+    return results;
   }
 
-  const positions = [];
+  const results = [];
   for (const node of allNodes) {
+    const parentPos = node.parent ? node.parent.position : node.position;
     // Individuals: include if their entity is hidden (but not by clustering)
     if (node.type === "individual") {
       const entity = entitiesById[node.id];
-      if (entity && !entity.show && !clusteredEntities.has(entity)) positions.push(node.position);
+      if (entity && !entity.show && !clusteredEntities.has(entity)) results.push({ position: node.position, parentPosition: parentPos });
       continue;
     }
     // Commander: include if its entity is hidden (but not by clustering)
     const cmdE = cmdEntitiesById[node.id];
-    if (cmdE && !cmdE.show && !clusteredEntities.has(cmdE)) positions.push(node.position);
+    if (cmdE && !cmdE.show && !clusteredEntities.has(cmdE)) results.push({ position: node.position, parentPosition: node.position });
     // Staff: include each hidden staff member (but not by clustering)
     const staffEs = staffEntitiesById[node.id];
     if (staffEs && node.staff) {
       for (let i = 0; i < staffEs.length; i++) {
-        if (!staffEs[i].show && !clusteredEntities.has(staffEs[i])) positions.push(node.staff[i].position);
+        if (!staffEs[i].show && !clusteredEntities.has(staffEs[i])) results.push({ position: node.staff[i].position, parentPosition: node.position });
       }
     }
   }
-  return positions;
+  return results;
 }
 
 function updateHeatmapLayer() {
   const viewer = moduleViewer;
   if (!viewer) return;
 
-  // Hide all currently active dots
+  // Hide all currently active dots and lines
   for (let i = 0; i < activeDots; i++) {
     dotPool[i].show = false;
+    dotLinePool[i].show = false;
   }
   activeDots = 0;
 
   if (!militaryVisible) return;
 
-  const positions = getHeatmapPositions();
+  const entries = getHeatmapPositions();
   const dotColor = Cesium.Color.fromCssColorString("#2040FF");
+  const lineColor = Cesium.Color.fromCssColorString("#2040FF").withAlpha(0.15);
 
-  for (let i = 0; i < positions.length; i++) {
-    const p = positions[i];
+  for (let i = 0; i < entries.length; i++) {
+    const { position: p, parentPosition: pp } = entries[i];
+    // Dot entity
     let dot;
     if (i < dotPool.length) {
       dot = dotPool[i];
     } else {
-      dot = viewer.entities.add({
+      dot = viewer.entities.add(DOT_USE_ELLIPSE ? {
+        ellipse: {
+          semiMajorAxis: 4.5,
+          semiMinorAxis: 4.5,
+          material: Cesium.Color.fromCssColorString("#2040FF").withAlpha(0.4),
+          outline: false,
+        },
+      } : {
         point: { pixelSize: 10, color: dotColor },
       });
       dotPool.push(dot);
     }
-    dot.position = Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt + HEIGHT_ABOVE_TERRAIN);
+    const childPos = Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt + HEIGHT_ABOVE_TERRAIN);
+    dot.position = childPos;
     dot.show = true;
+
+    // Line entity connecting parent to child
+    let line;
+    if (i < dotLinePool.length) {
+      line = dotLinePool[i];
+    } else {
+      line = viewer.entities.add({
+        polyline: {
+          width: 1,
+          material: lineColor,
+        },
+      });
+      dotLinePool.push(line);
+    }
+    const parentPos = Cesium.Cartesian3.fromDegrees(pp.lon, pp.lat, pp.alt + HEIGHT_ABOVE_TERRAIN);
+    line.polyline.positions = [parentPos, childPos];
+    line.show = true;
   }
-  activeDots = positions.length;
+  activeDots = entries.length;
 }
 
 function showLevel(levelIdx) {
