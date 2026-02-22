@@ -120,6 +120,12 @@ let heatmapCanvas = null;         // offscreen canvas (reused)
 const HEATMAP_CANVAS_SIZE = 512;
 let moduleViewer = null;          // viewer reference for heatmap updates
 
+// Visual clustering state
+const CLUSTER_PIXEL_RANGE = 80;
+const clusterProxies = [];        // pool of proxy entities
+let clusterDirty = true;          // flag to recalculate
+const clusteredEntities = new Set(); // entities hidden by clustering (not by merge/unmerge)
+
 // --- Sound effects ---
 
 let audioCtx = null;
@@ -496,6 +502,7 @@ export function onPreRender() {
   if (allDone) {
     animating = false;
     updateHeatmapLayer();
+    clusterDirty = true;
   }
 }
 
@@ -853,25 +860,151 @@ function hideAllCmdStaff() {
   }
 }
 
+// --- Visual Clustering ---
+
+function entityRank(entity) {
+  if (entity._milNode) return LEVEL_ORDER.indexOf(entity._milNode.type);
+  if (entity._milCmdOf) return LEVEL_ORDER.indexOf(entity._milCmdOf.type) + 0.5;
+  if (entity._milStaffOf) return 0;
+  return -1;
+}
+
+function clearVisualClusters() {
+  // Restore entities hidden by clustering
+  for (const entity of clusteredEntities) {
+    entity.show = true;
+  }
+  clusteredEntities.clear();
+  // Hide all proxy entities
+  for (const proxy of clusterProxies) {
+    proxy.show = false;
+  }
+}
+
+function getOrCreateProxy(viewer, index) {
+  if (index < clusterProxies.length) return clusterProxies[index];
+  const proxy = viewer.entities.add({
+    position: Cesium.Cartesian3.ZERO,
+    billboard: {
+      image: getSymbolImage("battalion"),
+      width: SYMBOL_SIZE,
+      height: SYMBOL_SIZE,
+      verticalOrigin: Cesium.VerticalOrigin.CENTER,
+    },
+    label: {
+      text: "",
+      font: "bold 18px sans-serif",
+      style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+      outlineWidth: 2,
+      verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+      pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE / 2 + 4)),
+    },
+    show: false,
+  });
+  proxy._isClusterProxy = true;
+  clusterProxies.push(proxy);
+  return proxy;
+}
+
+function updateVisualClusters(viewer) {
+  if (animating) return;
+  if (!militaryVisible) return;
+
+  // First restore anything previously hidden by clustering
+  clearVisualClusters();
+
+  // Collect visible entities with their positions
+  const visible = [];
+  for (const node of allNodes) {
+    const entity = entitiesById[node.id];
+    if (entity.show) {
+      visible.push({ entity, position: node.homePosition, name: node.name });
+    }
+    const cmdE = cmdEntitiesById[node.id];
+    if (cmdE && cmdE.show) {
+      visible.push({ entity: cmdE, position: node.cmdHomePosition, name: node.commander ? node.commander.name : node.name });
+    }
+    const staffEs = staffEntitiesById[node.id];
+    if (staffEs) {
+      for (let si = 0; si < staffEs.length; si++) {
+        if (staffEs[si].show) {
+          visible.push({ entity: staffEs[si], position: node.staffHomePositions[si], name: node.staff[si].name });
+        }
+      }
+    }
+  }
+
+  if (visible.length === 0) return;
+
+  // Project to screen space
+  const scene = viewer.scene;
+  const projected = [];
+  for (const v of visible) {
+    const screen = scene.cartesianToCanvasCoordinates(v.position);
+    if (!screen) continue; // behind camera or off-screen
+    projected.push({ ...v, screenX: screen.x, screenY: screen.y });
+  }
+
+  // Grid-based grouping
+  const cells = new Map();
+  for (const p of projected) {
+    const key = Math.floor(p.screenX / CLUSTER_PIXEL_RANGE) + "," + Math.floor(p.screenY / CLUSTER_PIXEL_RANGE);
+    if (!cells.has(key)) cells.set(key, []);
+    cells.get(key).push(p);
+  }
+
+  // Process cells, create proxies where needed
+  let proxyIdx = 0;
+  for (const [, members] of cells) {
+    if (members.length <= 1) continue;
+
+    // Sort by rank descending to pick representative
+    members.sort((a, b) => entityRank(b.entity) - entityRank(a.entity));
+    const rep = members[0];
+
+    // Hide all entities in this cell
+    for (const m of members) {
+      m.entity.show = false;
+      clusteredEntities.add(m.entity);
+    }
+
+    // Create/reuse proxy
+    const proxy = getOrCreateProxy(viewer, proxyIdx++);
+    proxy.position = rep.position;
+    const now = Cesium.JulianDate.now();
+    const repBb = rep.entity.billboard;
+    proxy.billboard.image = repBb.image ? repBb.image.getValue(now) : getSymbolImage("battalion");
+    proxy.billboard.width = repBb.width ? repBb.width.getValue(now) : SYMBOL_SIZE;
+    proxy.billboard.height = repBb.height ? repBb.height.getValue(now) : SYMBOL_SIZE;
+    proxy.label.text = rep.name + " +" + (members.length - 1);
+    proxy.show = true;
+  }
+
+  // Hide unused proxies
+  for (let i = proxyIdx; i < clusterProxies.length; i++) {
+    clusterProxies[i].show = false;
+  }
+}
+
 // --- Heatmap ---
 
 function getHeatmapPositions() {
   const positions = [];
   for (const node of allNodes) {
-    // Individuals: include if their entity is hidden
+    // Individuals: include if their entity is hidden (but not by clustering)
     if (node.type === "individual") {
       const entity = entitiesById[node.id];
-      if (entity && !entity.show) positions.push(node.position);
+      if (entity && !entity.show && !clusteredEntities.has(entity)) positions.push(node.position);
       continue;
     }
-    // Commander: include if its entity is hidden
+    // Commander: include if its entity is hidden (but not by clustering)
     const cmdE = cmdEntitiesById[node.id];
-    if (cmdE && !cmdE.show) positions.push(node.position);
-    // Staff: include each hidden staff member
+    if (cmdE && !cmdE.show && !clusteredEntities.has(cmdE)) positions.push(node.position);
+    // Staff: include each hidden staff member (but not by clustering)
     const staffEs = staffEntitiesById[node.id];
     if (staffEs && node.staff) {
       for (let i = 0; i < staffEs.length; i++) {
-        if (!staffEs[i].show) positions.push(node.staff[i].position);
+        if (!staffEs[i].show && !clusteredEntities.has(staffEs[i])) positions.push(node.staff[i].position);
       }
     }
   }
@@ -978,6 +1111,7 @@ function showLevel(levelIdx) {
     }
   }
   updateHeatmapLayer();
+  clusterDirty = true;
 }
 
 // --- Click toggle ---
@@ -987,6 +1121,8 @@ function pickMilNode(viewer, click) {
   const picked = viewer.scene.pick(click.position);
   if (!picked || !(picked.id instanceof Cesium.Entity)) return null;
   const entity = picked.id;
+  // Ignore proxy entities for click interactions
+  if (entity._isClusterProxy) return null;
   // Commander click: already unmerged, no-op for left click
   if (entity._milCmdOf || entity._milStaffOf) return null;
   const node = entity._milNode;
@@ -1001,6 +1137,9 @@ export function handleRightClick(viewer, click) {
   const picked = viewer.scene.pick(click.position);
   if (!picked || !(picked.id instanceof Cesium.Entity)) return false;
   const entity = picked.id;
+
+  // Ignore proxy entities for right-click
+  if (entity._isClusterProxy) return false;
 
   // Support right-clicking a commander entity to merge its children
   let node = entity._milNode;
@@ -1235,6 +1374,7 @@ function forEachDescendantAtLevel(node, type, fn) {
 // --- Zoom listener ---
 
 let zoomDebounceTimer = null;
+let clusterDebounceTimer = null;
 
 export function setupZoomListener(viewer) {
   viewer.camera.changed.addEventListener(() => {
@@ -1248,6 +1388,12 @@ export function setupZoomListener(viewer) {
         setLevel(newLevel, viewer);
       }
     }, 50);
+
+    // Debounced visual clustering update
+    if (clusterDebounceTimer) clearTimeout(clusterDebounceTimer);
+    clusterDebounceTimer = setTimeout(() => {
+      clusterDirty = true;
+    }, 100);
   });
   viewer.camera.percentageChanged = 0.1;
 }
@@ -1261,6 +1407,7 @@ export function handleKeydown(event, viewer) {
       if (militaryVisible) {
         showLevel(currentLevel);
       } else {
+        clearVisualClusters();
         for (const node of allNodes) {
           entitiesById[node.id].show = false;
         }
@@ -1286,6 +1433,11 @@ export function handleKeydown(event, viewer) {
 export function setupPreRender(viewer) {
   viewer.scene.preRender.addEventListener(() => {
     onPreRender();
+    // Visual clustering update
+    if (clusterDirty && !animating) {
+      clusterDirty = false;
+      updateVisualClusters(viewer);
+    }
     // Sync line visibility with entity visibility
     for (const node of allNodes) {
       const line = linesById[node.id];
