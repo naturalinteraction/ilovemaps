@@ -113,6 +113,7 @@ let militaryVisible = true;
 let manualMode = false; // disables zoom-based auto-leveling after click merge/unmerge
 let zoomLevelingDisabled = true; // when true, zoom/camera movement never triggers merge/unmerge
 let parentLinesEnabled = false; // when true, polylines connect units to their parent
+let labelsEnabled = false; // when true, text labels are shown on military entities
 
 // Heatmap state
 let heatmapLayer = null;          // Cesium.ImageryLayer
@@ -223,6 +224,7 @@ export async function loadMilitaryUnits(viewer) {
         outlineWidth: 2,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
         pixelOffset: new Cesium.Cartesian2(0, -(size / 2 + 4)),
+        show: labelsEnabled,
       },
       show: levelIdx === currentLevel,
     });
@@ -254,6 +256,7 @@ export async function loadMilitaryUnits(viewer) {
         outlineWidth: 2,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
         pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE / 2 + 4)),
+        show: labelsEnabled,
       },
       show: false,
     });
@@ -282,6 +285,7 @@ export async function loadMilitaryUnits(viewer) {
             outlineWidth: 2,
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
             pixelOffset: new Cesium.Cartesian2(0, -28),
+            show: labelsEnabled,
               },
           show: false,
         });
@@ -899,6 +903,7 @@ function getOrCreateProxy(viewer, index) {
       outlineWidth: 2,
       verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
       pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE / 2 + 4)),
+      show: labelsEnabled,
     },
     show: false,
   });
@@ -1043,13 +1048,13 @@ function renderHeatmapCanvas(positions) {
   // Pass 1: draw intensity as white blobs with additive blending
   ctx.globalCompositeOperation = "lighter";
   // const baseRadius = Math.max(10, Math.min(40, 150 / Math.sqrt(positions.length)));
-  const baseRadius = 20;
+  const baseRadius = 4;
   for (const p of positions) {
     const x = ((p.lon - minLon) / (maxLon - minLon)) * W;
     const y = ((maxLat - p.lat) / (maxLat - minLat)) * W; // flip Y
     const grad = ctx.createRadialGradient(x, y, 0, x, y, baseRadius);
-    grad.addColorStop(0, "rgba(255, 255, 255, 0.35)");
-    grad.addColorStop(0.4, "rgba(255, 255, 255, 0.15)");
+    grad.addColorStop(0, "rgba(255, 255, 255, 0.77)");
+    grad.addColorStop(0.1, "rgba(255, 255, 255, 0.15)");
     grad.addColorStop(1, "rgba(255, 255, 255, 0)");
     ctx.fillStyle = grad;
     ctx.fillRect(x - baseRadius, y - baseRadius, baseRadius * 2, baseRadius * 2);
@@ -1091,7 +1096,7 @@ function updateHeatmapLayer() {
     tileHeight: HEATMAP_CANVAS_SIZE,
   });
   heatmapLayer = viewer.imageryLayers.addImageryProvider(provider);
-  heatmapLayer.alpha = 0.6;
+  heatmapLayer.alpha = 0.8;
 }
 
 function showLevel(levelIdx) {
@@ -1433,6 +1438,19 @@ export function handleKeydown(event, viewer) {
       }
       updateHeatmapLayer();
     }
+    return true;
+  }
+
+  if (event.key === "l" || event.key === "L") {
+    labelsEnabled = !labelsEnabled;
+    for (const node of allNodes) {
+      entitiesById[node.id].label.show = labelsEnabled;
+      const cmdE = cmdEntitiesById[node.id];
+      if (cmdE) cmdE.label.show = labelsEnabled;
+      const staffEs = staffEntitiesById[node.id];
+      if (staffEs) for (const se of staffEs) se.label.show = labelsEnabled;
+    }
+    for (const proxy of clusterProxies) proxy.label.show = labelsEnabled;
     return true;
   }
 
