@@ -1089,7 +1089,7 @@ function updateHeatmapLayer() {
           outline: true,
         },
       } : {
-        point: { pixelSize: DOT_SIZE, color: dotColor.withAlpha(DOT_ALPHA) },
+        point: { pixelSize: DOT_SIZE, color: dotColor.withAlpha(DOT_ALPHA), outlineWidth: 0 },
       });
       dot._isDot = true;
       dotPool.push(dot);
