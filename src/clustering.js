@@ -1054,7 +1054,7 @@ function renderHeatmapCanvas(positions) {
     const y = ((maxLat - p.lat) / (maxLat - minLat)) * W; // flip Y
     const grad = ctx.createRadialGradient(x, y, 0, x, y, baseRadius);
     grad.addColorStop(0, "rgba(255, 255, 255, 0.77)");
-    grad.addColorStop(0.1, "rgba(255, 255, 255, 0.15)");
+    grad.addColorStop(0.85, "rgba(255, 255, 255, 0.7)");
     grad.addColorStop(1, "rgba(255, 255, 255, 0)");
     ctx.fillStyle = grad;
     ctx.fillRect(x - baseRadius, y - baseRadius, baseRadius * 2, baseRadius * 2);
@@ -1096,7 +1096,7 @@ function updateHeatmapLayer() {
     tileHeight: HEATMAP_CANVAS_SIZE,
   });
   heatmapLayer = viewer.imageryLayers.addImageryProvider(provider);
-  heatmapLayer.alpha = 0.8;
+  heatmapLayer.alpha = 0.4;
 }
 
 function showLevel(levelIdx) {
