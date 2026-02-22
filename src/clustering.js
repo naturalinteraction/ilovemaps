@@ -218,6 +218,7 @@ export async function loadMilitaryUnits(viewer) {
         width: size,
         height: size,
         verticalOrigin: Cesium.VerticalOrigin.CENTER,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
       label: {
         text: node.name,
@@ -227,6 +228,7 @@ export async function loadMilitaryUnits(viewer) {
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
         pixelOffset: new Cesium.Cartesian2(0, -(size / 2 + 4)),
         show: labelsEnabled,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
       show: levelIdx === currentLevel,
     });
@@ -250,6 +252,7 @@ export async function loadMilitaryUnits(viewer) {
         width: SYMBOL_SIZE,
         height: SYMBOL_SIZE,
         verticalOrigin: Cesium.VerticalOrigin.CENTER,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
       label: {
         text: cmdLabel,
@@ -259,6 +262,7 @@ export async function loadMilitaryUnits(viewer) {
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
         pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE / 2 + 4)),
         show: labelsEnabled,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
       show: false,
     });
@@ -279,6 +283,7 @@ export async function loadMilitaryUnits(viewer) {
             width: 48,
             height: 48,
             verticalOrigin: Cesium.VerticalOrigin.CENTER,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
               },
           label: {
             text: s.name,
@@ -288,6 +293,7 @@ export async function loadMilitaryUnits(viewer) {
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
             pixelOffset: new Cesium.Cartesian2(0, -28),
             show: labelsEnabled,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
               },
           show: false,
         });
@@ -897,6 +903,7 @@ function getOrCreateProxy(viewer, index) {
       width: SYMBOL_SIZE,
       height: SYMBOL_SIZE,
       verticalOrigin: Cesium.VerticalOrigin.CENTER,
+      disableDepthTestDistance: Number.POSITIVE_INFINITY,
     },
     label: {
       text: "",
@@ -906,6 +913,7 @@ function getOrCreateProxy(viewer, index) {
       verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
       pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE / 2 + 4)),
       show: labelsEnabled,
+      disableDepthTestDistance: Number.POSITIVE_INFINITY,
     },
     show: false,
   });
@@ -1051,6 +1059,7 @@ function getOrCreateLine(viewer, index, lineColor) {
     polyline: {
       width: 1,
       material: lineColor,
+      depthFailMaterial: lineColor,
     },
   });
   line._isDotLine = true;
@@ -1089,7 +1098,7 @@ function updateHeatmapLayer() {
           outline: true,
         },
       } : {
-        point: { pixelSize: DOT_SIZE, color: dotColor.withAlpha(DOT_ALPHA), outlineWidth: 0 },
+        point: { pixelSize: DOT_SIZE, color: dotColor.withAlpha(DOT_ALPHA), outlineWidth: 0, disableDepthTestDistance: Number.POSITIVE_INFINITY },
       });
       dot._isDot = true;
       dotPool.push(dot);
