@@ -994,7 +994,23 @@ function updateVisualClusters(viewer) {
 
 // --- Heatmap ---
 
+const DOTS_DIRECT_CHILDREN_ONLY = true; // true: dots only for direct child level; false: all hidden people
+
 function getHeatmapPositions() {
+  if (DOTS_DIRECT_CHILDREN_ONLY) {
+    const positions = [];
+    for (const node of allNodes) {
+      if (node.children.length === 0) continue; // leaf nodes don't have children to dot
+      const entity = entitiesById[node.id];
+      if (!entity || !entity.show) continue; // only visible units spawn child dots
+      for (const child of node.children) {
+        const childEntity = entitiesById[child.id];
+        if (childEntity && !childEntity.show) positions.push(child.position);
+      }
+    }
+    return positions;
+  }
+
   const positions = [];
   for (const node of allNodes) {
     // Individuals: include if their entity is hidden (but not by clustering)
@@ -1039,7 +1055,7 @@ function updateHeatmapLayer() {
       dot = dotPool[i];
     } else {
       dot = viewer.entities.add({
-        point: { pixelSize: 5, color: dotColor },
+        point: { pixelSize: 10, color: dotColor },
       });
       dotPool.push(dot);
     }
