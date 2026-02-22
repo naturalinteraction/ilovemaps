@@ -237,8 +237,9 @@ export async function loadMilitaryUnits(viewer) {
 
     // Commander entity: HQ symbol of node's type, at node's position
     const cmdImage = getSymbolImage(node.type, true);
+    const cmdLabel = node.name + " - " + node.commander.name;
     const cmdEntity = viewer.entities.add({
-      name: node.commander.name,
+      name: cmdLabel,
       position: node.cmdHomePosition,
       billboard: {
         image: cmdImage,
@@ -247,7 +248,7 @@ export async function loadMilitaryUnits(viewer) {
         verticalOrigin: Cesium.VerticalOrigin.CENTER,
       },
       label: {
-        text: node.commander.name,
+        text: cmdLabel,
         font: "18px sans-serif",
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         outlineWidth: 2,
@@ -922,7 +923,7 @@ function updateVisualClusters(viewer) {
     }
     const cmdE = cmdEntitiesById[node.id];
     if (cmdE && cmdE.show) {
-      visible.push({ entity: cmdE, position: node.cmdHomePosition, name: node.commander ? node.commander.name : node.name });
+      visible.push({ entity: cmdE, position: node.cmdHomePosition, name: node.name });
     }
     const staffEs = staffEntitiesById[node.id];
     if (staffEs) {
@@ -977,6 +978,7 @@ function updateVisualClusters(viewer) {
     proxy.billboard.width = repBb.width ? repBb.width.getValue(now) : SYMBOL_SIZE;
     proxy.billboard.height = repBb.height ? repBb.height.getValue(now) : SYMBOL_SIZE;
     proxy.label.text = rep.name + " +" + (members.length - 1);
+    proxy._clusterRepEntity = rep.entity;
     proxy.show = true;
   }
 
@@ -1116,13 +1118,24 @@ function showLevel(levelIdx) {
 
 // --- Click toggle ---
 
-function pickMilNode(viewer, click) {
+function resolvePickedEntity(viewer, click) {
   if (animating) return null;
   const picked = viewer.scene.pick(click.position);
   if (!picked || !(picked.id instanceof Cesium.Entity)) return null;
-  const entity = picked.id;
-  // Ignore proxy entities for click interactions
-  if (entity._isClusterProxy) return null;
+  let entity = picked.id;
+  // Resolve proxy to its representative entity
+  if (entity._isClusterProxy) {
+    entity = entity._clusterRepEntity;
+    if (!entity) return null;
+    // Clear clusters so the representative and its siblings become visible for animation
+    clearVisualClusters();
+  }
+  return entity;
+}
+
+function pickMilNode(viewer, click) {
+  const entity = resolvePickedEntity(viewer, click);
+  if (!entity) return null;
   // Commander click: already unmerged, no-op for left click
   if (entity._milCmdOf || entity._milStaffOf) return null;
   const node = entity._milNode;
@@ -1133,13 +1146,8 @@ function pickMilNode(viewer, click) {
 }
 
 export function handleRightClick(viewer, click) {
-  if (animating) return false;
-  const picked = viewer.scene.pick(click.position);
-  if (!picked || !(picked.id instanceof Cesium.Entity)) return false;
-  const entity = picked.id;
-
-  // Ignore proxy entities for right-click
-  if (entity._isClusterProxy) return false;
+  const entity = resolvePickedEntity(viewer, click);
+  if (!entity) return false;
 
   // Support right-clicking a commander entity to merge its children
   let node = entity._milNode;
@@ -1287,14 +1295,24 @@ export function handleRightClick(viewer, click) {
   return true;
 }
 
+function picksMilEntity(viewer, click) {
+  const entity = resolvePickedEntity(viewer, click);
+  if (!entity) return false;
+  return !!(entity._milNode || entity._milCmdOf || entity._milStaffOf);
+}
+
 export function handleLeftClick(viewer, click) {
   const hit = pickMilNode(viewer, click);
-  if (!hit) return false;
+  if (!hit) {
+    if (!picksMilEntity(viewer, click)) return false;
+    // Military entity that can't unmerge — merge instead
+    return handleRightClick(viewer, click);
+  }
   const { entity, node, childType } = hit;
 
   const firstChild = node.children[0];
   const childEntity = entitiesById[firstChild.id];
-  if (childEntity.show) return false; // children already visible, nothing to unmerge
+  if (childEntity.show) return handleRightClick(viewer, click); // children already visible, merge instead
 
   const anims = [];
   anims.push({

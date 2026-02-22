@@ -40,7 +40,7 @@
               "children": [
                 {
                   "id": "ind1",
-                  "name": "Sgt Sabatini",
+                  "name": "Ind. Spartan",
                   "type": "individual",
                   "position": {
                     "lat": 46.589562,
@@ -51,7 +51,7 @@
                 },
                 {
                   "id": "ind2",
-                  "name": "C.M. Giuliani",
+                  "name": "Ind. Titan",
                   "type": "individual",
                   "position": {
                     "lat": 46.590401,
@@ -62,7 +62,7 @@
                 },
                 {
                   "id": "ind3",
-                  "name": "Cpl Marchetti",
+                  "name": "Ind. Nomad",
                   "type": "individual",
                   "position": {
                     "lat": 46.588426,
@@ -73,7 +73,7 @@
                 },
                 {
                   "id": "ind4",
-                  "name": "Sdt Molteni",
+                  "name": "Ind. Striker",
                   "type": "individual",
                   "position": {
                     "lat": 46.590094,
@@ -84,7 +84,7 @@
                 },
                 {
                   "id": "ind5",
-                  "name": "Sdt Galli",
+                  "name": "Ind. Blaze",
                   "type": "individual",
                   "position": {
                     "lat": 46.588451,
@@ -96,12 +96,12 @@
               ],
               "commander": {
                 "id": "cmd10",
-                "name": "Sgt. Pirovano"
+                "name": "Cmd. Cobra"
               },
               "staff": [
                 {
                   "id": "staff11",
-                  "name": "C.M. Mancuso",
+                  "name": "Stf. Hawk",
                   "position": {
                     "lat": 46.588722,
                     "lon": 7.946754,
@@ -110,7 +110,7 @@
                 },
                 {
                   "id": "staff12",
-                  "name": "Cpl. Ruocco",
+                  "name": "Stf. Reaper",
                   "position": {
                     "lat": 46.589031,
                     "lon": 7.946691,
@@ -131,7 +131,7 @@
               "children": [
                 {
                   "id": "ind6",
-                  "name": "Sgt Parisi",
+                  "name": "Ind. Sabre",
                   "type": "individual",
                   "position": {
                     "lat": 46.576519,
@@ -142,7 +142,7 @@
                 },
                 {
                   "id": "ind7",
-                  "name": "C.M. Donati",
+                  "name": "Ind. Talon",
                   "type": "individual",
                   "position": {
                     "lat": 46.577354,
@@ -153,7 +153,7 @@
                 },
                 {
                   "id": "ind8",
-                  "name": "Cpl Ruggiero",
+                  "name": "Ind. Bravo",
                   "type": "individual",
                   "position": {
                     "lat": 46.575953,
@@ -164,7 +164,7 @@
                 },
                 {
                   "id": "ind9",
-                  "name": "Sdt De Santis",
+                  "name": "Ind. De Sierra",
                   "type": "individual",
                   "position": {
                     "lat": 46.57696,
@@ -175,7 +175,7 @@
                 },
                 {
                   "id": "ind10",
-                  "name": "Sdt Spadaro",
+                  "name": "Ind. Tango",
                   "type": "individual",
                   "position": {
                     "lat": 46.577814,
@@ -187,12 +187,12 @@
               ],
               "commander": {
                 "id": "cmd13",
-                "name": "Sgt. Cremonesi"
+                "name": "Cmd. Frost"
               },
               "staff": [
                 {
                   "id": "staff14",
-                  "name": "C.M. Baldi",
+                  "name": "Stf. Maverick",
                   "position": {
                     "lat": 46.57751,
                     "lon": 7.972921,
@@ -201,7 +201,7 @@
                 },
                 {
                   "id": "staff15",
-                  "name": "Cpl. Castelli",
+                  "name": "Stf. Rogue",
                   "position": {
                     "lat": 46.577733,
                     "lon": 7.97324,
@@ -222,7 +222,7 @@
               "children": [
                 {
                   "id": "ind11",
-                  "name": "Sgt Aiello",
+                  "name": "Ind. Kilo",
                   "type": "individual",
                   "position": {
                     "lat": 46.585058,
@@ -233,7 +233,7 @@
                 },
                 {
                   "id": "ind12",
-                  "name": "C.M. Rizzi",
+                  "name": "Ind. Lima",
                   "type": "individual",
                   "position": {
                     "lat": 46.586134,
@@ -244,7 +244,7 @@
                 },
                 {
                   "id": "ind13",
-                  "name": "Cpl Santoro",
+                  "name": "Ind. Oscar",
                   "type": "individual",
                   "position": {
                     "lat": 46.586,
@@ -255,7 +255,7 @@
                 },
                 {
                   "id": "ind14",
-                  "name": "Sdt Damiani",
+                  "name": "Ind. Papa",
                   "type": "individual",
                   "position": {
                     "lat": 46.585763,
@@ -266,7 +266,7 @@
                 },
                 {
                   "id": "ind15",
-                  "name": "Sdt Piras",
+                  "name": "Ind. Quebec",
                   "type": "individual",
                   "position": {
                     "lat": 46.586652,
@@ -278,12 +278,12 @@
               ],
               "commander": {
                 "id": "cmd16",
-                "name": "Sgt. Venturini"
+                "name": "Cmd. Delta"
               },
               "staff": [
                 {
                   "id": "staff17",
-                  "name": "C.M. Pastore",
+                  "name": "Stf. Echo",
                   "position": {
                     "lat": 46.586899,
                     "lon": 7.958931,
@@ -292,7 +292,7 @@
                 },
                 {
                   "id": "staff18",
-                  "name": "Cpl. Spada",
+                  "name": "Stf. Foxtrot",
                   "position": {
                     "lat": 46.586861,
                     "lon": 7.959383,
@@ -313,7 +313,7 @@
               "children": [
                 {
                   "id": "ind16",
-                  "name": "Sgt Romagnoli",
+                  "name": "Ind. Zulu",
                   "type": "individual",
                   "position": {
                     "lat": 46.579003,
@@ -324,7 +324,7 @@
                 },
                 {
                   "id": "ind17",
-                  "name": "C.M. Mancini",
+                  "name": "Ind. Archer",
                   "type": "individual",
                   "position": {
                     "lat": 46.579626,
@@ -335,7 +335,7 @@
                 },
                 {
                   "id": "ind18",
-                  "name": "Cpl Cattaneo",
+                  "name": "Ind. Bishop",
                   "type": "individual",
                   "position": {
                     "lat": 46.58055,
@@ -346,7 +346,7 @@
                 },
                 {
                   "id": "ind19",
-                  "name": "Sdt Presti",
+                  "name": "Ind. Castle",
                   "type": "individual",
                   "position": {
                     "lat": 46.579311,
@@ -357,7 +357,7 @@
                 },
                 {
                   "id": "ind20",
-                  "name": "Sdt Capodieci",
+                  "name": "Ind. Dagger",
                   "type": "individual",
                   "position": {
                     "lat": 46.581068,
@@ -369,12 +369,12 @@
               ],
               "commander": {
                 "id": "cmd19",
-                "name": "Sgt. Amodio"
+                "name": "Cmd. Romeo"
               },
               "staff": [
                 {
                   "id": "staff20",
-                  "name": "C.M. Cornetti",
+                  "name": "Stf. Whiskey",
                   "position": {
                     "lat": 46.580585,
                     "lon": 7.982996,
@@ -383,7 +383,7 @@
                 },
                 {
                   "id": "staff21",
-                  "name": "Cpl. Gargiulo",
+                  "name": "Stf. Yankee",
                   "position": {
                     "lat": 46.580315,
                     "lon": 7.983226,
@@ -404,7 +404,7 @@
               "children": [
                 {
                   "id": "ind21",
-                  "name": "Sgt Cosentino",
+                  "name": "Ind. Hammer",
                   "type": "individual",
                   "position": {
                     "lat": 46.593164,
@@ -415,7 +415,7 @@
                 },
                 {
                   "id": "ind22",
-                  "name": "C.M. Serra",
+                  "name": "Ind. Iron",
                   "type": "individual",
                   "position": {
                     "lat": 46.592382,
@@ -426,7 +426,7 @@
                 },
                 {
                   "id": "ind23",
-                  "name": "Cpl Conti",
+                  "name": "Ind. Javelin",
                   "type": "individual",
                   "position": {
                     "lat": 46.591336,
@@ -437,7 +437,7 @@
                 },
                 {
                   "id": "ind24",
-                  "name": "Sdt Capasso",
+                  "name": "Ind. Knight",
                   "type": "individual",
                   "position": {
                     "lat": 46.592057,
@@ -448,7 +448,7 @@
                 },
                 {
                   "id": "ind25",
-                  "name": "Sdt Ruggeri",
+                  "name": "Ind. Lancer",
                   "type": "individual",
                   "position": {
                     "lat": 46.590827,
@@ -460,12 +460,12 @@
               ],
               "commander": {
                 "id": "cmd22",
-                "name": "Sgt. Tarantino"
+                "name": "Cmd. Ember"
               },
               "staff": [
                 {
                   "id": "staff23",
-                  "name": "C.M. Napoli",
+                  "name": "Stf. Flint",
                   "position": {
                     "lat": 46.591813,
                     "lon": 7.970281,
@@ -474,7 +474,7 @@
                 },
                 {
                   "id": "staff24",
-                  "name": "Cpl. Calabrese",
+                  "name": "Stf. Granite",
                   "position": {
                     "lat": 46.591523,
                     "lon": 7.970111,
@@ -486,12 +486,12 @@
           ],
           "commander": {
             "id": "cmd7",
-            "name": "S.Ten. Casella"
+            "name": "Cmd. Thunder"
           },
           "staff": [
             {
               "id": "staff8",
-              "name": "Sgt.Magg. Zanella",
+              "name": "Stf. Eagle",
               "position": {
                 "lat": 46.582152,
                 "lon": 7.964563,
@@ -500,7 +500,7 @@
             },
             {
               "id": "staff9",
-              "name": "Sgt. Marra",
+              "name": "Stf. Wolf",
               "position": {
                 "lat": 46.582306,
                 "lon": 7.964167,
@@ -531,7 +531,7 @@
               "children": [
                 {
                   "id": "ind26",
-                  "name": "Sgt Colombo",
+                  "name": "Ind. Storm",
                   "type": "individual",
                   "position": {
                     "lat": 46.546256,
@@ -542,7 +542,7 @@
                 },
                 {
                   "id": "ind27",
-                  "name": "C.M. Sartori",
+                  "name": "Ind. Tempest",
                   "type": "individual",
                   "position": {
                     "lat": 46.543599,
@@ -553,7 +553,7 @@
                 },
                 {
                   "id": "ind28",
-                  "name": "Cpl Coppola",
+                  "name": "Ind. Valkyrie",
                   "type": "individual",
                   "position": {
                     "lat": 46.54419,
@@ -564,7 +564,7 @@
                 },
                 {
                   "id": "ind29",
-                  "name": "Sdt Raimondi",
+                  "name": "Ind. Warden",
                   "type": "individual",
                   "position": {
                     "lat": 46.54602,
@@ -575,7 +575,7 @@
                 },
                 {
                   "id": "ind30",
-                  "name": "Sdt Marchesini",
+                  "name": "Ind. Apex",
                   "type": "individual",
                   "position": {
                     "lat": 46.543596,
@@ -587,12 +587,12 @@
               ],
               "commander": {
                 "id": "cmd28",
-                "name": "Sgt. Fiorentino"
+                "name": "Cmd. Panther"
               },
               "staff": [
                 {
                   "id": "staff29",
-                  "name": "C.M. Genovese",
+                  "name": "Stf. Quartz",
                   "position": {
                     "lat": 46.544198,
                     "lon": 7.977406,
@@ -601,7 +601,7 @@
                 },
                 {
                   "id": "staff30",
-                  "name": "Cpl. Pisani",
+                  "name": "Stf. Raven",
                   "position": {
                     "lat": 46.544386,
                     "lon": 7.977043,
@@ -622,7 +622,7 @@
               "children": [
                 {
                   "id": "ind31",
-                  "name": "Sgt Giordano",
+                  "name": "Ind. Fury",
                   "type": "individual",
                   "position": {
                     "lat": 46.531628,
@@ -633,7 +633,7 @@
                 },
                 {
                   "id": "ind32",
-                  "name": "C.M. Caruso",
+                  "name": "Ind. Grizzly",
                   "type": "individual",
                   "position": {
                     "lat": 46.532015,
@@ -644,7 +644,7 @@
                 },
                 {
                   "id": "ind33",
-                  "name": "Cpl Neri",
+                  "name": "Ind. Hornet",
                   "type": "individual",
                   "position": {
                     "lat": 46.532818,
@@ -655,7 +655,7 @@
                 },
                 {
                   "id": "ind34",
-                  "name": "Sdt Agostini",
+                  "name": "Ind. Inferno",
                   "type": "individual",
                   "position": {
                     "lat": 46.532876,
@@ -666,7 +666,7 @@
                 },
                 {
                   "id": "ind35",
-                  "name": "Sdt Fiore",
+                  "name": "Ind. Jaguar",
                   "type": "individual",
                   "position": {
                     "lat": 46.531026,
@@ -678,12 +678,12 @@
               ],
               "commander": {
                 "id": "cmd31",
-                "name": "Sgt. Luciani"
+                "name": "Cmd. Bolt"
               },
               "staff": [
                 {
                   "id": "staff32",
-                  "name": "C.M. Mantovani",
+                  "name": "Stf. Cipher",
                   "position": {
                     "lat": 46.531836,
                     "lon": 8.003714,
@@ -692,7 +692,7 @@
                 },
                 {
                   "id": "staff33",
-                  "name": "Cpl. Padovani",
+                  "name": "Stf. Drake",
                   "position": {
                     "lat": 46.532149,
                     "lon": 8.00371,
@@ -713,7 +713,7 @@
               "children": [
                 {
                   "id": "ind36",
-                  "name": "Sgt De Simone",
+                  "name": "Ind. De Neptune",
                   "type": "individual",
                   "position": {
                     "lat": 46.542524,
@@ -724,7 +724,7 @@
                 },
                 {
                   "id": "ind37",
-                  "name": "C.M. D'Amico",
+                  "name": "Ind. Odin",
                   "type": "individual",
                   "position": {
                     "lat": 46.541224,
@@ -735,7 +735,7 @@
                 },
                 {
                   "id": "ind38",
-                  "name": "Cpl Benedetti",
+                  "name": "Ind. Patriot",
                   "type": "individual",
                   "position": {
                     "lat": 46.542308,
@@ -746,7 +746,7 @@
                 },
                 {
                   "id": "ind39",
-                  "name": "Sdt Scognamiglio",
+                  "name": "Ind. Razor",
                   "type": "individual",
                   "position": {
                     "lat": 46.543266,
@@ -757,7 +757,7 @@
                 },
                 {
                   "id": "ind40",
-                  "name": "Sdt Pellegrini",
+                  "name": "Ind. Sentinel",
                   "type": "individual",
                   "position": {
                     "lat": 46.54065,
@@ -769,12 +769,12 @@
               ],
               "commander": {
                 "id": "cmd34",
-                "name": "Sgt. Bolognese"
+                "name": "Cmd. Kraken"
               },
               "staff": [
                 {
                   "id": "staff35",
-                  "name": "C.M. Ravenna",
+                  "name": "Stf. Legion",
                   "position": {
                     "lat": 46.542602,
                     "lon": 7.995028,
@@ -783,7 +783,7 @@
                 },
                 {
                   "id": "staff36",
-                  "name": "Cpl. Salerno",
+                  "name": "Stf. Mirage",
                   "position": {
                     "lat": 46.542795,
                     "lon": 7.995386,
@@ -804,7 +804,7 @@
               "children": [
                 {
                   "id": "ind41",
-                  "name": "Sgt Greco",
+                  "name": "Ind. Atlas",
                   "type": "individual",
                   "position": {
                     "lat": 46.535352,
@@ -815,7 +815,7 @@
                 },
                 {
                   "id": "ind42",
-                  "name": "C.M. Pappalardo",
+                  "name": "Ind. Bandit",
                   "type": "individual",
                   "position": {
                     "lat": 46.536636,
@@ -826,7 +826,7 @@
                 },
                 {
                   "id": "ind43",
-                  "name": "Cpl Ferrari",
+                  "name": "Ind. Centurion",
                   "type": "individual",
                   "position": {
                     "lat": 46.537088,
@@ -837,7 +837,7 @@
                 },
                 {
                   "id": "ind44",
-                  "name": "Sdt Vitale",
+                  "name": "Ind. Draco",
                   "type": "individual",
                   "position": {
                     "lat": 46.536428,
@@ -848,7 +848,7 @@
                 },
                 {
                   "id": "ind45",
-                  "name": "Sdt Bianchi",
+                  "name": "Ind. Enigma",
                   "type": "individual",
                   "position": {
                     "lat": 46.537057,
@@ -860,12 +860,12 @@
               ],
               "commander": {
                 "id": "cmd37",
-                "name": "Sgt. Catania"
+                "name": "Cmd. Trident"
               },
               "staff": [
                 {
                   "id": "staff38",
-                  "name": "C.M. Messini",
+                  "name": "Stf. Vanguard",
                   "position": {
                     "lat": 46.536897,
                     "lon": 7.982103,
@@ -874,7 +874,7 @@
                 },
                 {
                   "id": "staff39",
-                  "name": "Cpl. Ragusa",
+                  "name": "Stf. Wraith",
                   "position": {
                     "lat": 46.536819,
                     "lon": 7.982543,
@@ -895,7 +895,7 @@
               "children": [
                 {
                   "id": "ind46",
-                  "name": "Sgt Testa",
+                  "name": "Ind. Impulse",
                   "type": "individual",
                   "position": {
                     "lat": 46.530485,
@@ -906,7 +906,7 @@
                 },
                 {
                   "id": "ind47",
-                  "name": "C.M. Basile",
+                  "name": "Ind. Jester",
                   "type": "individual",
                   "position": {
                     "lat": 46.529026,
@@ -917,7 +917,7 @@
                 },
                 {
                   "id": "ind48",
-                  "name": "Cpl Nardi",
+                  "name": "Ind. Kodiak",
                   "type": "individual",
                   "position": {
                     "lat": 46.529523,
@@ -928,7 +928,7 @@
                 },
                 {
                   "id": "ind49",
-                  "name": "Sdt Sorrentino",
+                  "name": "Ind. Lynx",
                   "type": "individual",
                   "position": {
                     "lat": 46.529988,
@@ -939,7 +939,7 @@
                 },
                 {
                   "id": "ind50",
-                  "name": "Sdt Pugliese",
+                  "name": "Ind. Mantis",
                   "type": "individual",
                   "position": {
                     "lat": 46.529054,
@@ -951,12 +951,12 @@
               ],
               "commander": {
                 "id": "cmd40",
-                "name": "Sgt. Trapani"
+                "name": "Cmd. Forge"
               },
               "staff": [
                 {
                   "id": "staff41",
-                  "name": "C.M. Aquila",
+                  "name": "Stf. Gladius",
                   "position": {
                     "lat": 46.52949,
                     "lon": 8.000097,
@@ -965,7 +965,7 @@
                 },
                 {
                   "id": "staff42",
-                  "name": "Cpl. Ancona",
+                  "name": "Stf. Havoc",
                   "position": {
                     "lat": 46.529202,
                     "lon": 8.000275,
@@ -977,12 +977,12 @@
           ],
           "commander": {
             "id": "cmd25",
-            "name": "S.Ten. Siciliano"
+            "name": "Cmd. Marshal"
           },
           "staff": [
             {
               "id": "staff26",
-              "name": "Sgt.Magg. Vitali",
+              "name": "Stf. Nitro",
               "position": {
                 "lat": 46.538188,
                 "lon": 7.990563,
@@ -991,7 +991,7 @@
             },
             {
               "id": "staff27",
-              "name": "Sgt. Pellegrino",
+              "name": "Stf. Onyx",
               "position": {
                 "lat": 46.538104,
                 "lon": 7.990125,
@@ -1022,7 +1022,7 @@
               "children": [
                 {
                   "id": "ind51",
-                  "name": "Sgt Mazza",
+                  "name": "Ind. Umbra",
                   "type": "individual",
                   "position": {
                     "lat": 46.543956,
@@ -1033,7 +1033,7 @@
                 },
                 {
                   "id": "ind52",
-                  "name": "C.M. Rossi",
+                  "name": "Ind. Vertex",
                   "type": "individual",
                   "position": {
                     "lat": 46.542604,
@@ -1044,7 +1044,7 @@
                 },
                 {
                   "id": "ind53",
-                  "name": "Cpl Cozzolino",
+                  "name": "Ind. Wildfire",
                   "type": "individual",
                   "position": {
                     "lat": 46.543778,
@@ -1055,7 +1055,7 @@
                 },
                 {
                   "id": "ind54",
-                  "name": "Sdt Basso",
+                  "name": "Ind. Arsenal",
                   "type": "individual",
                   "position": {
                     "lat": 46.542623,
@@ -1066,7 +1066,7 @@
                 },
                 {
                   "id": "ind55",
-                  "name": "Sdt Gentile",
+                  "name": "Ind. Breaker",
                   "type": "individual",
                   "position": {
                     "lat": 46.545203,
@@ -1078,12 +1078,12 @@
               ],
               "commander": {
                 "id": "cmd46",
-                "name": "Sgt. Savona"
+                "name": "Cmd. Revenant"
               },
               "staff": [
                 {
                   "id": "staff47",
-                  "name": "C.M. Imperia",
+                  "name": "Stf. Spectre",
                   "position": {
                     "lat": 46.543144,
                     "lon": 7.930404,
@@ -1092,7 +1092,7 @@
                 },
                 {
                   "id": "staff48",
-                  "name": "Cpl. Sanremo",
+                  "name": "Stf. Torque",
                   "position": {
                     "lat": 46.543101,
                     "lon": 7.929954,
@@ -1113,7 +1113,7 @@
               "children": [
                 {
                   "id": "ind56",
-                  "name": "Sgt Orlando",
+                  "name": "Ind. Firestorm",
                   "type": "individual",
                   "position": {
                     "lat": 46.53393,
@@ -1124,7 +1124,7 @@
                 },
                 {
                   "id": "ind57",
-                  "name": "C.M. Priore",
+                  "name": "Ind. Goliath",
                   "type": "individual",
                   "position": {
                     "lat": 46.533147,
@@ -1135,7 +1135,7 @@
                 },
                 {
                   "id": "ind58",
-                  "name": "Cpl Costa",
+                  "name": "Ind. Hydra",
                   "type": "individual",
                   "position": {
                     "lat": 46.532926,
@@ -1146,7 +1146,7 @@
                 },
                 {
                   "id": "ind59",
-                  "name": "Sdt Ferretti",
+                  "name": "Ind. Icarus",
                   "type": "individual",
                   "position": {
                     "lat": 46.531549,
@@ -1157,7 +1157,7 @@
                 },
                 {
                   "id": "ind60",
-                  "name": "Sdt Marino",
+                  "name": "Ind. Juggernaut",
                   "type": "individual",
                   "position": {
                     "lat": 46.533573,
@@ -1169,12 +1169,12 @@
               ],
               "commander": {
                 "id": "cmd49",
-                "name": "Sgt. Bordighera"
+                "name": "Cmd. Corsair"
               },
               "staff": [
                 {
                   "id": "staff50",
-                  "name": "C.M. Ventimiglia",
+                  "name": "Stf. Dynamo",
                   "position": {
                     "lat": 46.532258,
                     "lon": 7.946259,
@@ -1183,7 +1183,7 @@
                 },
                 {
                   "id": "staff51",
-                  "name": "Cpl. Ferretti",
+                  "name": "Stf. Eclipse",
                   "position": {
                     "lat": 46.532477,
                     "lon": 7.945935,
@@ -1204,7 +1204,7 @@
               "children": [
                 {
                   "id": "ind61",
-                  "name": "Sgt Mele",
+                  "name": "Ind. Nova",
                   "type": "individual",
                   "position": {
                     "lat": 46.541677,
@@ -1215,7 +1215,7 @@
                 },
                 {
                   "id": "ind62",
-                  "name": "C.M. Barbieri",
+                  "name": "Ind. Orion",
                   "type": "individual",
                   "position": {
                     "lat": 46.541354,
@@ -1226,7 +1226,7 @@
                 },
                 {
                   "id": "ind63",
-                  "name": "Cpl Ferrara",
+                  "name": "Ind. Phantom",
                   "type": "individual",
                   "position": {
                     "lat": 46.539637,
@@ -1237,7 +1237,7 @@
                 },
                 {
                   "id": "ind64",
-                  "name": "Sdt Maggi",
+                  "name": "Ind. Quicksilver",
                   "type": "individual",
                   "position": {
                     "lat": 46.540826,
@@ -1248,7 +1248,7 @@
                 },
                 {
                   "id": "ind65",
-                  "name": "Sdt Sanna",
+                  "name": "Ind. Ronin",
                   "type": "individual",
                   "position": {
                     "lat": 46.539864,
@@ -1260,12 +1260,12 @@
               ],
               "commander": {
                 "id": "cmd52",
-                "name": "Sgt. Capobianco"
+                "name": "Cmd. Kestrel"
               },
               "staff": [
                 {
                   "id": "staff53",
-                  "name": "C.M. Gravina",
+                  "name": "Stf. Leopard",
                   "position": {
                     "lat": 46.540953,
                     "lon": 7.933693,
@@ -1274,7 +1274,7 @@
                 },
                 {
                   "id": "staff54",
-                  "name": "Cpl. Poletti",
+                  "name": "Stf. Mustang",
                   "position": {
                     "lat": 46.541263,
                     "lon": 7.933749,
@@ -1295,7 +1295,7 @@
               "children": [
                 {
                   "id": "ind66",
-                  "name": "Sgt Pinna",
+                  "name": "Ind. Viking",
                   "type": "individual",
                   "position": {
                     "lat": 46.537337,
@@ -1306,7 +1306,7 @@
                 },
                 {
                   "id": "ind67",
-                  "name": "C.M. Ventura",
+                  "name": "Ind. Wolverine",
                   "type": "individual",
                   "position": {
                     "lat": 46.534525,
@@ -1317,7 +1317,7 @@
                 },
                 {
                   "id": "ind68",
-                  "name": "Cpl Costanzo",
+                  "name": "Ind. Xenon",
                   "type": "individual",
                   "position": {
                     "lat": 46.536048,
@@ -1328,7 +1328,7 @@
                 },
                 {
                   "id": "ind69",
-                  "name": "Sdt Battaglia",
+                  "name": "Ind. Yeti",
                   "type": "individual",
                   "position": {
                     "lat": 46.536165,
@@ -1339,7 +1339,7 @@
                 },
                 {
                   "id": "ind70",
-                  "name": "Sdt Volpe",
+                  "name": "Ind. Zenith",
                   "type": "individual",
                   "position": {
                     "lat": 46.536493,
@@ -1351,12 +1351,12 @@
               ],
               "commander": {
                 "id": "cmd55",
-                "name": "Sgt. Vianello"
+                "name": "Cmd. Scorpion"
               },
               "staff": [
                 {
                   "id": "staff56",
-                  "name": "C.M. Terzi",
+                  "name": "Stf. Thunderbolt",
                   "position": {
                     "lat": 46.536684,
                     "lon": 7.95115,
@@ -1365,7 +1365,7 @@
                 },
                 {
                   "id": "staff57",
-                  "name": "Cpl. Casella",
+                  "name": "Stf. Uppercut",
                   "position": {
                     "lat": 46.536843,
                     "lon": 7.951542,
@@ -1386,7 +1386,7 @@
               "children": [
                 {
                   "id": "ind71",
-                  "name": "Sgt Colucci",
+                  "name": "Ind. Dominator",
                   "type": "individual",
                   "position": {
                     "lat": 46.548401,
@@ -1397,7 +1397,7 @@
                 },
                 {
                   "id": "ind72",
-                  "name": "C.M. Bernardi",
+                  "name": "Ind. Enforcer",
                   "type": "individual",
                   "position": {
                     "lat": 46.547934,
@@ -1408,7 +1408,7 @@
                 },
                 {
                   "id": "ind73",
-                  "name": "Cpl D'Angelo",
+                  "name": "Ind. Foxhound",
                   "type": "individual",
                   "position": {
                     "lat": 46.548479,
@@ -1419,7 +1419,7 @@
                 },
                 {
                   "id": "ind74",
-                  "name": "Sdt Olivieri",
+                  "name": "Ind. Gunner",
                   "type": "individual",
                   "position": {
                     "lat": 46.548123,
@@ -1430,7 +1430,7 @@
                 },
                 {
                   "id": "ind75",
-                  "name": "Sdt Maffei",
+                  "name": "Ind. Hercules",
                   "type": "individual",
                   "position": {
                     "lat": 46.546483,
@@ -1442,12 +1442,12 @@
               ],
               "commander": {
                 "id": "cmd58",
-                "name": "Sgt. Zanella"
+                "name": "Cmd. Ace"
               },
               "staff": [
                 {
                   "id": "staff59",
-                  "name": "C.M. Marra",
+                  "name": "Stf. Barrage",
                   "position": {
                     "lat": 46.54788,
                     "lon": 7.942272,
@@ -1456,7 +1456,7 @@
                 },
                 {
                   "id": "staff60",
-                  "name": "Cpl. Pirovano",
+                  "name": "Stf. Cyclone",
                   "position": {
                     "lat": 46.547763,
                     "lon": 7.942693,
@@ -1468,12 +1468,12 @@
           ],
           "commander": {
             "id": "cmd43",
-            "name": "S.Ten. Perugia"
+            "name": "Cmd. Nemesis"
           },
           "staff": [
             {
               "id": "staff44",
-              "name": "Sgt.Magg. Urbino",
+              "name": "Stf. Outlaw",
               "position": {
                 "lat": 46.5387,
                 "lon": 7.941233,
@@ -1482,7 +1482,7 @@
             },
             {
               "id": "staff45",
-              "name": "Sgt. Livorno",
+              "name": "Stf. Phalanx",
               "position": {
                 "lat": 46.538428,
                 "lon": 7.94101,
@@ -1494,12 +1494,12 @@
       ],
       "commander": {
         "id": "cmd4",
-        "name": "Cap. Poletti"
+        "name": "Cmd. Ghost"
       },
       "staff": [
         {
           "id": "staff5",
-          "name": "Ten. Vianello",
+          "name": "Stf. Shadow",
           "position": {
             "lat": 46.553245,
             "lon": 7.965713,
@@ -1508,7 +1508,7 @@
         },
         {
           "id": "staff6",
-          "name": "M.llo Terzi",
+          "name": "M.llo Phoenix",
           "position": {
             "lat": 46.553123,
             "lon": 7.965294,
@@ -1549,7 +1549,7 @@
               "children": [
                 {
                   "id": "ind76",
-                  "name": "Sgt Esposito",
+                  "name": "Ind. Sledgehammer",
                   "type": "individual",
                   "position": {
                     "lat": 46.614269,
@@ -1560,7 +1560,7 @@
                 },
                 {
                   "id": "ind77",
-                  "name": "C.M. Bruno",
+                  "name": "Ind. Tomahawk",
                   "type": "individual",
                   "position": {
                     "lat": 46.611968,
@@ -1571,7 +1571,7 @@
                 },
                 {
                   "id": "ind78",
-                  "name": "Cpl Fontana",
+                  "name": "Ind. Venom",
                   "type": "individual",
                   "position": {
                     "lat": 46.611651,
@@ -1582,7 +1582,7 @@
                 },
                 {
                   "id": "ind79",
-                  "name": "Sdt Gallo",
+                  "name": "Ind. Warlock",
                   "type": "individual",
                   "position": {
                     "lat": 46.613363,
@@ -1593,7 +1593,7 @@
                 },
                 {
                   "id": "ind80",
-                  "name": "Sdt Lucchese",
+                  "name": "Ind. Ares",
                   "type": "individual",
                   "position": {
                     "lat": 46.614423,
@@ -1605,12 +1605,12 @@
               ],
               "commander": {
                 "id": "cmd67",
-                "name": "Sgt. Pastore"
+                "name": "Cmd. Overlord"
               },
               "staff": [
                 {
                   "id": "staff68",
-                  "name": "C.M. Spada",
+                  "name": "Stf. Prowler",
                   "position": {
                     "lat": 46.612115,
                     "lon": 8.039239,
@@ -1619,7 +1619,7 @@
                 },
                 {
                   "id": "staff69",
-                  "name": "Cpl. Amodio",
+                  "name": "Stf. Rampart",
                   "position": {
                     "lat": 46.612112,
                     "lon": 8.038784,
@@ -1640,7 +1640,7 @@
               "children": [
                 {
                   "id": "ind81",
-                  "name": "Sgt Longo",
+                  "name": "Ind. Raptor",
                   "type": "individual",
                   "position": {
                     "lat": 46.623718,
@@ -1651,7 +1651,7 @@
                 },
                 {
                   "id": "ind82",
-                  "name": "C.M. Bianco",
+                  "name": "Ind. Ghost",
                   "type": "individual",
                   "position": {
                     "lat": 46.624126,
@@ -1662,7 +1662,7 @@
                 },
                 {
                   "id": "ind83",
-                  "name": "Cpl Guglielmo",
+                  "name": "Ind. Shadow",
                   "type": "individual",
                   "position": {
                     "lat": 46.624198,
@@ -1673,7 +1673,7 @@
                 },
                 {
                   "id": "ind84",
-                  "name": "Sdt Monti",
+                  "name": "Ind. Phoenix",
                   "type": "individual",
                   "position": {
                     "lat": 46.624026,
@@ -1684,7 +1684,7 @@
                 },
                 {
                   "id": "ind85",
-                  "name": "Sdt Messina",
+                  "name": "Ind. Thunder",
                   "type": "individual",
                   "position": {
                     "lat": 46.622894,
@@ -1696,12 +1696,12 @@
               ],
               "commander": {
                 "id": "cmd70",
-                "name": "Sgt. Cornetti"
+                "name": "Cmd. Bulldog"
               },
               "staff": [
                 {
                   "id": "staff71",
-                  "name": "C.M. Gargiulo",
+                  "name": "Stf. Viper",
                   "position": {
                     "lat": 46.622331,
                     "lon": 8.062123,
@@ -1710,7 +1710,7 @@
                 },
                 {
                   "id": "staff72",
-                  "name": "Cpl. Tarantino",
+                  "name": "Stf. Falcon",
                   "position": {
                     "lat": 46.622577,
                     "lon": 8.061843,
@@ -1731,7 +1731,7 @@
               "children": [
                 {
                   "id": "ind86",
-                  "name": "Sgt Locatelli",
+                  "name": "Ind. Hawk",
                   "type": "individual",
                   "position": {
                     "lat": 46.618018,
@@ -1742,7 +1742,7 @@
                 },
                 {
                   "id": "ind87",
-                  "name": "C.M. Russo",
+                  "name": "Ind. Reaper",
                   "type": "individual",
                   "position": {
                     "lat": 46.619432,
@@ -1753,7 +1753,7 @@
                 },
                 {
                   "id": "ind88",
-                  "name": "Cpl Trevisan",
+                  "name": "Ind. Spartan",
                   "type": "individual",
                   "position": {
                     "lat": 46.619289,
@@ -1764,7 +1764,7 @@
                 },
                 {
                   "id": "ind89",
-                  "name": "Sdt De Luca",
+                  "name": "Ind. De Titan",
                   "type": "individual",
                   "position": {
                     "lat": 46.619267,
@@ -1775,7 +1775,7 @@
                 },
                 {
                   "id": "ind90",
-                  "name": "Sdt Piazza",
+                  "name": "Ind. Nomad",
                   "type": "individual",
                   "position": {
                     "lat": 46.618044,
@@ -1787,12 +1787,12 @@
               ],
               "commander": {
                 "id": "cmd73",
-                "name": "Sgt. Napoli"
+                "name": "Cmd. Eagle"
               },
               "staff": [
                 {
                   "id": "staff74",
-                  "name": "C.M. Calabrese",
+                  "name": "Stf. Wolf",
                   "position": {
                     "lat": 46.619071,
                     "lon": 8.044694,
@@ -1801,7 +1801,7 @@
                 },
                 {
                   "id": "staff75",
-                  "name": "Cpl. Siciliano",
+                  "name": "Stf. Cobra",
                   "position": {
                     "lat": 46.619373,
                     "lon": 8.044808,
@@ -1822,7 +1822,7 @@
               "children": [
                 {
                   "id": "ind91",
-                  "name": "Sgt Palumbo",
+                  "name": "Ind. Maverick",
                   "type": "individual",
                   "position": {
                     "lat": 46.6112,
@@ -1833,7 +1833,7 @@
                 },
                 {
                   "id": "ind92",
-                  "name": "C.M. Amato",
+                  "name": "Ind. Rogue",
                   "type": "individual",
                   "position": {
                     "lat": 46.612188,
@@ -1844,7 +1844,7 @@
                 },
                 {
                   "id": "ind93",
-                  "name": "Cpl Motta",
+                  "name": "Ind. Sabre",
                   "type": "individual",
                   "position": {
                     "lat": 46.609681,
@@ -1855,7 +1855,7 @@
                 },
                 {
                   "id": "ind94",
-                  "name": "Sdt Leone",
+                  "name": "Ind. Talon",
                   "type": "individual",
                   "position": {
                     "lat": 46.6095,
@@ -1866,7 +1866,7 @@
                 },
                 {
                   "id": "ind95",
-                  "name": "Sdt Ferrante",
+                  "name": "Ind. Bravo",
                   "type": "individual",
                   "position": {
                     "lat": 46.609672,
@@ -1878,12 +1878,12 @@
               ],
               "commander": {
                 "id": "cmd76",
-                "name": "Sgt. Vitali"
+                "name": "Cmd. Striker"
               },
               "staff": [
                 {
                   "id": "staff77",
-                  "name": "C.M. Pellegrino",
+                  "name": "Stf. Blaze",
                   "position": {
                     "lat": 46.611755,
                     "lon": 8.058286,
@@ -1892,7 +1892,7 @@
                 },
                 {
                   "id": "staff78",
-                  "name": "Cpl. Fiorentino",
+                  "name": "Stf. Frost",
                   "position": {
                     "lat": 46.611877,
                     "lon": 8.058705,
@@ -1913,7 +1913,7 @@
               "children": [
                 {
                   "id": "ind96",
-                  "name": "Sgt Lorusso",
+                  "name": "Ind. Echo",
                   "type": "individual",
                   "position": {
                     "lat": 46.624505,
@@ -1924,7 +1924,7 @@
                 },
                 {
                   "id": "ind97",
-                  "name": "C.M. Zambon",
+                  "name": "Ind. Foxtrot",
                   "type": "individual",
                   "position": {
                     "lat": 46.625537,
@@ -1935,7 +1935,7 @@
                 },
                 {
                   "id": "ind98",
-                  "name": "Cpl Liguori",
+                  "name": "Ind. Kilo",
                   "type": "individual",
                   "position": {
                     "lat": 46.626458,
@@ -1946,7 +1946,7 @@
                 },
                 {
                   "id": "ind99",
-                  "name": "Sdt Farina",
+                  "name": "Ind. Lima",
                   "type": "individual",
                   "position": {
                     "lat": 46.626269,
@@ -1957,7 +1957,7 @@
                 },
                 {
                   "id": "ind100",
-                  "name": "Sdt Guerra",
+                  "name": "Ind. Oscar",
                   "type": "individual",
                   "position": {
                     "lat": 46.625745,
@@ -1969,12 +1969,12 @@
               ],
               "commander": {
                 "id": "cmd79",
-                "name": "Sgt. Genovese"
+                "name": "Cmd. Sierra"
               },
               "staff": [
                 {
                   "id": "staff80",
-                  "name": "C.M. Pisani",
+                  "name": "Stf. Tango",
                   "position": {
                     "lat": 46.626848,
                     "lon": 8.042437,
@@ -1983,7 +1983,7 @@
                 },
                 {
                   "id": "staff81",
-                  "name": "Cpl. Luciani",
+                  "name": "Stf. Delta",
                   "position": {
                     "lat": 46.626694,
                     "lon": 8.042834,
@@ -1995,12 +1995,12 @@
           ],
           "commander": {
             "id": "cmd64",
-            "name": "S.Ten. Baldi"
+            "name": "Cmd. Longbow"
           },
           "staff": [
             {
               "id": "staff65",
-              "name": "Sgt.Magg. Castelli",
+              "name": "Stf. Mongoose",
               "position": {
                 "lat": 46.616591,
                 "lon": 8.053167,
@@ -2009,7 +2009,7 @@
             },
             {
               "id": "staff66",
-              "name": "Sgt. Venturini",
+              "name": "Stf. Nighthawk",
               "position": {
                 "lat": 46.616342,
                 "lon": 8.052894,
@@ -2040,7 +2040,7 @@
               "children": [
                 {
                   "id": "ind101",
-                  "name": "Sgt Pisano",
+                  "name": "Ind. Archer",
                   "type": "individual",
                   "position": {
                     "lat": 46.583271,
@@ -2051,7 +2051,7 @@
                 },
                 {
                   "id": "ind102",
-                  "name": "C.M. Bonetti",
+                  "name": "Ind. Bishop",
                   "type": "individual",
                   "position": {
                     "lat": 46.583622,
@@ -2062,7 +2062,7 @@
                 },
                 {
                   "id": "ind103",
-                  "name": "Cpl Riva",
+                  "name": "Ind. Castle",
                   "type": "individual",
                   "position": {
                     "lat": 46.58427,
@@ -2073,7 +2073,7 @@
                 },
                 {
                   "id": "ind104",
-                  "name": "Sdt Catalano",
+                  "name": "Ind. Dagger",
                   "type": "individual",
                   "position": {
                     "lat": 46.583289,
@@ -2084,7 +2084,7 @@
                 },
                 {
                   "id": "ind105",
-                  "name": "Sdt Moro",
+                  "name": "Ind. Ember",
                   "type": "individual",
                   "position": {
                     "lat": 46.584437,
@@ -2096,12 +2096,12 @@
               ],
               "commander": {
                 "id": "cmd85",
-                "name": "Sgt. Ravenna"
+                "name": "Cmd. Whiskey"
               },
               "staff": [
                 {
                   "id": "staff86",
-                  "name": "C.M. Salerno",
+                  "name": "Stf. Yankee",
                   "position": {
                     "lat": 46.58249,
                     "lon": 8.062079,
@@ -2110,7 +2110,7 @@
                 },
                 {
                   "id": "staff87",
-                  "name": "Cpl. Catania",
+                  "name": "Stf. Zulu",
                   "position": {
                     "lat": 46.582267,
                     "lon": 8.06176,
@@ -2131,7 +2131,7 @@
               "children": [
                 {
                   "id": "ind106",
-                  "name": "Sgt Pagano",
+                  "name": "Ind. Iron",
                   "type": "individual",
                   "position": {
                     "lat": 46.57253,
@@ -2142,7 +2142,7 @@
                 },
                 {
                   "id": "ind107",
-                  "name": "C.M. Perrone",
+                  "name": "Ind. Javelin",
                   "type": "individual",
                   "position": {
                     "lat": 46.574252,
@@ -2153,7 +2153,7 @@
                 },
                 {
                   "id": "ind108",
-                  "name": "Cpl Lombardi",
+                  "name": "Ind. Knight",
                   "type": "individual",
                   "position": {
                     "lat": 46.57246,
@@ -2164,7 +2164,7 @@
                 },
                 {
                   "id": "ind109",
-                  "name": "Sdt Ricci",
+                  "name": "Ind. Lancer",
                   "type": "individual",
                   "position": {
                     "lat": 46.574428,
@@ -2175,7 +2175,7 @@
                 },
                 {
                   "id": "ind110",
-                  "name": "Sdt Fumagalli",
+                  "name": "Ind. Marshal",
                   "type": "individual",
                   "position": {
                     "lat": 46.57331,
@@ -2187,12 +2187,12 @@
               ],
               "commander": {
                 "id": "cmd88",
-                "name": "Sgt. Messini"
+                "name": "Cmd. Flint"
               },
               "staff": [
                 {
                   "id": "staff89",
-                  "name": "C.M. Ragusa",
+                  "name": "Stf. Granite",
                   "position": {
                     "lat": 46.572101,
                     "lon": 8.089069,
@@ -2201,7 +2201,7 @@
                 },
                 {
                   "id": "staff90",
-                  "name": "Cpl. Trapani",
+                  "name": "Stf. Hammer",
                   "position": {
                     "lat": 46.572139,
                     "lon": 8.088617,
@@ -2222,7 +2222,7 @@
               "children": [
                 {
                   "id": "ind111",
-                  "name": "Sgt De Rosa",
+                  "name": "Ind. De Quartz",
                   "type": "individual",
                   "position": {
                     "lat": 46.58239,
@@ -2233,7 +2233,7 @@
                 },
                 {
                   "id": "ind112",
-                  "name": "C.M. De Angelis",
+                  "name": "Ind. De Raven",
                   "type": "individual",
                   "position": {
                     "lat": 46.580419,
@@ -2244,7 +2244,7 @@
                 },
                 {
                   "id": "ind113",
-                  "name": "Cpl Scarpa",
+                  "name": "Ind. Storm",
                   "type": "individual",
                   "position": {
                     "lat": 46.580151,
@@ -2255,7 +2255,7 @@
                 },
                 {
                   "id": "ind114",
-                  "name": "Sdt Zanetti",
+                  "name": "Ind. Tempest",
                   "type": "individual",
                   "position": {
                     "lat": 46.581381,
@@ -2266,7 +2266,7 @@
                 },
                 {
                   "id": "ind115",
-                  "name": "Sdt Maggio",
+                  "name": "Ind. Valkyrie",
                   "type": "individual",
                   "position": {
                     "lat": 46.580594,
@@ -2278,12 +2278,12 @@
               ],
               "commander": {
                 "id": "cmd91",
-                "name": "Sgt. Aquila"
+                "name": "Cmd. Nitro"
               },
               "staff": [
                 {
                   "id": "staff92",
-                  "name": "C.M. Ancona",
+                  "name": "Stf. Onyx",
                   "position": {
                     "lat": 46.580415,
                     "lon": 8.077004,
@@ -2292,7 +2292,7 @@
                 },
                 {
                   "id": "staff93",
-                  "name": "Cpl. Perugia",
+                  "name": "Stf. Panther",
                   "position": {
                     "lat": 46.580685,
                     "lon": 8.076774,
@@ -2313,7 +2313,7 @@
               "children": [
                 {
                   "id": "ind116",
-                  "name": "Sgt Barone",
+                  "name": "Ind. Cipher",
                   "type": "individual",
                   "position": {
                     "lat": 46.576211,
@@ -2324,7 +2324,7 @@
                 },
                 {
                   "id": "ind117",
-                  "name": "C.M. Villa",
+                  "name": "Ind. Drake",
                   "type": "individual",
                   "position": {
                     "lat": 46.576122,
@@ -2335,7 +2335,7 @@
                 },
                 {
                   "id": "ind118",
-                  "name": "Cpl Rinaldi",
+                  "name": "Ind. Fury",
                   "type": "individual",
                   "position": {
                     "lat": 46.577063,
@@ -2346,7 +2346,7 @@
                 },
                 {
                   "id": "ind119",
-                  "name": "Sdt Poli",
+                  "name": "Ind. Grizzly",
                   "type": "individual",
                   "position": {
                     "lat": 46.575865,
@@ -2357,7 +2357,7 @@
                 },
                 {
                   "id": "ind120",
-                  "name": "Sdt Rosetti",
+                  "name": "Ind. Hornet",
                   "type": "individual",
                   "position": {
                     "lat": 46.576377,
@@ -2369,12 +2369,12 @@
               ],
               "commander": {
                 "id": "cmd94",
-                "name": "Sgt. Urbino"
+                "name": "Cmd. Warden"
               },
               "staff": [
                 {
                   "id": "staff95",
-                  "name": "C.M. Livorno",
+                  "name": "Stf. Apex",
                   "position": {
                     "lat": 46.576187,
                     "lon": 8.064719,
@@ -2383,7 +2383,7 @@
                 },
                 {
                   "id": "staff96",
-                  "name": "Cpl. Savona",
+                  "name": "Stf. Bolt",
                   "position": {
                     "lat": 46.576477,
                     "lon": 8.06489,
@@ -2404,7 +2404,7 @@
               "children": [
                 {
                   "id": "ind121",
-                  "name": "Sgt Quaranta",
+                  "name": "Ind. Legion",
                   "type": "individual",
                   "position": {
                     "lat": 46.583516,
@@ -2415,7 +2415,7 @@
                 },
                 {
                   "id": "ind122",
-                  "name": "C.M. Grassi",
+                  "name": "Ind. Mirage",
                   "type": "individual",
                   "position": {
                     "lat": 46.58448,
@@ -2426,7 +2426,7 @@
                 },
                 {
                   "id": "ind123",
-                  "name": "Cpl Falcone",
+                  "name": "Ind. Neptune",
                   "type": "individual",
                   "position": {
                     "lat": 46.585447,
@@ -2437,7 +2437,7 @@
                 },
                 {
                   "id": "ind124",
-                  "name": "Sdt Franchi",
+                  "name": "Ind. Odin",
                   "type": "individual",
                   "position": {
                     "lat": 46.584879,
@@ -2448,7 +2448,7 @@
                 },
                 {
                   "id": "ind125",
-                  "name": "Sdt Palmieri",
+                  "name": "Ind. Patriot",
                   "type": "individual",
                   "position": {
                     "lat": 46.585625,
@@ -2460,12 +2460,12 @@
               ],
               "commander": {
                 "id": "cmd97",
-                "name": "Sgt. Imperia"
+                "name": "Cmd. Inferno"
               },
               "staff": [
                 {
                   "id": "staff98",
-                  "name": "C.M. Sanremo",
+                  "name": "Stf. Jaguar",
                   "position": {
                     "lat": 46.585812,
                     "lon": 8.083436,
@@ -2474,7 +2474,7 @@
                 },
                 {
                   "id": "staff99",
-                  "name": "Cpl. Bordighera",
+                  "name": "Stf. Kraken",
                   "position": {
                     "lat": 46.585896,
                     "lon": 8.083874,
@@ -2486,12 +2486,12 @@
           ],
           "commander": {
             "id": "cmd82",
-            "name": "S.Ten. Mantovani"
+            "name": "Cmd. Papa"
           },
           "staff": [
             {
               "id": "staff83",
-              "name": "Sgt.Magg. Padovani",
+              "name": "Stf. Quebec",
               "position": {
                 "lat": 46.578278,
                 "lon": 8.075245,
@@ -2500,7 +2500,7 @@
             },
             {
               "id": "staff84",
-              "name": "Sgt. Bolognese",
+              "name": "Stf. Romeo",
               "position": {
                 "lat": 46.577969,
                 "lon": 8.075309,
@@ -2531,7 +2531,7 @@
               "children": [
                 {
                   "id": "ind126",
-                  "name": "Sgt Masi",
+                  "name": "Ind. Bandit",
                   "type": "individual",
                   "position": {
                     "lat": 46.583362,
@@ -2542,7 +2542,7 @@
                 },
                 {
                   "id": "ind127",
-                  "name": "C.M. Moretti",
+                  "name": "Ind. Centurion",
                   "type": "individual",
                   "position": {
                     "lat": 46.583348,
@@ -2553,7 +2553,7 @@
                 },
                 {
                   "id": "ind128",
-                  "name": "Cpl Valenti",
+                  "name": "Ind. Draco",
                   "type": "individual",
                   "position": {
                     "lat": 46.581753,
@@ -2564,7 +2564,7 @@
                 },
                 {
                   "id": "ind129",
-                  "name": "Sdt Pozzi",
+                  "name": "Ind. Enigma",
                   "type": "individual",
                   "position": {
                     "lat": 46.584154,
@@ -2575,7 +2575,7 @@
                 },
                 {
                   "id": "ind130",
-                  "name": "Sdt Albanese",
+                  "name": "Ind. Forge",
                   "type": "individual",
                   "position": {
                     "lat": 46.582897,
@@ -2587,12 +2587,12 @@
               ],
               "commander": {
                 "id": "cmd103",
-                "name": "Sgt. Gravina"
+                "name": "Cmd. Vanguard"
               },
               "staff": [
                 {
                   "id": "staff104",
-                  "name": "C.M. Poletti",
+                  "name": "Stf. Wraith",
                   "position": {
                     "lat": 46.583164,
                     "lon": 8.025288,
@@ -2601,7 +2601,7 @@
                 },
                 {
                   "id": "staff105",
-                  "name": "Cpl. Vianello",
+                  "name": "Stf. Atlas",
                   "position": {
                     "lat": 46.582851,
                     "lon": 8.025292,
@@ -2622,7 +2622,7 @@
               "children": [
                 {
                   "id": "ind131",
-                  "name": "Sgt Morelli",
+                  "name": "Ind. Jester",
                   "type": "individual",
                   "position": {
                     "lat": 46.574336,
@@ -2633,7 +2633,7 @@
                 },
                 {
                   "id": "ind132",
-                  "name": "C.M. Silvestri",
+                  "name": "Ind. Kodiak",
                   "type": "individual",
                   "position": {
                     "lat": 46.573716,
@@ -2644,7 +2644,7 @@
                 },
                 {
                   "id": "ind133",
-                  "name": "Cpl Martinelli",
+                  "name": "Ind. Lynx",
                   "type": "individual",
                   "position": {
                     "lat": 46.575205,
@@ -2655,7 +2655,7 @@
                 },
                 {
                   "id": "ind134",
-                  "name": "Sdt Gatti",
+                  "name": "Ind. Mantis",
                   "type": "individual",
                   "position": {
                     "lat": 46.572604,
@@ -2666,7 +2666,7 @@
                 },
                 {
                   "id": "ind135",
-                  "name": "Sdt Montanari",
+                  "name": "Ind. Nemesis",
                   "type": "individual",
                   "position": {
                     "lat": 46.574104,
@@ -2678,12 +2678,12 @@
               ],
               "commander": {
                 "id": "cmd106",
-                "name": "Sgt. Terzi"
+                "name": "Cmd. Gladius"
               },
               "staff": [
                 {
                   "id": "staff107",
-                  "name": "C.M. Casella",
+                  "name": "Stf. Havoc",
                   "position": {
                     "lat": 46.573398,
                     "lon": 8.037973,
@@ -2692,7 +2692,7 @@
                 },
                 {
                   "id": "staff108",
-                  "name": "Cpl. Zanella",
+                  "name": "Stf. Impulse",
                   "position": {
                     "lat": 46.573205,
                     "lon": 8.037615,
@@ -2713,7 +2713,7 @@
               "children": [
                 {
                   "id": "ind136",
-                  "name": "Sgt Romano",
+                  "name": "Ind. Spectre",
                   "type": "individual",
                   "position": {
                     "lat": 46.581428,
@@ -2724,7 +2724,7 @@
                 },
                 {
                   "id": "ind137",
-                  "name": "C.M. Marchese",
+                  "name": "Ind. Torque",
                   "type": "individual",
                   "position": {
                     "lat": 46.580073,
@@ -2735,7 +2735,7 @@
                 },
                 {
                   "id": "ind138",
-                  "name": "Cpl Rizzo",
+                  "name": "Ind. Umbra",
                   "type": "individual",
                   "position": {
                     "lat": 46.578764,
@@ -2746,7 +2746,7 @@
                 },
                 {
                   "id": "ind139",
-                  "name": "Sdt De Marco",
+                  "name": "Ind. De Vertex",
                   "type": "individual",
                   "position": {
                     "lat": 46.579664,
@@ -2757,7 +2757,7 @@
                 },
                 {
                   "id": "ind140",
-                  "name": "Sdt Ceccarelli",
+                  "name": "Ind. Wildfire",
                   "type": "individual",
                   "position": {
                     "lat": 46.579822,
@@ -2769,12 +2769,12 @@
               ],
               "commander": {
                 "id": "cmd109",
-                "name": "Sgt. Marra"
+                "name": "Cmd. Outlaw"
               },
               "staff": [
                 {
                   "id": "staff110",
-                  "name": "C.M. Pirovano",
+                  "name": "Stf. Phalanx",
                   "position": {
                     "lat": 46.579103,
                     "lon": 8.027897,
@@ -2783,7 +2783,7 @@
                 },
                 {
                   "id": "staff111",
-                  "name": "Cpl. Mancuso",
+                  "name": "Stf. Revenant",
                   "position": {
                     "lat": 46.579181,
                     "lon": 8.027457,
@@ -2804,7 +2804,7 @@
               "children": [
                 {
                   "id": "ind141",
-                  "name": "Sgt Mariani",
+                  "name": "Ind. Dynamo",
                   "type": "individual",
                   "position": {
                     "lat": 46.575508,
@@ -2815,7 +2815,7 @@
                 },
                 {
                   "id": "ind142",
-                  "name": "C.M. Fabbri",
+                  "name": "Ind. Eclipse",
                   "type": "individual",
                   "position": {
                     "lat": 46.577144,
@@ -2826,7 +2826,7 @@
                 },
                 {
                   "id": "ind143",
-                  "name": "Cpl Landi",
+                  "name": "Ind. Firestorm",
                   "type": "individual",
                   "position": {
                     "lat": 46.575977,
@@ -2837,7 +2837,7 @@
                 },
                 {
                   "id": "ind144",
-                  "name": "Sdt Conte",
+                  "name": "Ind. Goliath",
                   "type": "individual",
                   "position": {
                     "lat": 46.576215,
@@ -2848,7 +2848,7 @@
                 },
                 {
                   "id": "ind145",
-                  "name": "Sdt Ferraro",
+                  "name": "Ind. Hydra",
                   "type": "individual",
                   "position": {
                     "lat": 46.575165,
@@ -2860,12 +2860,12 @@
               ],
               "commander": {
                 "id": "cmd112",
-                "name": "Sgt. Ruocco"
+                "name": "Cmd. Arsenal"
               },
               "staff": [
                 {
                   "id": "staff113",
-                  "name": "C.M. Cremonesi",
+                  "name": "Stf. Breaker",
                   "position": {
                     "lat": 46.57551,
                     "lon": 8.040902,
@@ -2874,7 +2874,7 @@
                 },
                 {
                   "id": "staff114",
-                  "name": "Cpl. Baldi",
+                  "name": "Stf. Corsair",
                   "position": {
                     "lat": 46.575798,
                     "lon": 8.040724,
@@ -2895,7 +2895,7 @@
               "children": [
                 {
                   "id": "ind146",
-                  "name": "Sgt Ferri",
+                  "name": "Ind. Leopard",
                   "type": "individual",
                   "position": {
                     "lat": 46.583964,
@@ -2906,7 +2906,7 @@
                 },
                 {
                   "id": "ind147",
-                  "name": "C.M. Martini",
+                  "name": "Ind. Mustang",
                   "type": "individual",
                   "position": {
                     "lat": 46.584517,
@@ -2917,7 +2917,7 @@
                 },
                 {
                   "id": "ind148",
-                  "name": "Cpl Grasso",
+                  "name": "Ind. Nova",
                   "type": "individual",
                   "position": {
                     "lat": 46.584854,
@@ -2928,7 +2928,7 @@
                 },
                 {
                   "id": "ind149",
-                  "name": "Sdt Bellini",
+                  "name": "Ind. Orion",
                   "type": "individual",
                   "position": {
                     "lat": 46.585678,
@@ -2939,7 +2939,7 @@
                 },
                 {
                   "id": "ind150",
-                  "name": "Sdt Caputo",
+                  "name": "Ind. Phantom",
                   "type": "individual",
                   "position": {
                     "lat": 46.585748,
@@ -2951,12 +2951,12 @@
               ],
               "commander": {
                 "id": "cmd115",
-                "name": "Sgt. Castelli"
+                "name": "Cmd. Icarus"
               },
               "staff": [
                 {
                   "id": "staff116",
-                  "name": "C.M. Venturini",
+                  "name": "Stf. Juggernaut",
                   "position": {
                     "lat": 46.5853,
                     "lon": 8.030766,
@@ -2965,7 +2965,7 @@
                 },
                 {
                   "id": "staff117",
-                  "name": "Cpl. Pastore",
+                  "name": "Stf. Kestrel",
                   "position": {
                     "lat": 46.585572,
                     "lon": 8.03099,
@@ -2977,12 +2977,12 @@
           ],
           "commander": {
             "id": "cmd100",
-            "name": "S.Ten. Ventimiglia"
+            "name": "Cmd. Razor"
           },
           "staff": [
             {
               "id": "staff101",
-              "name": "Sgt.Magg. Ferretti",
+              "name": "Stf. Sentinel",
               "position": {
                 "lat": 46.578802,
                 "lon": 8.030594,
@@ -2991,7 +2991,7 @@
             },
             {
               "id": "staff102",
-              "name": "Sgt. Capobianco",
+              "name": "Stf. Trident",
               "position": {
                 "lat": 46.578614,
                 "lon": 8.030958,
@@ -3003,12 +3003,12 @@
       ],
       "commander": {
         "id": "cmd61",
-        "name": "Cap. Mancuso"
+        "name": "Cmd. Interceptor"
       },
       "staff": [
         {
           "id": "staff62",
-          "name": "Ten. Ruocco",
+          "name": "Stf. Jackal",
           "position": {
             "lat": 46.591387,
             "lon": 8.053182,
@@ -3017,7 +3017,7 @@
         },
         {
           "id": "staff63",
-          "name": "M.llo Cremonesi",
+          "name": "M.llo Kingpin",
           "position": {
             "lat": 46.591086,
             "lon": 8.053304,
@@ -3029,12 +3029,12 @@
   ],
   "commander": {
     "id": "cmd1",
-    "name": "Ten.Col. Ferretti"
+    "name": "Cmd. Viper"
   },
   "staff": [
     {
       "id": "staff2",
-      "name": "Magg. Capobianco",
+      "name": "Stf. Falcon",
       "position": {
         "lat": 46.571929,
         "lon": 8.011305,
@@ -3043,7 +3043,7 @@
     },
     {
       "id": "staff3",
-      "name": "Cap. Gravina",
+      "name": "Stf. Raptor",
       "position": {
         "lat": 46.571627,
         "lon": 8.011191,
