@@ -114,6 +114,12 @@ let manualMode = false; // disables zoom-based auto-leveling after click merge/u
 let zoomLevelingDisabled = true; // when true, zoom/camera movement never triggers merge/unmerge
 let parentLinesEnabled = false; // when true, polylines connect units to their parent
 
+// Heatmap state
+let heatmapLayer = null;          // Cesium.ImageryLayer
+let heatmapCanvas = null;         // offscreen canvas (reused)
+const HEATMAP_CANVAS_SIZE = 512;
+let moduleViewer = null;          // viewer reference for heatmap updates
+
 // --- Sound effects ---
 
 let audioCtx = null;
@@ -182,6 +188,7 @@ function flattenTree(node, parent) {
 }
 
 export async function loadMilitaryUnits(viewer) {
+  moduleViewer = viewer;
   const response = await fetch("/data/military-units.json");
   const tree = await response.json();
   allNodes = [];
@@ -349,6 +356,7 @@ export async function loadMilitaryUnits(viewer) {
     linesById[node.id] = lineEntity;
   }
 
+  updateHeatmapLayer();
   return { entitiesById, nodesById, allNodes };
 }
 
@@ -487,6 +495,7 @@ export function onPreRender() {
 
   if (allDone) {
     animating = false;
+    updateHeatmapLayer();
   }
 }
 
@@ -664,6 +673,7 @@ function mergeStep(fromLevel, toLevel) {
   if (anims.length > 0) {
     playBeep(MERGE_BEEP_FREQ);
     startAnimations(anims);
+    updateHeatmapLayer();
   } else {
     // No animations needed, just show correct level
     showLevel(toLevel);
@@ -807,6 +817,7 @@ function unmergeStep(fromLevel, toLevel) {
   if (anims.length > 0) {
     playBeep(UNMERGE_BEEP_FREQ);
     startAnimations(anims);
+    updateHeatmapLayer();
   } else {
     showLevel(toLevel);
   }
@@ -842,6 +853,104 @@ function hideAllCmdStaff() {
   }
 }
 
+// --- Heatmap ---
+
+function getHeatmapPositions() {
+  if (currentLevel === 0) return []; // individuals visible, nothing below
+  const positions = [];
+  for (const node of allNodes) {
+    const lvl = LEVEL_ORDER.indexOf(node.type);
+    if (lvl >= currentLevel) continue; // not a sub-level node
+    const entity = entitiesById[node.id];
+    if (entity && entity.show) continue; // individually unmerged and visible, skip
+    positions.push(node.position); // {lat, lon, alt}
+    // Include staff positions for non-individual hidden nodes
+    if (node.type !== "individual" && node.staff) {
+      for (const s of node.staff) {
+        positions.push(s.position);
+      }
+    }
+  }
+  return positions;
+}
+
+function renderHeatmapCanvas(positions) {
+  if (!heatmapCanvas) {
+    heatmapCanvas = document.createElement("canvas");
+    heatmapCanvas.width = HEATMAP_CANVAS_SIZE;
+    heatmapCanvas.height = HEATMAP_CANVAS_SIZE;
+  }
+  const ctx = heatmapCanvas.getContext("2d");
+  const W = HEATMAP_CANVAS_SIZE;
+
+  // Compute lat/lon bounds with padding
+  let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
+  for (const p of positions) {
+    if (p.lat < minLat) minLat = p.lat;
+    if (p.lat > maxLat) maxLat = p.lat;
+    if (p.lon < minLon) minLon = p.lon;
+    if (p.lon > maxLon) maxLon = p.lon;
+  }
+  const latSpan = maxLat - minLat || 0.01;
+  const lonSpan = maxLon - minLon || 0.01;
+  const pad = 0.15;
+  minLat -= latSpan * pad;
+  maxLat += latSpan * pad;
+  minLon -= lonSpan * pad;
+  maxLon += lonSpan * pad;
+
+  ctx.clearRect(0, 0, W, W);
+  ctx.globalCompositeOperation = "lighter";
+
+  // Radius scaled to point count so blobs overlap nicely
+  const baseRadius = Math.max(20, Math.min(80, 300 / Math.sqrt(positions.length)));
+
+  for (const p of positions) {
+    const x = ((p.lon - minLon) / (maxLon - minLon)) * W;
+    const y = ((maxLat - p.lat) / (maxLat - minLat)) * W; // flip Y
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, baseRadius);
+    grad.addColorStop(0, "rgba(30, 80, 255, 0.35)");
+    grad.addColorStop(0.4, "rgba(30, 80, 255, 0.15)");
+    grad.addColorStop(1, "rgba(30, 80, 255, 0)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(x - baseRadius, y - baseRadius, baseRadius * 2, baseRadius * 2);
+  }
+
+  ctx.globalCompositeOperation = "source-over";
+  return {
+    west: Cesium.Math.toRadians(minLon),
+    south: Cesium.Math.toRadians(minLat),
+    east: Cesium.Math.toRadians(maxLon),
+    north: Cesium.Math.toRadians(maxLat),
+  };
+}
+
+function updateHeatmapLayer() {
+  const viewer = moduleViewer;
+  if (!viewer) return;
+
+  // Remove old layer
+  if (heatmapLayer) {
+    viewer.imageryLayers.remove(heatmapLayer, false);
+    heatmapLayer = null;
+  }
+
+  if (!militaryVisible) return;
+
+  const positions = getHeatmapPositions();
+  if (positions.length === 0) return;
+
+  const bounds = renderHeatmapCanvas(positions);
+  const provider = new Cesium.SingleTileImageryProvider({
+    url: heatmapCanvas.toDataURL(),
+    rectangle: new Cesium.Rectangle(bounds.west, bounds.south, bounds.east, bounds.north),
+    tileWidth: HEATMAP_CANVAS_SIZE,
+    tileHeight: HEATMAP_CANVAS_SIZE,
+  });
+  heatmapLayer = viewer.imageryLayers.addImageryProvider(provider);
+  heatmapLayer.alpha = 0.8;
+}
+
 function showLevel(levelIdx) {
   const type = LEVEL_ORDER[levelIdx];
   for (const node of allNodes) {
@@ -860,6 +969,7 @@ function showLevel(levelIdx) {
       }
     }
   }
+  updateHeatmapLayer();
 }
 
 // --- Click toggle ---
@@ -1148,6 +1258,7 @@ export function handleKeydown(event, viewer) {
         }
         hideAllCmdStaff();
       }
+      updateHeatmapLayer();
     }
     return true;
   }
