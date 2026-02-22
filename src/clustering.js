@@ -856,18 +856,22 @@ function hideAllCmdStaff() {
 // --- Heatmap ---
 
 function getHeatmapPositions() {
-  if (currentLevel === 0) return []; // individuals visible, nothing below
   const positions = [];
   for (const node of allNodes) {
-    const lvl = LEVEL_ORDER.indexOf(node.type);
-    if (lvl >= currentLevel) continue; // not a sub-level node
-    const entity = entitiesById[node.id];
-    if (entity && entity.show) continue; // individually unmerged and visible, skip
-    positions.push(node.position); // {lat, lon, alt}
-    // Include staff positions for non-individual hidden nodes
-    if (node.type !== "individual" && node.staff) {
-      for (const s of node.staff) {
-        positions.push(s.position);
+    // Individuals: include if their entity is hidden
+    if (node.type === "individual") {
+      const entity = entitiesById[node.id];
+      if (entity && !entity.show) positions.push(node.position);
+      continue;
+    }
+    // Commander: include if its entity is hidden
+    const cmdE = cmdEntitiesById[node.id];
+    if (cmdE && !cmdE.show) positions.push(node.position);
+    // Staff: include each hidden staff member
+    const staffEs = staffEntitiesById[node.id];
+    if (staffEs && node.staff) {
+      for (let i = 0; i < staffEs.length; i++) {
+        if (!staffEs[i].show) positions.push(node.staff[i].position);
       }
     }
   }
@@ -900,22 +904,26 @@ function renderHeatmapCanvas(positions) {
   maxLon += lonSpan * pad;
 
   ctx.clearRect(0, 0, W, W);
+
+  // Pass 1: draw intensity as white blobs with additive blending
   ctx.globalCompositeOperation = "lighter";
-
-  // Radius scaled to point count so blobs overlap nicely
-  const baseRadius = Math.max(20, Math.min(80, 300 / Math.sqrt(positions.length)));
-
+  // const baseRadius = Math.max(10, Math.min(40, 150 / Math.sqrt(positions.length)));
+  const baseRadius = 20;
   for (const p of positions) {
     const x = ((p.lon - minLon) / (maxLon - minLon)) * W;
     const y = ((maxLat - p.lat) / (maxLat - minLat)) * W; // flip Y
     const grad = ctx.createRadialGradient(x, y, 0, x, y, baseRadius);
-    grad.addColorStop(0, "rgba(30, 80, 255, 0.35)");
-    grad.addColorStop(0.4, "rgba(30, 80, 255, 0.15)");
-    grad.addColorStop(1, "rgba(30, 80, 255, 0)");
+    grad.addColorStop(0, "rgba(255, 255, 255, 0.35)");
+    grad.addColorStop(0.4, "rgba(255, 255, 255, 0.15)");
+    grad.addColorStop(1, "rgba(255, 255, 255, 0)");
     ctx.fillStyle = grad;
     ctx.fillRect(x - baseRadius, y - baseRadius, baseRadius * 2, baseRadius * 2);
   }
 
+  // Pass 2: colorize — replace color with blue, keeping alpha
+  ctx.globalCompositeOperation = "source-in";
+  ctx.fillStyle = "#1E50FF";
+  ctx.fillRect(0, 0, W, W);
   ctx.globalCompositeOperation = "source-over";
   return {
     west: Cesium.Math.toRadians(minLon),
@@ -948,7 +956,7 @@ function updateHeatmapLayer() {
     tileHeight: HEATMAP_CANVAS_SIZE,
   });
   heatmapLayer = viewer.imageryLayers.addImageryProvider(provider);
-  heatmapLayer.alpha = 0.8;
+  heatmapLayer.alpha = 0.6;
 }
 
 function showLevel(levelIdx) {
