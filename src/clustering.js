@@ -115,11 +115,10 @@ let zoomLevelingDisabled = true; // when true, zoom/camera movement never trigge
 let parentLinesEnabled = false; // when true, polylines connect units to their parent
 let labelsEnabled = false; // when true, text labels are shown on military entities
 
-// Heatmap state
-let heatmapLayer = null;          // Cesium.ImageryLayer
-let heatmapCanvas = null;         // offscreen canvas (reused)
-const HEATMAP_CANVAS_SIZE = 512;
-let moduleViewer = null;          // viewer reference for heatmap updates
+// Dot overlay state (replaces heatmap)
+const dotPool = [];
+let activeDots = 0;
+let moduleViewer = null;          // viewer reference for dot updates
 
 // Visual clustering state
 const CLUSTER_PIXEL_RANGE = 80;
@@ -1018,85 +1017,36 @@ function getHeatmapPositions() {
   return positions;
 }
 
-function renderHeatmapCanvas(positions) {
-  if (!heatmapCanvas) {
-    heatmapCanvas = document.createElement("canvas");
-    heatmapCanvas.width = HEATMAP_CANVAS_SIZE;
-    heatmapCanvas.height = HEATMAP_CANVAS_SIZE;
-  }
-  const ctx = heatmapCanvas.getContext("2d");
-  const W = HEATMAP_CANVAS_SIZE;
-
-  // Compute lat/lon bounds with padding
-  let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
-  for (const p of positions) {
-    if (p.lat < minLat) minLat = p.lat;
-    if (p.lat > maxLat) maxLat = p.lat;
-    if (p.lon < minLon) minLon = p.lon;
-    if (p.lon > maxLon) maxLon = p.lon;
-  }
-  const latSpan = maxLat - minLat || 0.01;
-  const lonSpan = maxLon - minLon || 0.01;
-  const pad = 0.15;
-  minLat -= latSpan * pad;
-  maxLat += latSpan * pad;
-  minLon -= lonSpan * pad;
-  maxLon += lonSpan * pad;
-
-  ctx.clearRect(0, 0, W, W);
-
-  // Pass 1: draw intensity as white blobs with additive blending
-  ctx.globalCompositeOperation = "lighter";
-  // const baseRadius = Math.max(10, Math.min(40, 150 / Math.sqrt(positions.length)));
-  const baseRadius = 4;
-  for (const p of positions) {
-    const x = ((p.lon - minLon) / (maxLon - minLon)) * W;
-    const y = ((maxLat - p.lat) / (maxLat - minLat)) * W; // flip Y
-    const grad = ctx.createRadialGradient(x, y, 0, x, y, baseRadius);
-    grad.addColorStop(0, "rgba(255, 255, 255, 0.77)");
-    grad.addColorStop(0.1, "rgba(255, 255, 255, 0.15)");
-    grad.addColorStop(1, "rgba(255, 255, 255, 0)");
-    ctx.fillStyle = grad;
-    ctx.fillRect(x - baseRadius, y - baseRadius, baseRadius * 2, baseRadius * 2);
-  }
-
-  // Pass 2: colorize — replace color with blue, keeping alpha
-  ctx.globalCompositeOperation = "source-in";
-  ctx.fillStyle = "#1E50FF";
-  ctx.fillRect(0, 0, W, W);
-  ctx.globalCompositeOperation = "source-over";
-  return {
-    west: Cesium.Math.toRadians(minLon),
-    south: Cesium.Math.toRadians(minLat),
-    east: Cesium.Math.toRadians(maxLon),
-    north: Cesium.Math.toRadians(maxLat),
-  };
-}
-
 function updateHeatmapLayer() {
   const viewer = moduleViewer;
   if (!viewer) return;
 
-  // Remove old layer
-  if (heatmapLayer) {
-    viewer.imageryLayers.remove(heatmapLayer, false);
-    heatmapLayer = null;
+  // Hide all currently active dots
+  for (let i = 0; i < activeDots; i++) {
+    dotPool[i].show = false;
   }
+  activeDots = 0;
 
   if (!militaryVisible) return;
 
   const positions = getHeatmapPositions();
-  if (positions.length === 0) return;
+  const dotColor = Cesium.Color.fromCssColorString("#2040FF");
 
-  const bounds = renderHeatmapCanvas(positions);
-  const provider = new Cesium.SingleTileImageryProvider({
-    url: heatmapCanvas.toDataURL(),
-    rectangle: new Cesium.Rectangle(bounds.west, bounds.south, bounds.east, bounds.north),
-    tileWidth: HEATMAP_CANVAS_SIZE,
-    tileHeight: HEATMAP_CANVAS_SIZE,
-  });
-  heatmapLayer = viewer.imageryLayers.addImageryProvider(provider);
-  heatmapLayer.alpha = 0.8;
+  for (let i = 0; i < positions.length; i++) {
+    const p = positions[i];
+    let dot;
+    if (i < dotPool.length) {
+      dot = dotPool[i];
+    } else {
+      dot = viewer.entities.add({
+        point: { pixelSize: 5, color: dotColor },
+      });
+      dotPool.push(dot);
+    }
+    dot.position = Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt + HEIGHT_ABOVE_TERRAIN);
+    dot.show = true;
+  }
+  activeDots = positions.length;
 }
 
 function showLevel(levelIdx) {
