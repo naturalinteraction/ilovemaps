@@ -1,3 +1,7 @@
+- gps puo' avere svarioni e mandare un commander in africa
+- assumiamo che tutti abbiano la radio+gps, se i commander non la avessero, in particolare, sarebbe un casino
+- come rappresento il fatto che una squadra ha 7 persone senza gps?
+
 Here are the most interesting options, roughly ranked:
 
   plan_path — Claude chooses start + end coordinates (using get_entities to find unit positions or waypoints) and tells the client to run the
