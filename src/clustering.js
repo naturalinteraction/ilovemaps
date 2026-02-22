@@ -120,6 +120,7 @@ const DOT_USE_ELLIPSE = false; // false: pixel-sized point; true: 9m semi-transp
 const dotPool = [];
 const dotLinePool = [];          // polylines connecting parent billboard to child dot
 let activeDots = 0;
+let activeLines = 0;              // tracks dotLinePool usage (dots + billboard lines)
 let moduleViewer = null;          // viewer reference for dot updates
 
 // Visual clustering state
@@ -996,7 +997,7 @@ function updateVisualClusters(viewer) {
 
 // --- Heatmap ---
 
-const DOTS_DIRECT_CHILDREN_ONLY = true; // true: dots only for direct child level; false: all hidden people
+const DOTS_DIRECT_CHILDREN_ONLY = false; // true: dots only for direct child level; false: all hidden people
 
 function getHeatmapPositions() {
   // Returns array of { position, parentPosition } for each dot
@@ -1029,7 +1030,7 @@ function getHeatmapPositions() {
     }
     // Commander: include if its entity is hidden (but not by clustering)
     const cmdE = cmdEntitiesById[node.id];
-    if (cmdE && !cmdE.show && !clusteredEntities.has(cmdE)) results.push({ position: node.position, parentPosition: node.position });
+    if (cmdE && !cmdE.show && !clusteredEntities.has(cmdE)) results.push({ position: node.position, parentPosition: parentPos });
     // Staff: include each hidden staff member (but not by clustering)
     const staffEs = staffEntitiesById[node.id];
     if (staffEs && node.staff) {
@@ -1041,16 +1042,31 @@ function getHeatmapPositions() {
   return results;
 }
 
+const DOT_SIZE  = 100;  // 10
+const DOT_ALPHA = 0.1;  // 1.0
+
+function getOrCreateLine(viewer, index, lineColor) {
+  if (index < dotLinePool.length) return dotLinePool[index];
+  const line = viewer.entities.add({
+    polyline: {
+      width: 1,
+      material: lineColor,
+    },
+  });
+  line._isDotLine = true;
+  dotLinePool.push(line);
+  return line;
+}
+
 function updateHeatmapLayer() {
   const viewer = moduleViewer;
   if (!viewer) return;
 
   // Hide all currently active dots and lines
-  for (let i = 0; i < activeDots; i++) {
-    dotPool[i].show = false;
-    dotLinePool[i].show = false;
-  }
+  for (let i = 0; i < activeDots; i++) dotPool[i].show = false;
+  for (let i = 0; i < activeLines; i++) dotLinePool[i].show = false;
   activeDots = 0;
+  activeLines = 0;
 
   if (!militaryVisible) return;
 
@@ -1067,38 +1083,43 @@ function updateHeatmapLayer() {
     } else {
       dot = viewer.entities.add(DOT_USE_ELLIPSE ? {
         ellipse: {
-          semiMajorAxis: 4.5,
-          semiMinorAxis: 4.5,
+          semiMajorAxis: 45,
+          semiMinorAxis: 45,
           material: Cesium.Color.fromCssColorString("#2040FF").withAlpha(0.4),
-          outline: false,
+          outline: true,
         },
       } : {
-        point: { pixelSize: 10, color: dotColor },
+        point: { pixelSize: DOT_SIZE, color: dotColor.withAlpha(DOT_ALPHA) },
       });
+      dot._isDot = true;
       dotPool.push(dot);
     }
     const childPos = Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt + HEIGHT_ABOVE_TERRAIN);
     dot.position = childPos;
     dot.show = true;
 
-    // Line entity connecting parent to child
-    let line;
-    if (i < dotLinePool.length) {
-      line = dotLinePool[i];
-    } else {
-      line = viewer.entities.add({
-        polyline: {
-          width: 1,
-          material: lineColor,
-        },
-      });
-      dotLinePool.push(line);
-    }
+    // Line entity connecting parent to child dot
+    const line = getOrCreateLine(viewer, activeLines, lineColor);
     const parentPos = Cesium.Cartesian3.fromDegrees(pp.lon, pp.lat, pp.alt + HEIGHT_ABOVE_TERRAIN);
     line.polyline.positions = [parentPos, childPos];
     line.show = true;
+    activeLines++;
   }
   activeDots = entries.length;
+
+  // Lines connecting visible billboards to their parent's position
+  for (const node of allNodes) {
+    if (!node.parent) continue;
+    const entity = entitiesById[node.id];
+    if (!entity || !entity.show) continue;
+    const parentNode = node.parent;
+    const line = getOrCreateLine(viewer, activeLines, lineColor);
+    const childPos = node.homePosition;
+    const parentPos = parentNode.homePosition;
+    line.polyline.positions = [parentPos, childPos];
+    line.show = true;
+    activeLines++;
+  }
 }
 
 function showLevel(levelIdx) {
@@ -1127,17 +1148,22 @@ function showLevel(levelIdx) {
 
 function resolvePickedEntity(viewer, click) {
   if (animating) return null;
-  const picked = viewer.scene.pick(click.position);
-  if (!picked || !(picked.id instanceof Cesium.Entity)) return null;
-  let entity = picked.id;
-  // Resolve proxy to its representative entity
-  if (entity._isClusterProxy) {
-    entity = entity._clusterRepEntity;
-    if (!entity) return null;
-    // Clear clusters so the representative and its siblings become visible for animation
-    clearVisualClusters();
+  // Use drillPick to see through non-pickable overlay entities (dots, dot-lines)
+  const picks = viewer.scene.drillPick(click.position);
+  for (const picked of picks) {
+    if (!(picked.id instanceof Cesium.Entity)) continue;
+    let entity = picked.id;
+    if (entity._isDot || entity._isDotLine) continue; // skip dot overlay entities
+    // Resolve proxy to its representative entity
+    if (entity._isClusterProxy) {
+      entity = entity._clusterRepEntity;
+      if (!entity) continue;
+      // Clear clusters so the representative and its siblings become visible for animation
+      clearVisualClusters();
+    }
+    return entity;
   }
-  return entity;
+  return null;
 }
 
 function pickMilNode(viewer, click) {
