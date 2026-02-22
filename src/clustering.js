@@ -1005,7 +1005,11 @@ function getHeatmapPositions() {
       if (!entity || !entity.show) continue; // only visible units spawn child dots
       for (const child of node.children) {
         const childEntity = entitiesById[child.id];
-        if (childEntity && !childEntity.show) positions.push(child.position);
+        if (!childEntity || childEntity.show) continue; // child visible as unit billboard — no dot
+        // Skip if child's commander is visible (child is unmerged, not collapsed)
+        const cmdE = cmdEntitiesById[child.id];
+        if (cmdE && cmdE.show) continue;
+        positions.push(child.position);
       }
     }
     return positions;
@@ -1119,40 +1123,23 @@ function pickMilNode(viewer, click) {
 export function handleRightClick(viewer, click) {
   const entity = resolvePickedEntity(viewer, click);
   if (!entity) return false;
+  // Right click only merges — eat event for any military entity
+  if (!entity._milNode && !entity._milCmdOf && !entity._milStaffOf) return false;
 
   // Support right-clicking a commander entity to merge its children
   let node = entity._milNode;
   let cmdOfNode = entity._milCmdOf || entity._milStaffOf;
   if (cmdOfNode) {
+    // Clear visual clusters so all entities have their real visibility state
+    clearVisualClusters();
     // Right-clicked a commander — treat as merging this unit's children
-    // We need to find what child type is visible and merge into the commander's unit
     const parentNode = cmdOfNode;
     const parentEntity = entitiesById[parentNode.id];
-    // Find visible child type
-    let childType = null;
-    for (const child of parentNode.children) {
-      if (entitiesById[child.id].show) {
-        childType = child.type;
-        break;
-      }
-    }
-    if (!childType) return false;
 
     const anims = [];
-    forEachDescendantAtLevel(parentNode, childType, (desc) => {
-      const e = entitiesById[desc.id];
-      anims.push({
-        entity: e,
-        from: desc.homePosition,
-        to: parentNode.homePosition,
-        duration: ANIM_DURATION,
-        fade: "out",
-        onComplete: () => {
-          e.show = false;
-          e.position = desc.homePosition;
-        },
-      });
-    });
+    // Animate ALL visible descendants (handles exploded sub-levels too)
+    animateMergeAllDescendants(parentNode, parentNode.homePosition, anims);
+
     parentEntity.position = parentNode.homePosition;
     anims.push({
       entity: parentEntity,
@@ -1166,9 +1153,9 @@ export function handleRightClick(viewer, click) {
       onComplete: () => { parentEntity.position = parentNode.homePosition; },
     });
 
-    // Fade OUT commander/staff
+    // Fade OUT merge target's own commander/staff
     const cmdE = cmdEntitiesById[parentNode.id];
-    if (cmdE) {
+    if (cmdE && cmdE.show) {
       anims.push({
         entity: cmdE,
         from: parentNode.cmdHomePosition,
@@ -1183,15 +1170,17 @@ export function handleRightClick(viewer, click) {
     if (staffEs && parentNode.staffHomePositions) {
       for (let si = 0; si < staffEs.length; si++) {
         const se = staffEs[si];
-        anims.push({
-          entity: se,
-          from: parentNode.staffHomePositions[si],
-          to: parentNode.staffHomePositions[si],
-          duration: ANIM_DURATION,
-          fade: "out",
-          fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
-          onComplete: () => { se.show = false; },
-        });
+        if (se.show) {
+          anims.push({
+            entity: se,
+            from: parentNode.staffHomePositions[si],
+            to: parentNode.staffHomePositions[si],
+            duration: ANIM_DURATION,
+            fade: "out",
+            fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+            onComplete: () => { se.show = false; },
+          });
+        }
       }
     }
 
@@ -1199,27 +1188,18 @@ export function handleRightClick(viewer, click) {
     return true;
   }
 
-  if (!node || !node.parent) return false; // need a parent to merge into
+  if (!node || !node.parent) return true; // can't merge, but still eat event
+
+  // Clear visual clusters so all entities have their real visibility state
+  clearVisualClusters();
 
   const parent = node.parent;
   const parentEntity = entitiesById[parent.id];
-  const childType = node.type;
 
   const anims = [];
-  forEachDescendantAtLevel(parent, childType, (desc) => {
-    const e = entitiesById[desc.id];
-    anims.push({
-      entity: e,
-      from: desc.homePosition,
-      to: parent.homePosition,
-      duration: ANIM_DURATION,
-      fade: "out",
-      onComplete: () => {
-        e.show = false;
-        e.position = desc.homePosition;
-      },
-    });
-  });
+  // Animate ALL visible descendants (handles exploded sub-levels too)
+  animateMergeAllDescendants(parent, parent.homePosition, anims);
+
   parentEntity.position = parent.homePosition;
   anims.push({
     entity: parentEntity,
@@ -1233,9 +1213,9 @@ export function handleRightClick(viewer, click) {
     onComplete: () => { parentEntity.position = parent.homePosition; },
   });
 
-  // Fade OUT commander/staff of parent (commander disappears, unit symbol returns)
+  // Fade OUT parent's own commander/staff (commander disappears, unit symbol returns)
   const cmdE = cmdEntitiesById[parent.id];
-  if (cmdE) {
+  if (cmdE && cmdE.show) {
     anims.push({
       entity: cmdE,
       from: parent.cmdHomePosition,
@@ -1250,15 +1230,17 @@ export function handleRightClick(viewer, click) {
   if (staffEs && parent.staffHomePositions) {
     for (let si = 0; si < staffEs.length; si++) {
       const se = staffEs[si];
-      anims.push({
-        entity: se,
-        from: parent.staffHomePositions[si],
-        to: parent.staffHomePositions[si],
-        duration: ANIM_DURATION,
-        fade: "out",
-        fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
-        onComplete: () => { se.show = false; },
-      });
+      if (se.show) {
+        anims.push({
+          entity: se,
+          from: parent.staffHomePositions[si],
+          to: parent.staffHomePositions[si],
+          duration: ANIM_DURATION,
+          fade: "out",
+          fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+          onComplete: () => { se.show = false; },
+        });
+      }
     }
   }
 
@@ -1273,17 +1255,18 @@ function picksMilEntity(viewer, click) {
 }
 
 export function handleLeftClick(viewer, click) {
+  if (!picksMilEntity(viewer, click)) return false;
+  // Always eat the event for military entities — left click only unmerges
   const hit = pickMilNode(viewer, click);
-  if (!hit) {
-    if (!picksMilEntity(viewer, click)) return false;
-    // Military entity that can't unmerge — merge instead
-    return handleRightClick(viewer, click);
-  }
-  const { entity, node, childType } = hit;
+  if (!hit) return true; // can't unmerge, but still eat event
 
+  const { entity, node, childType } = hit;
   const firstChild = node.children[0];
   const childEntity = entitiesById[firstChild.id];
-  if (childEntity.show) return handleRightClick(viewer, click); // children already visible, merge instead
+  if (childEntity.show) return true; // children already visible, can't unmerge further
+
+  // Clear visual clusters so all entities have their real visibility state
+  clearVisualClusters();
 
   const anims = [];
   anims.push({
@@ -1357,6 +1340,58 @@ function forEachDescendantAtLevel(node, type, fn) {
     } else {
       forEachDescendantAtLevel(child, type, fn);
     }
+  }
+}
+
+// Collect animations to merge ALL visible descendants (at any level) back to targetPos.
+// This handles cases where deeper levels have been exploded (e.g. individuals under an exploded squad).
+function animateMergeAllDescendants(node, targetPos, anims) {
+  for (const child of node.children) {
+    const e = entitiesById[child.id];
+    if (e && e.show) {
+      anims.push({
+        entity: e,
+        from: child.homePosition,
+        to: targetPos,
+        duration: ANIM_DURATION,
+        fade: "out",
+        onComplete: () => {
+          e.show = false;
+          e.position = child.homePosition;
+        },
+      });
+    }
+    // Hide commander/staff of this child if visible
+    const cmdE = cmdEntitiesById[child.id];
+    if (cmdE && cmdE.show) {
+      anims.push({
+        entity: cmdE,
+        from: child.cmdHomePosition,
+        to: child.cmdHomePosition,
+        duration: ANIM_DURATION,
+        fade: "out",
+        fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+        onComplete: () => { cmdE.show = false; },
+      });
+    }
+    const staffEs = staffEntitiesById[child.id];
+    if (staffEs && child.staffHomePositions) {
+      for (let si = 0; si < staffEs.length; si++) {
+        const se = staffEs[si];
+        if (se.show) {
+          anims.push({
+            entity: se,
+            from: child.staffHomePositions[si],
+            to: child.staffHomePositions[si],
+            duration: ANIM_DURATION,
+            fade: "out",
+            fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
+            onComplete: () => { se.show = false; },
+          });
+        }
+      }
+    }
+    animateMergeAllDescendants(child, targetPos, anims);
   }
 }
 
