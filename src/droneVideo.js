@@ -27,8 +27,8 @@ const DRONE_POSE_2 = {
   aspectRatio: 4 / 3,
 };
 
-const DRONE_POSE = DRONE_POSE_3
-const DRONE_FRAME_URL = "/data/drone_frame_3.png"
+const DRONE_POSE = DRONE_POSE_2
+const DRONE_FRAME_URL = "/data/drone_frame_2.png"
 
 // ---------------------------------------------------------------------------
 // Build drone camera matrix (projection * view) in RTC frame
@@ -294,6 +294,14 @@ export async function setupDroneVideoLayer(viewer) {
       refreshIndicator();
     } else if (e.key === "t" || e.key === "T") {
       droneAlpha = droneAlpha < 0.1 ? 0.5 : droneAlpha < 0.6 ? 1.0 : 0.0;
+    } else if (e.key === "[") {
+      DRONE_POSE.aspectRatio -= 0.05;
+      drone = computeDroneCameraMatrix(DRONE_POSE);
+      refreshIndicator();
+    } else if (e.key === "]") {
+      DRONE_POSE.aspectRatio += 0.05;
+      drone = computeDroneCameraMatrix(DRONE_POSE);
+      refreshIndicator();
     }
   });
 
