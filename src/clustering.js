@@ -1067,7 +1067,9 @@ function getHeatmapPositions() {
   return results;
 }
 
-const DOT_SIZE  = 10;  // 10
+//const DOT_SIZE  = 10;  // 10
+//const DOT_ALPHA = 0.3;  // 1.0
+const DOT_SIZE  = 100;  // 10
 const DOT_ALPHA = 0.3;  // 1.0
 
 function updateHeatmapLayer() {
