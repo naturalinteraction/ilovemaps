@@ -113,7 +113,7 @@ let militaryVisible = true;
 let manualMode = false; // disables zoom-based auto-leveling after click merge/unmerge
 let zoomLevelingDisabled = true; // when true, zoom/camera movement never triggers merge/unmerge
 let parentLinesEnabled = false; // when true, polylines connect units to their parent
-let labelsEnabled = false; // when true, text labels are shown on military entities
+let labelsEnabled = true; // when true, text labels are shown on military entities
 
 // Dot overlay state (replaces heatmap)
 const DOT_USE_ELLIPSE = false; // false: pixel-sized point; true: 9m semi-transparent circle
