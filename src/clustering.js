@@ -117,11 +117,13 @@ let labelsEnabled = true; // when true, text labels are shown on military entiti
 
 // Dot overlay state (replaces heatmap)
 const DOT_USE_ELLIPSE = false; // false: pixel-sized point; true: 9m semi-transparent circle
-const dotPool = [];
-const dotLinePool = [];          // polylines connecting parent billboard to child dot
-let activeDots = 0;
-let activeLines = 0;              // tracks dotLinePool usage (dots + billboard lines)
 let moduleViewer = null;          // viewer reference for dot updates
+
+// Canvas overlay for dots (avoids alpha accumulation on overlap)
+let dotCanvas = null;
+let dotCtx = null;
+let dotWorldPositions = [];       // array of Cartesian3 positions for canvas dots
+let dotWorldLines = [];           // array of [Cartesian3, Cartesian3] pairs for canvas lines
 
 // Visual clustering state
 const CLUSTER_PIXEL_RANGE = 80;
@@ -377,6 +379,32 @@ export async function loadMilitaryUnits(viewer) {
     });
     linesById[node.id] = lineEntity;
   }
+
+  // Create canvas overlay for dots
+  const container = document.getElementById("cesiumContainer");
+  dotCanvas = document.createElement("canvas");
+  dotCanvas.style.position = "absolute";
+  dotCanvas.style.top = "0";
+  dotCanvas.style.left = "0";
+  dotCanvas.style.pointerEvents = "none";
+  dotCanvas.style.opacity = "0.3";
+  const syncCanvasSize = () => {
+    const cw = viewer.canvas.clientWidth;
+    const ch = viewer.canvas.clientHeight;
+    const dpr = window.devicePixelRatio || 1;
+    dotCanvas.style.width = cw + "px";
+    dotCanvas.style.height = ch + "px";
+    dotCanvas.width = cw * dpr;
+    dotCanvas.height = ch * dpr;
+    dotCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+  container.appendChild(dotCanvas);
+  dotCtx = dotCanvas.getContext("2d");
+  syncCanvasSize();
+
+  // Keep canvas size in sync with Cesium canvas
+  const ro = new ResizeObserver(syncCanvasSize);
+  ro.observe(viewer.canvas);
 
   updateHeatmapLayer();
   return { entitiesById, nodesById, allNodes };
@@ -1038,70 +1066,28 @@ function getHeatmapPositions() {
 }
 
 const DOT_SIZE  = 10;  // 10
-const DOT_ALPHA = 0.8;  // 1.0
-
-function getOrCreateLine(viewer, index, lineColor) {
-  if (index < dotLinePool.length) return dotLinePool[index];
-  const line = viewer.entities.add({
-    polyline: {
-      width: 4,
-      material: lineColor,
-      depthFailMaterial: lineColor,
-    },
-  });
-  line._isDotLine = true;
-  dotLinePool.push(line);
-  return line;
-}
+const DOT_ALPHA = 0.3;  // 1.0
 
 function updateHeatmapLayer() {
   const viewer = moduleViewer;
   if (!viewer) return;
 
-  // Hide all currently active dots and lines
-  for (let i = 0; i < activeDots; i++) dotPool[i].show = false;
-  for (let i = 0; i < activeLines; i++) dotLinePool[i].show = false;
-  activeDots = 0;
-  activeLines = 0;
+  dotWorldPositions = [];
+  dotWorldLines = [];
 
   if (!militaryVisible) return;
 
   const entries = getHeatmapPositions();
-  const dotColor = Cesium.Color.fromCssColorString("#2040FF");
-  const lineColor = Cesium.Color.fromCssColorString("#2040FF").withAlpha(0.45);
 
   for (let i = 0; i < entries.length; i++) {
     const { position: p, parentPosition: pp } = entries[i];
-    // Dot entity
-    let dot;
-    if (i < dotPool.length) {
-      dot = dotPool[i];
-    } else {
-      dot = viewer.entities.add(DOT_USE_ELLIPSE ? {
-        ellipse: {
-          semiMajorAxis: 45,
-          semiMinorAxis: 45,
-          material: Cesium.Color.fromCssColorString("#2040FF").withAlpha(0.4),
-          outline: true,
-        },
-      } : {
-        point: { pixelSize: DOT_SIZE, color: dotColor.withAlpha(DOT_ALPHA), outlineWidth: 0, disableDepthTestDistance: Number.POSITIVE_INFINITY },
-      });
-      dot._isDot = true;
-      dotPool.push(dot);
-    }
     const childPos = Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt + HEIGHT_ABOVE_TERRAIN);
-    dot.position = childPos;
-    dot.show = true;
-
-    // Line entity connecting parent to child dot
-    const line = getOrCreateLine(viewer, activeLines, lineColor);
     const parentPos = Cesium.Cartesian3.fromDegrees(pp.lon, pp.lat, pp.alt + HEIGHT_ABOVE_TERRAIN);
-    line.polyline.positions = [parentPos, childPos];
-    line.show = true;
-    activeLines++;
+
+    // Store position for canvas drawing
+    dotWorldPositions.push(childPos);
+    dotWorldLines.push([parentPos, childPos]);
   }
-  activeDots = entries.length;
 
   // Lines connecting visible billboards (or unmerged commanders) to their parent's position
   for (const node of allNodes) {
@@ -1110,32 +1096,20 @@ function updateHeatmapLayer() {
     const cmdE = cmdEntitiesById[node.id];
     const visible = (entity && entity.show) || (cmdE && cmdE.show);
     if (!visible) continue;
-    const parentNode = node.parent;
-    const line = getOrCreateLine(viewer, activeLines, lineColor);
-    const childPos = node.homePosition;
-    const parentPos = parentNode.homePosition;
-    line.polyline.positions = [parentPos, childPos];
-    line.show = true;
-    activeLines++;
+    dotWorldLines.push([node.parent.homePosition, node.homePosition]);
   }
 
   // Lines connecting visible commander/staff to their unit's position
   for (const node of allNodes) {
     const cmdE = cmdEntitiesById[node.id];
     if (cmdE && cmdE.show) {
-      const line = getOrCreateLine(viewer, activeLines, lineColor);
-      line.polyline.positions = [node.homePosition, node.cmdHomePosition];
-      line.show = true;
-      activeLines++;
+      dotWorldLines.push([node.homePosition, node.cmdHomePosition]);
     }
     const staffEs = staffEntitiesById[node.id];
     if (staffEs && node.staffHomePositions) {
       for (let si = 0; si < staffEs.length; si++) {
         if (staffEs[si].show) {
-          const line = getOrCreateLine(viewer, activeLines, lineColor);
-          line.polyline.positions = [node.homePosition, node.staffHomePositions[si]];
-          line.show = true;
-          activeLines++;
+          dotWorldLines.push([node.homePosition, node.staffHomePositions[si]]);
         }
       }
     }
@@ -1505,6 +1479,7 @@ export function setupZoomListener(viewer) {
 export function handleKeydown(event, viewer) {
   if (event.key === "m" || event.key === "M") {
     militaryVisible = !militaryVisible;
+    if (dotCanvas) dotCanvas.style.display = militaryVisible ? "" : "none";
     if (!animating) {
       if (militaryVisible) {
         showLevel(currentLevel);
@@ -1557,6 +1532,39 @@ export function setupPreRender(viewer) {
     for (const node of allNodes) {
       const line = linesById[node.id];
       if (line) line.show = parentLinesEnabled && entitiesById[node.id].show;
+    }
+    // Draw dots on canvas overlay
+    if (dotCanvas && dotCtx) {
+      dotCtx.clearRect(0, 0, dotCanvas.width, dotCanvas.height);
+      if (militaryVisible) {
+        const scene = viewer.scene;
+        // Draw lines
+        if (dotWorldLines.length > 0) {
+          dotCtx.strokeStyle = "#2040FF";
+          dotCtx.lineWidth = 2;
+          dotCtx.beginPath();
+          for (let i = 0; i < dotWorldLines.length; i++) {
+            const a = scene.cartesianToCanvasCoordinates(dotWorldLines[i][0]);
+            const b = scene.cartesianToCanvasCoordinates(dotWorldLines[i][1]);
+            if (!a || !b) continue;
+            dotCtx.moveTo(a.x, a.y);
+            dotCtx.lineTo(b.x, b.y);
+          }
+          dotCtx.stroke();
+        }
+        // Draw dots
+        if (dotWorldPositions.length > 0) {
+          dotCtx.fillStyle = "#2040FF";
+          dotCtx.beginPath();
+          for (let i = 0; i < dotWorldPositions.length; i++) {
+            const screen = scene.cartesianToCanvasCoordinates(dotWorldPositions[i]);
+            if (!screen) continue;
+            dotCtx.moveTo(screen.x + DOT_SIZE, screen.y);
+            dotCtx.arc(screen.x, screen.y, DOT_SIZE, 0, Math.PI * 2);
+          }
+          dotCtx.fill();
+        }
+      }
     }
   });
 }
