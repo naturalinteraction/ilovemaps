@@ -27,8 +27,12 @@ const DRONE_POSE_2 = {
   aspectRatio: 4 / 3,
 };
 
-const DRONE_POSE = DRONE_POSE_2
-const DRONE_FRAME_URL = "/data/drone_frame_2.png"
+const DRONE_FRAMES = [
+  { pose: DRONE_POSE_2, url: "/data/drone_frame_2.png" },
+  { pose: DRONE_POSE_3, url: "/data/drone_frame_3.png" },
+];
+let currentFrameIndex = 0;
+let DRONE_POSE = { ...DRONE_FRAMES[0].pose };
 
 // ---------------------------------------------------------------------------
 // Build drone camera matrix (projection * view) in RTC frame
@@ -116,11 +120,35 @@ function computeDroneCameraMatrix(pose) {
     0,          0, 2.0 * far * near * nf, 0,
   );
 
+  const matrix = Cesium.Matrix4.multiply(projMatrix, viewMatrix, new Cesium.Matrix4());
+  const inverseMatrix = Cesium.Matrix4.inverse(matrix, new Cesium.Matrix4());
+
   return {
     ecef: droneEcef,
     forward,
-    matrix: Cesium.Matrix4.multiply(projMatrix, viewMatrix, new Cesium.Matrix4()),
+    matrix,
+    inverseMatrix,
   };
+}
+
+// Compute the 4 frustum corner rays extended from drone position.
+// Corners in NDC: (-1,-1), (1,-1), (1,1), (-1,1) → image corners.
+const FRUSTUM_RAY_LENGTH = 1500; // metres
+const CORNER_NDC = [
+  new Cesium.Cartesian4(-1, -1, -1, 1),
+  new Cesium.Cartesian4( 1, -1, -1, 1),
+  new Cesium.Cartesian4( 1,  1, -1, 1),
+  new Cesium.Cartesian4(-1,  1, -1, 1),
+];
+
+function computeFrustumCorners(droneResult) {
+  return CORNER_NDC.map((ndc) => {
+    const rtc = Cesium.Matrix4.multiplyByVector(droneResult.inverseMatrix, ndc, new Cesium.Cartesian4());
+    const dir = new Cesium.Cartesian3(rtc.x / rtc.w, rtc.y / rtc.w, rtc.z / rtc.w);
+    Cesium.Cartesian3.normalize(dir, dir);
+    const tip = Cesium.Cartesian3.multiplyByScalar(dir, FRUSTUM_RAY_LENGTH, new Cesium.Cartesian3());
+    return Cesium.Cartesian3.add(droneResult.ecef, tip, new Cesium.Cartesian3());
+  });
 }
 
 // Length of the look-direction arrow in metres
@@ -131,12 +159,14 @@ const MOVE_STEP = 0.00009; // degrees ~10m at equator
 // Public API
 // ---------------------------------------------------------------------------
 export async function setupDroneVideoLayer(viewer) {
-  const image = await Cesium.Resource.fetchImage({ url: DRONE_FRAME_URL });
-
-  const texture = new Cesium.Texture({
-    context: viewer.scene.context,
-    source: image,
-  });
+  // Preload all frame textures
+  const textures = await Promise.all(
+    DRONE_FRAMES.map(async (f) => {
+      const img = await Cesium.Resource.fetchImage({ url: f.url });
+      return new Cesium.Texture({ context: viewer.scene.context, source: img });
+    }),
+  );
+  let currentTexture = textures[0];
 
   let drone = computeDroneCameraMatrix(DRONE_POSE);
   let droneAlpha = 0.7;
@@ -144,7 +174,7 @@ export async function setupDroneVideoLayer(viewer) {
   const stage = new Cesium.PostProcessStage({
     fragmentShader: drapeShaderGLSL,
     uniforms: {
-      videoTexture:      () => texture,
+      videoTexture:      () => currentTexture,
       droneEcefPosition: () => drone.ecef,
       droneCameraMatrix: () => drone.matrix,
       videoAlpha:        () => droneAlpha,
@@ -216,11 +246,28 @@ export async function setupDroneVideoLayer(viewer) {
     },
   });
 
+  // --- Frustum corner lines (drone → 4 image corners) ----------------------
+  let frustumCorners = computeFrustumCorners(drone);
+  let frustumLinePositions = frustumCorners.map((c) => [drone.ecef, c]);
+
+  const frustumLineEntities = frustumLinePositions.map((_, i) =>
+    viewer.entities.add({
+      polyline: {
+        positions: new Cesium.CallbackProperty(() => frustumLinePositions[i], false),
+        width: 2,
+        material: Cesium.Color.CYAN.withAlpha(0.7),
+        arcType: Cesium.ArcType.NONE,
+      },
+    }),
+  );
+
   function refreshIndicator() {
     sphereEntity.position = drone.ecef;
     dotEntity.position = drone.ecef;
     dotEntity.label.text = poseLabel();
     arrowPositions = [drone.ecef, arrowTip(drone.ecef, drone.forward)];
+    frustumCorners = computeFrustumCorners(drone);
+    frustumLinePositions = frustumCorners.map((c) => [drone.ecef, c]);
   }
 
   // -------------------------------------------------------------------------
@@ -292,6 +339,14 @@ export async function setupDroneVideoLayer(viewer) {
       DRONE_POSE.alt -= 2;
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
+    } else if (e.key === "b" || e.key === "B") {
+      currentFrameIndex = (currentFrameIndex + 1) % DRONE_FRAMES.length;
+      const frame = DRONE_FRAMES[currentFrameIndex];
+      currentTexture = textures[currentFrameIndex];
+      Object.assign(DRONE_POSE, frame.pose);
+      drone = computeDroneCameraMatrix(DRONE_POSE);
+      refreshIndicator();
+      console.log("Switched to frame", currentFrameIndex + 2);
     } else if (e.key === "t" || e.key === "T") {
       droneAlpha = droneAlpha < 0.1 ? 0.5 : droneAlpha < 0.6 ? 1.0 : 0.0;
     } else if (e.key === "[") {
