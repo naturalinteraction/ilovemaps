@@ -227,6 +227,7 @@ export async function loadMilitaryUnits(viewer) {
         outlineWidth: 2,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
         pixelOffset: new Cesium.Cartesian2(0, -(size / 2 + 4)),
+        eyeOffset: new Cesium.Cartesian3(0, 0, -50),
         show: labelsEnabled,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
@@ -261,6 +262,7 @@ export async function loadMilitaryUnits(viewer) {
         outlineWidth: 2,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
         pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE / 2 + 4)),
+        eyeOffset: new Cesium.Cartesian3(0, 0, -50),
         show: labelsEnabled,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
@@ -292,6 +294,7 @@ export async function loadMilitaryUnits(viewer) {
             outlineWidth: 2,
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
             pixelOffset: new Cesium.Cartesian2(0, -28),
+            eyeOffset: new Cesium.Cartesian3(0, 0, -50),
             show: labelsEnabled,
             disableDepthTestDistance: Number.POSITIVE_INFINITY,
               },
@@ -561,29 +564,20 @@ function mergeStep(fromLevel, toLevel) {
   // Hide all commander/staff initially
   hideAllCmdStaff();
 
-  // Animate nodes at fromLevel → their ancestor at toLevel
+  // Fade out nodes at fromLevel in place
   const fromNodes = getNodesAtLevel(fromLevel);
   for (const node of fromNodes) {
     const entity = entitiesById[node.id];
-    // Find ancestor at toLevel
-    let ancestor = node;
-    while (ancestor && LEVEL_ORDER.indexOf(ancestor.type) < toLevel) {
-      ancestor = ancestor.parent;
-    }
-    if (!ancestor) continue;
-
-    const fromPos = node.homePosition;
-    const toPos = ancestor.homePosition;
 
     anims.push({
       entity,
-      from: fromPos,
-      to: toPos,
+      from: node.homePosition,
+      to: node.homePosition,
       duration: ANIM_DURATION,
       fade: "out",
       onComplete: () => {
         entity.show = false;
-        entity.position = node.homePosition; // reset
+        entity.position = node.homePosition;
       },
     });
   }
@@ -714,24 +708,15 @@ function unmergeStep(fromLevel, toLevel) {
   // Hide all commander/staff initially
   hideAllCmdStaff();
 
-  // Animate nodes at toLevel from their ancestor at fromLevel
+  // Fade in nodes at toLevel in place
   const toNodes = getNodesAtLevel(toLevel);
   for (const node of toNodes) {
     const entity = entitiesById[node.id];
-    // Find ancestor at fromLevel
-    let ancestor = node;
-    while (ancestor && LEVEL_ORDER.indexOf(ancestor.type) < fromLevel) {
-      ancestor = ancestor.parent;
-    }
-    if (!ancestor) continue;
-
-    const fromPos = ancestor.homePosition;
-    const toPos = node.homePosition;
 
     anims.push({
       entity,
-      from: fromPos,
-      to: toPos,
+      from: node.homePosition,
+      to: node.homePosition,
       duration: ANIM_DURATION,
       fade: "in",
       onComplete: () => {
@@ -912,6 +897,7 @@ function getOrCreateProxy(viewer, index) {
       outlineWidth: 2,
       verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
       pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE / 2 + 4)),
+      eyeOffset: new Cesium.Cartesian3(0, 0, -50),
       show: labelsEnabled,
       disableDepthTestDistance: Number.POSITIVE_INFINITY,
     },
@@ -1036,9 +1022,10 @@ function getHeatmapPositions() {
       if (entity && !entity.show && !clusteredEntities.has(entity)) results.push({ position: node.position, parentPosition: parentPos });
       continue;
     }
-    // Commander: include if its entity is hidden (but not by clustering)
+    // Commander: include if its entity is hidden (but not by clustering) and the unit billboard isn't shown
+    const unitE = entitiesById[node.id];
     const cmdE = cmdEntitiesById[node.id];
-    if (cmdE && !cmdE.show && !clusteredEntities.has(cmdE)) results.push({ position: node.position, parentPosition: parentPos });
+    if (cmdE && !cmdE.show && !clusteredEntities.has(cmdE) && !(unitE && unitE.show)) results.push({ position: node.position, parentPosition: parentPos });
     // Staff: include each hidden staff member (but not by clustering)
     const staffEs = staffEntitiesById[node.id];
     if (staffEs && node.staff) {
@@ -1130,6 +1117,28 @@ function updateHeatmapLayer() {
     line.polyline.positions = [parentPos, childPos];
     line.show = true;
     activeLines++;
+  }
+
+  // Lines connecting visible commander/staff to their unit's position
+  for (const node of allNodes) {
+    const cmdE = cmdEntitiesById[node.id];
+    if (cmdE && cmdE.show) {
+      const line = getOrCreateLine(viewer, activeLines, lineColor);
+      line.polyline.positions = [node.homePosition, node.cmdHomePosition];
+      line.show = true;
+      activeLines++;
+    }
+    const staffEs = staffEntitiesById[node.id];
+    if (staffEs && node.staffHomePositions) {
+      for (let si = 0; si < staffEs.length; si++) {
+        if (staffEs[si].show) {
+          const line = getOrCreateLine(viewer, activeLines, lineColor);
+          line.polyline.positions = [node.homePosition, node.staffHomePositions[si]];
+          line.show = true;
+          activeLines++;
+        }
+      }
+    }
   }
 }
 
@@ -1355,7 +1364,7 @@ export function handleLeftClick(viewer, click) {
     const e = entitiesById[desc.id];
     anims.push({
       entity: e,
-      from: node.homePosition,
+      from: desc.homePosition,
       to: desc.homePosition,
       duration: ANIM_DURATION,
       fade: "in",
@@ -1421,7 +1430,7 @@ function animateMergeAllDescendants(node, targetPos, anims) {
       anims.push({
         entity: e,
         from: child.homePosition,
-        to: targetPos,
+        to: child.homePosition,
         duration: ANIM_DURATION,
         fade: "out",
         onComplete: () => {
