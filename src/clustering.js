@@ -5,65 +5,67 @@ import * as Cesium from "cesium";
 const SYMBOL_SIZE = 64;
 const BLUE = "#2040FF";
 
+// Draw a path twice: first as thick white outline, then as blue foreground
+function outlinedStroke(ctx, drawPath) {
+  ctx.strokeStyle = "white"; ctx.lineWidth = 5;
+  ctx.beginPath(); drawPath(); ctx.stroke();
+  ctx.strokeStyle = BLUE; ctx.lineWidth = 2;
+  ctx.beginPath(); drawPath(); ctx.stroke();
+}
+
+function outlinedDot(ctx, x, y, r) {
+  ctx.fillStyle = "white";
+  ctx.beginPath(); ctx.arc(x, y, r + 2, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = BLUE;
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+}
+
 function drawMilitarySymbol(type, hq) {
   const canvas = document.createElement("canvas");
   canvas.width = SYMBOL_SIZE;
   canvas.height = SYMBOL_SIZE;
   const ctx = canvas.getContext("2d");
 
-  // Rectangle body
+  // Rectangle body (white fill + outline, then blue)
   const rx = 10, ry = 16, rw = 44, rh = 24;
-  ctx.strokeStyle = BLUE;
-  ctx.fillStyle = "rgba(30,60,255,0.6)";
-  ctx.lineWidth = 2;
+  ctx.fillStyle = "white";
   ctx.fillRect(rx, ry, rw, rh);
+  ctx.strokeStyle = "white"; ctx.lineWidth = 5;
   ctx.strokeRect(rx, ry, rw, rh);
+  ctx.fillStyle = "rgba(30,60,255,0.8)";
+  ctx.fillRect(rx, ry, rw, rh);
+  ctx.strokeStyle = BLUE; ctx.lineWidth = 2;
+  ctx.strokeRect(rx, ry, rw, rh);
+
+  const cx = SYMBOL_SIZE / 2;
 
   // HQ staff line below rectangle (APP-6 HQ indicator)
   if (hq) {
-    const cx = SYMBOL_SIZE / 2;
-    ctx.strokeStyle = BLUE;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(cx, ry + rh);
-    ctx.lineTo(cx, ry + rh + 14);
-    ctx.stroke();
+    outlinedStroke(ctx, () => {
+      ctx.moveTo(cx, ry + rh);
+      ctx.lineTo(cx, ry + rh + 14);
+    });
   }
 
   // Echelon marker above rectangle
-  const cx = SYMBOL_SIZE / 2;
-  ctx.fillStyle = BLUE;
-  ctx.strokeStyle = BLUE;
-  ctx.lineWidth = 2;
-
-  if (type === "individual") {
-    // APP-6: no echelon marker for individual — just the rectangle frame
-  } else if (type === "squad") {
-    // × (cross)
+  if (type === "squad") {
     const y = ry - 4;
-    ctx.beginPath();
-    ctx.moveTo(cx - 5, y - 5); ctx.lineTo(cx + 5, y + 5);
-    ctx.moveTo(cx + 5, y - 5); ctx.lineTo(cx - 5, y + 5);
-    ctx.stroke();
+    outlinedStroke(ctx, () => {
+      ctx.moveTo(cx - 5, y - 5); ctx.lineTo(cx + 5, y + 5);
+      ctx.moveTo(cx + 5, y - 5); ctx.lineTo(cx - 5, y + 5);
+    });
   } else if (type === "platoon") {
-    // • • •
     const y = ry - 6;
-    for (const dx of [-8, 0, 8]) {
-      ctx.beginPath();
-      ctx.arc(cx + dx, y, 3, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    for (const dx of [-8, 0, 8]) outlinedDot(ctx, cx + dx, y, 3);
   } else if (type === "company") {
-    // |
-    ctx.beginPath();
-    ctx.moveTo(cx, ry - 2); ctx.lineTo(cx, ry - 12);
-    ctx.stroke();
+    outlinedStroke(ctx, () => {
+      ctx.moveTo(cx, ry - 2); ctx.lineTo(cx, ry - 12);
+    });
   } else if (type === "battalion") {
-    // | |
-    ctx.beginPath();
-    ctx.moveTo(cx - 5, ry - 2); ctx.lineTo(cx - 5, ry - 12);
-    ctx.moveTo(cx + 5, ry - 2); ctx.lineTo(cx + 5, ry - 12);
-    ctx.stroke();
+    outlinedStroke(ctx, () => {
+      ctx.moveTo(cx - 5, ry - 2); ctx.lineTo(cx - 5, ry - 12);
+      ctx.moveTo(cx + 5, ry - 2); ctx.lineTo(cx + 5, ry - 12);
+    });
   }
 
   return canvas;
