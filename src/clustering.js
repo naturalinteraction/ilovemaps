@@ -105,7 +105,7 @@ const scratchStart = new Cesium.Cartesian3();
 const scratchEnd = new Cesium.Cartesian3();
 const ARC_SEGMENTS = 16;
 const ARC_BOW = 0.15; // perpendicular offset as fraction of distance
-const HEIGHT_ABOVE_TERRAIN = 150; // meters above terrain surface
+const HEIGHT_ABOVE_TERRAIN = 1; // meters above terrain surface
 
 // Current visible level index (0=squad, 3=battalion)
 let currentLevel = 4; // start at battalion level
@@ -1057,7 +1057,7 @@ function getOrCreateLine(viewer, index, lineColor) {
   if (index < dotLinePool.length) return dotLinePool[index];
   const line = viewer.entities.add({
     polyline: {
-      width: 1,
+      width: 4,
       material: lineColor,
       depthFailMaterial: lineColor,
     },
@@ -1081,7 +1081,7 @@ function updateHeatmapLayer() {
 
   const entries = getHeatmapPositions();
   const dotColor = Cesium.Color.fromCssColorString("#2040FF");
-  const lineColor = Cesium.Color.fromCssColorString("#2040FF").withAlpha(0.15);
+  const lineColor = Cesium.Color.fromCssColorString("#2040FF").withAlpha(0.45);
 
   for (let i = 0; i < entries.length; i++) {
     const { position: p, parentPosition: pp } = entries[i];
@@ -1116,11 +1116,13 @@ function updateHeatmapLayer() {
   }
   activeDots = entries.length;
 
-  // Lines connecting visible billboards to their parent's position
+  // Lines connecting visible billboards (or unmerged commanders) to their parent's position
   for (const node of allNodes) {
     if (!node.parent) continue;
     const entity = entitiesById[node.id];
-    if (!entity || !entity.show) continue;
+    const cmdE = cmdEntitiesById[node.id];
+    const visible = (entity && entity.show) || (cmdE && cmdE.show);
+    if (!visible) continue;
     const parentNode = node.parent;
     const line = getOrCreateLine(viewer, activeLines, lineColor);
     const childPos = node.homePosition;
