@@ -112,6 +112,14 @@ const DOT_ALPHA = 0.15;   // alpha per dot; overlapping dots sum alphas
 let moduleViewer = null;          // viewer reference for dot updates
 const dotEntities = [];           // pool of Cesium ellipse entities for dots
 
+// Heatmap state (imported from clu)
+let heatmapLayer = null;          // Cesium.ImageryLayer
+let heatmapCanvas = null;         // offscreen canvas (reused)
+const HEATMAP_CANVAS_SIZE = 512;
+let heatmapUrlCounter = 0;        // cache-busting counter
+let heatmapLayerLastUpdate = 0;   // last time layer was rebuilt
+const HEATMAP_LAYER_UPDATE_MS = 5000; // only rebuild layer every 5 seconds
+
 
 // Canvas overlay for drone arrows (full opacity, drawn on top of post-process stages)
 let arrowCanvas = null;
@@ -759,10 +767,130 @@ function getHeatmapPositions() {
   return results;
 }
 
+// Heatmap canvas rendering (imported from clu)
+function renderHeatmapCanvas(positions) {
+  if (!heatmapCanvas) {
+    heatmapCanvas = document.createElement("canvas");
+    heatmapCanvas.width = HEATMAP_CANVAS_SIZE;
+    heatmapCanvas.height = HEATMAP_CANVAS_SIZE;
+  }
+  const ctx = heatmapCanvas.getContext("2d");
+  const W = HEATMAP_CANVAS_SIZE;
+
+  // Compute lat/lon bounds with padding
+  let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
+  for (const p of positions) {
+    if (p.lat < minLat) minLat = p.lat;
+    if (p.lat > maxLat) maxLat = p.lat;
+    if (p.lon < minLon) minLon = p.lon;
+    if (p.lon > maxLon) maxLon = p.lon;
+  }
+  const latSpan = maxLat - minLat || 0.01;
+  const lonSpan = maxLon - minLon || 0.01;
+  const pad = 0.15;
+  minLat -= latSpan * pad;
+  maxLat += latSpan * pad;
+  minLon -= lonSpan * pad;
+  maxLon += lonSpan * pad;
+
+  ctx.clearRect(0, 0, W, W);
+  ctx.globalCompositeOperation = "color";// screen, hue, color
+
+  // Radius scaled to point count so blobs overlap nicely, 100 was 80
+  const baseRadius = Math.max(20, Math.min(100, 300 / Math.sqrt(positions.length)));
+
+  for (const p of positions) {
+    const x = ((p.lon - minLon) / (maxLon - minLon)) * W;
+    const y = ((maxLat - p.lat) / (maxLat - minLat)) * W; // flip Y
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, baseRadius);
+    grad.addColorStop(0, "rgba(30, 80, 255, 0.25)");
+    grad.addColorStop(0.25, "rgba(30, 80, 255, 0.10)");
+    grad.addColorStop(1, "rgba(30, 80, 255, 0)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(x - baseRadius, y - baseRadius, baseRadius * 2, baseRadius * 2);
+  }
+
+  ctx.globalCompositeOperation = "source-over";
+  return {
+    west: Cesium.Math.toRadians(minLon),
+    south: Cesium.Math.toRadians(minLat),
+    east: Cesium.Math.toRadians(maxLon),
+    north: Cesium.Math.toRadians(maxLat),
+  };
+}
+
+function updateCesiumHeatmapLayer() {
+  const viewer = moduleViewer;
+  if (!viewer) return;
+
+  if (!militaryVisible) {
+    if (heatmapLayer) {
+      viewer.imageryLayers.remove(heatmapLayer, false);
+      heatmapLayer = null;
+    }
+    return;
+  }
+
+  const positions = getHeatmapPositions().map(e => e.position);
+  if (positions.length === 0) {
+    if (heatmapLayer) {
+      viewer.imageryLayers.remove(heatmapLayer, false);
+      heatmapLayer = null;
+    }
+    return;
+  }
+
+  // Compute bounds
+  let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
+  for (const p of positions) {
+    if (p.lat < minLat) minLat = p.lat;
+    if (p.lat > maxLat) maxLat = p.lat;
+    if (p.lon < minLon) minLon = p.lon;
+    if (p.lon > maxLon) maxLon = p.lon;
+  }
+  const latSpan = maxLat - minLat || 0.01;
+  const lonSpan = maxLon - minLon || 0.01;
+  const pad = 0.15;
+  minLat -= latSpan * pad;
+  maxLat += latSpan * pad;
+  minLon -= lonSpan * pad;
+  maxLon += lonSpan * pad;
+
+  // Render canvas
+  renderHeatmapCanvas(positions);
+
+  // If layer exists, try to update it in place
+  if (heatmapLayer) {
+    try {
+      heatmapLayer.imageryProvider.url = heatmapCanvas.toDataURL() + "?v=" + (++heatmapUrlCounter);
+      return;
+    } catch (e) {
+      // If update fails, remove and recreate
+      viewer.imageryLayers.remove(heatmapLayer, false);
+    }
+  }
+
+  // Create new layer
+  const provider = new Cesium.SingleTileImageryProvider({
+    url: heatmapCanvas.toDataURL() + "?v=" + (++heatmapUrlCounter),
+    rectangle: new Cesium.Rectangle(
+      Cesium.Math.toRadians(minLon),
+      Cesium.Math.toRadians(minLat),
+      Cesium.Math.toRadians(maxLon),
+      Cesium.Math.toRadians(maxLat)
+    ),
+    tileWidth: HEATMAP_CANVAS_SIZE,
+    tileHeight: HEATMAP_CANVAS_SIZE,
+  });
+  heatmapLayer = viewer.imageryLayers.addImageryProvider(provider);
+  heatmapLayer.alpha = 1.0;
+}
 
 function updateHeatmapLayer() {
   const viewer = moduleViewer;
   if (!viewer) return;
+
+  // Don't remove heatmap layer here - let updateCesiumHeatmapLayer handle it
 
   blobGroups = [];
 
@@ -821,34 +949,38 @@ function updateHeatmapLayer() {
     
       const entries = getHeatmapPositions();
     
-      for (let i = 0; i < entries.length; i++) {
-        const { position: p } = entries[i];
-        const childPos = Cesium.Cartesian3.fromDegrees(p.lon, p.lat, HEIGHT_ABOVE_TERRAIN);
-    
-        // Create or reuse a terrain-clamped ellipse entity for this dot
-        let dotE = dotEntities[i];
-        if (!dotE) {
-          dotE = viewer.entities.add({
-            position: childPos,
-            ellipse: {
-              semiMinorAxis: DOT_RADIUS_M,
-              semiMajorAxis: DOT_RADIUS_M,
-              material: Cesium.Color.BLUE.withAlpha(DOT_ALPHA),
-              classificationType: Cesium.ClassificationType.BOTH,
-            },
-            show: true,
-          });
-          dotE._isDot = true;
-          dotEntities.push(dotE);
-        } else {
-          dotE.position = childPos;
-          dotE.show = true;
-        }
-    
-      }  // Hide unused dot entities
-  for (let i = entries.length; i < dotEntities.length; i++) {
-    dotEntities[i].show = false;
-  }
+      // Commented out: circle rendering
+      // for (let i = 0; i < entries.length; i++) {
+      //   const { position: p } = entries[i];
+      //   const childPos = Cesium.Cartesian3.fromDegrees(p.lon, p.lat, HEIGHT_ABOVE_TERRAIN);
+      //
+      //   // Create or reuse a terrain-clamped ellipse entity for this dot
+      //   let dotE = dotEntities[i];
+      //   if (!dotE) {
+      //     dotE = viewer.entities.add({
+      //       position: childPos,
+      //       ellipse: {
+      //         semiMinorAxis: DOT_RADIUS_M,
+      //         semiMajorAxis: DOT_RADIUS_M,
+      //         material: Cesium.Color.BLUE.withAlpha(DOT_ALPHA),
+      //         classificationType: Cesium.ClassificationType.BOTH,
+      //       },
+      //       show: true,
+      //     });
+      //     dotE._isDot = true;
+      //     dotEntities.push(dotE);
+      //   } else {
+      //     dotE.position = childPos;
+      //     dotE.show = true;
+      //   }
+      //
+      // }  // Hide unused dot entities
+      // for (let i = entries.length; i < dotEntities.length; i++) {
+      //   dotEntities[i].show = false;
+      // }
+
+  // Also update canvas-based heatmap layer
+  updateCesiumHeatmapLayer();
 }
 
 function showLevel(levelIdx) {
