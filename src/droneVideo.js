@@ -6,14 +6,14 @@ import drapeShaderGLSL from "./drapeShader.glsl?raw";
 // ---------------------------------------------------------------------------
 
 const DRONE_POSE_3 = {
-  lat: 46.3267,       // degrees
-  lon: 10.3244,        // degrees
-  alt: 1078.0,        // metres above ellipsoid
-  heading: 201,         // degrees, 0 = North, clockwise
-  pitch: 43,       // degrees, 0 = horizontal, positive = looking down, 90 = straight down
-  roll: -2,          // degrees
-  hFovDeg: 71.20,      // horizontal field of view
-  aspectRatio: 4 / 3,
+  lat: 46.3285,       // degrees
+  lon: 10.3228,        // degrees
+  alt: 1276.5,        // metres above ellipsoid
+  heading: 191.5,         // degrees, 0 = North, clockwise
+  pitch: 33.5,       // degrees, 0 = horizontal, positive = looking down, 90 = straight down
+  roll: 0,          // degrees
+  hFovDeg: 60.20,      // horizontal field of view
+  aspectRatio: 1.0,
 };
 
 const DRONE_POSE_2 = {
@@ -24,12 +24,12 @@ const DRONE_POSE_2 = {
   pitch: 51,       // degrees, 0 = horizontal, positive = looking down, 90 = straight down
   roll: 6,          // degrees
   hFovDeg: 71.20,      // horizontal field of view
-  aspectRatio: 1.05,
+  aspectRatio: 1.0,
 };
 
 const DRONE_FRAMES = [
-  { pose: DRONE_POSE_2, url: "/data/drone_frame_2.png" },
-  { pose: DRONE_POSE_3, url: "/data/drone_frame_3.png" },
+  { pose: DRONE_POSE_2, url: "/data/drone_frame_2b.png" },
+  { pose: DRONE_POSE_3, url: "/data/drone_frame_3b.png" },
 ];
 let currentFrameIndex = 0;
 let DRONE_POSE = { ...DRONE_FRAMES[0].pose };
@@ -104,7 +104,7 @@ function computeDroneCameraMatrix(pose) {
   const aspect  = pose.aspectRatio;
   const vFovRad = 2.0 * Math.atan(Math.tan(hFovRad / 2.0) / aspect);
   const near    = 1.0;
-  const far     = 5000.0;
+  const far     = 50000.0;
   const f       = 1.0 / Math.tan(vFovRad / 2.0);
   const nf      = 1.0 / (near - far);
 
