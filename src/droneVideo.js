@@ -155,7 +155,7 @@ function computeFrustumCorners(droneResult) {
 }
 
 // Length of the look-direction arrow in metres
-const ARROW_LENGTH = 20;
+const ARROW_LENGTH = 40;
 const MOVE_STEP = 0.0000225; // degrees ~2.5m at equator
 
 // ---------------------------------------------------------------------------
@@ -206,21 +206,6 @@ export async function setupDroneVideoLayer(viewer) {
     );
   }
 
-  // Sphere: store entity ref so we can reassign .position when pose changes.
-  // Use a direct Cartesian3 (wrapped to ConstantPositionProperty internally)
-  // rather than CallbackProperty, which can have issues with ellipsoid graphics.
-  const sphereEntity = viewer.entities.add({
-    position: drone.ecef,
-    show: false,
-    ellipsoid: {
-      radii: new Cesium.Cartesian3(2, 2, 2),
-      material: Cesium.Color.YELLOW,
-      outline: true,
-      outlineColor: Cesium.Color.ORANGE,
-      outlineWidth: 2,
-    },
-  });
-
   function poseLabel() {
     return `${DRONE_POSE.lat.toFixed(4)}, ${DRONE_POSE.lon.toFixed(4)}, ${DRONE_POSE.alt.toFixed(1)}m\nH:${DRONE_POSE.heading.toFixed(1)}° P:${DRONE_POSE.pitch.toFixed(1)}° R:${DRONE_POSE.roll.toFixed(1)}° FOV:${DRONE_POSE.hFovDeg.toFixed(1)}° AR:${DRONE_POSE.aspectRatio.toFixed(2)}`;
   }
@@ -231,52 +216,61 @@ export async function setupDroneVideoLayer(viewer) {
   poseOverlay.textContent = poseLabel();
   viewer.container.appendChild(poseOverlay);
 
-  // Always-visible point at the drone location.
-  const dotEntity = viewer.entities.add({
-    position: drone.ecef,
-    point: {
-      pixelSize: 14,
-      color: Cesium.Color.YELLOW,
-      outlineColor: Cesium.Color.ORANGE,
-      outlineWidth: 2,
-      disableDepthTestDistance: Number.POSITIVE_INFINITY,
-    },
-  });
+  // --- Per-frame 3D indicators (dot + arrow + frustum lines) ----------------
+  const INDICATOR_COLORS = [Cesium.Color.YELLOW, Cesium.Color.LIME];
+  const indicators = DRONE_FRAMES.map((frame, i) => {
+    const cam = droneStates[i].cam;
+    let arrowPos = [cam.ecef, arrowTip(cam.ecef, cam.forward)];
+    let corners = computeFrustumCorners(cam);
+    let frustumPos = corners.map((c) => [cam.ecef, c]);
 
-  // Arrow positions are mutable; CallbackProperty is fine for polyline positions.
-  let arrowPositions = [drone.ecef, arrowTip(drone.ecef, drone.forward)];
+    const dot = viewer.entities.add({
+      position: cam.ecef,
+      point: {
+        pixelSize: 14,
+        color: INDICATOR_COLORS[i],
+        outlineColor: Cesium.Color.ORANGE,
+        outlineWidth: 2,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      },
+    });
 
-  const arrowEntity = viewer.entities.add({
-    polyline: {
-      positions: new Cesium.CallbackProperty(() => arrowPositions, false),
-      width: 16,
-      material: new Cesium.PolylineArrowMaterialProperty(Cesium.Color.RED),
-      arcType: Cesium.ArcType.NONE,
-    },
-  });
-
-  // --- Frustum corner lines (drone → 4 image corners) ----------------------
-  let frustumCorners = computeFrustumCorners(drone);
-  let frustumLinePositions = frustumCorners.map((c) => [drone.ecef, c]);
-
-  const frustumLineEntities = frustumLinePositions.map((_, i) =>
-    viewer.entities.add({
+    const arrow = viewer.entities.add({
       polyline: {
-        positions: new Cesium.CallbackProperty(() => frustumLinePositions[i], false),
-        width: 2,
-        material: Cesium.Color.CYAN.withAlpha(0.7),
+        positions: new Cesium.CallbackProperty(() => arrowPos, false),
+        width: 16,
+        material: new Cesium.PolylineArrowMaterialProperty(Cesium.Color.RED),
         arcType: Cesium.ArcType.NONE,
       },
-    }),
-  );
+    });
+
+    const frustumLines = frustumPos.map((_, j) =>
+      viewer.entities.add({
+        polyline: {
+          positions: new Cesium.CallbackProperty(() => frustumPos[j], false),
+          width: 2,
+          material: INDICATOR_COLORS[i].withAlpha(0.7),
+          arcType: Cesium.ArcType.NONE,
+        },
+      }),
+    );
+
+    return {
+      dot, arrow, frustumLines,
+      get arrowPos() { return arrowPos; },
+      set arrowPos(v) { arrowPos = v; },
+      get frustumPos() { return frustumPos; },
+      set frustumPos(v) { frustumPos = v; },
+    };
+  });
 
   function refreshIndicator() {
-    sphereEntity.position = drone.ecef;
-    dotEntity.position = drone.ecef;
+    const ind = indicators[currentFrameIndex];
+    ind.dot.position = drone.ecef;
+    ind.arrowPos = [drone.ecef, arrowTip(drone.ecef, drone.forward)];
+    const corners = computeFrustumCorners(drone);
+    ind.frustumPos = corners.map((c) => [drone.ecef, c]);
     poseOverlay.textContent = poseLabel();
-    arrowPositions = [drone.ecef, arrowTip(drone.ecef, drone.forward)];
-    frustumCorners = computeFrustumCorners(drone);
-    frustumLinePositions = frustumCorners.map((c) => [drone.ecef, c]);
     droneStates[currentFrameIndex].cam = drone;
   }
 
