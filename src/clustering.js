@@ -103,8 +103,6 @@ const HEIGHT_ABOVE_TERRAIN = 1; // meters above terrain surface
 // Current visible level index (0=squad, 3=battalion)
 let currentLevel = 4; // start at battalion level
 let militaryVisible = true;
-let manualMode = false; // disables zoom-based auto-leveling after click merge/unmerge
-let zoomLevelingDisabled = true; // when true, zoom/camera movement never triggers merge/unmerge
 let labelsEnabled = true; // when true, text labels are shown on military entities
 
 // Dot overlay state (replaces heatmap)
@@ -444,26 +442,6 @@ export async function loadMilitaryUnits(viewer) {
   return { entitiesById, nodesById, allNodes };
 }
 
-// --- Zoom-based level ---
-
-const ZOOM_THRESHOLDS = [3000, 10000, 30000, 70000]; // meters (distance to look-at point)
-
-function levelForDist(dist) {
-  for (let i = 0; i < ZOOM_THRESHOLDS.length; i++) {
-    if (dist < ZOOM_THRESHOLDS[i]) return i;
-  }
-  return ZOOM_THRESHOLDS.length; // battalion
-}
-
-function cameraZoomDist(viewer) {
-  // H / sin(-pitch) is the camera-to-focal-point distance.
-  // It stays constant during orbit (tilt/rotate) and panning — only zoom changes it.
-  const H = viewer.camera.positionCartographic.height;
-  const sinDown = Math.sin(-viewer.camera.pitch); // 1 = straight down, 0 = horizon
-  if (sinDown < 0.05) return null; // near-horizontal view, skip
-  return H / sinDown;
-}
-
 // --- Animation ---
 
 function easeInOutCubic(t) {
@@ -529,7 +507,7 @@ function startAnimations(anims) {
   animating = true;
 }
 
-export function onPreRender() {
+function onPreRender() {
   if (!animating) return;
 
   const now = performance.now();
@@ -590,305 +568,6 @@ const ANIM_DURATION = 400;
 const PARENT_POP_SCALE = 1.2; // max scale factor for parent appear/disappear effect
 const PARENT_FADE_RELATIVE_DURATION = 0.5; // parent fade duration relative to ANIM_DURATION (also used as delay for fade-in)
 
-function getNodesAtLevel(levelIdx) {
-  const type = LEVEL_ORDER[levelIdx];
-  return allNodes.filter(n => n.type === type);
-}
-
-function setLevel(newLevel, viewer) {
-  if (newLevel === currentLevel || animating) return;
-  if (newLevel < 0 || newLevel > LEVEL_ORDER.length - 1) return;
-
-  const oldLevel = currentLevel;
-  currentLevel = newLevel;
-
-  if (newLevel > oldLevel) {
-    // Merging: children converge to parent
-    // For each step up, animate children → parent
-    mergeStep(oldLevel, newLevel);
-  } else {
-    // Unmerging: parent expands to children
-    unmergeStep(oldLevel, newLevel);
-  }
-}
-
-function mergeStep(fromLevel, toLevel) {
-  const anims = [];
-
-  // Hide all levels except what's animating
-  for (const node of allNodes) {
-    const lvl = LEVEL_ORDER.indexOf(node.type);
-    if (lvl < fromLevel || lvl > toLevel) {
-      entitiesById[node.id].show = false;
-    }
-  }
-
-  // Hide all commander/staff initially
-  hideAllCmdStaff();
-
-  // Fade out nodes at fromLevel in place
-  const fromNodes = getNodesAtLevel(fromLevel);
-  for (const node of fromNodes) {
-    const entity = entitiesById[node.id];
-
-    anims.push({
-      entity,
-      from: node.homePosition,
-      to: node.homePosition,
-      duration: ANIM_DURATION,
-      fade: "out",
-      onComplete: () => {
-        entity.show = false;
-        entity.position = node.homePosition;
-      },
-    });
-  }
-
-  // Also animate intermediate levels if jumping multiple levels
-  for (let lvl = fromLevel + 1; lvl < toLevel; lvl++) {
-    for (const node of getNodesAtLevel(lvl)) {
-      entitiesById[node.id].show = false;
-    }
-  }
-
-  // Fade OUT commander/staff of toLevel nodes (unit symbol replacing commander)
-  for (const node of getNodesAtLevel(toLevel)) {
-    const cmdE = cmdEntitiesById[node.id];
-    if (cmdE) {
-      cmdE.show = true;
-      cmdE.position = node.cmdHomePosition;
-      anims.push({
-        entity: cmdE,
-        from: node.cmdHomePosition,
-        to: node.cmdHomePosition,
-        duration: ANIM_DURATION,
-        fade: "out",
-        fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
-        onComplete: () => { cmdE.show = false; },
-      });
-    }
-    const staffEs = staffEntitiesById[node.id];
-    if (staffEs && node.staffHomePositions) {
-      for (let si = 0; si < staffEs.length; si++) {
-        const se = staffEs[si];
-        se.show = true;
-        se.position = node.staffHomePositions[si];
-        anims.push({
-          entity: se,
-          from: node.staffHomePositions[si],
-          to: node.staffHomePositions[si],
-          duration: ANIM_DURATION,
-          fade: "out",
-          fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
-          onComplete: () => { se.show = false; },
-        });
-      }
-    }
-  }
-
-  // Fade in parent entities at toLevel (twice as fast, delayed by half)
-  for (const node of getNodesAtLevel(toLevel)) {
-    const pe = entitiesById[node.id];
-    pe.position = node.homePosition;
-    anims.push({
-      entity: pe,
-      from: node.homePosition,
-      to: node.homePosition,
-      duration: ANIM_DURATION,
-      fade: "in",
-      popScale: true,
-      fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
-      fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
-      onComplete: () => {
-        pe.position = node.homePosition;
-      },
-    });
-  }
-
-  // After merge, show cmd/staff for the NEW parent level (toLevel+1) if exists
-  if (toLevel + 1 < LEVEL_ORDER.length) {
-    const newParentType = LEVEL_ORDER[toLevel + 1];
-    for (const node of allNodes) {
-      if (node.type === newParentType) {
-        // Fade IN these cmd/staff
-        const cmdE = cmdEntitiesById[node.id];
-        if (cmdE) {
-          cmdE.position = node.cmdHomePosition;
-          anims.push({
-            entity: cmdE,
-            from: node.cmdHomePosition,
-            to: node.cmdHomePosition,
-            duration: ANIM_DURATION,
-            fade: "in",
-            fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
-            fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
-            onComplete: () => { cmdE.position = node.cmdHomePosition; },
-          });
-        }
-        const staffEs = staffEntitiesById[node.id];
-        if (staffEs && node.staffHomePositions) {
-          for (let si = 0; si < staffEs.length; si++) {
-            const se = staffEs[si];
-            se.position = node.staffHomePositions[si];
-            anims.push({
-              entity: se,
-              from: node.staffHomePositions[si],
-              to: node.staffHomePositions[si],
-              duration: ANIM_DURATION,
-              fade: "in",
-              fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
-              fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
-              onComplete: () => { se.position = node.staffHomePositions[si]; },
-            });
-          }
-        }
-      }
-    }
-  }
-
-  if (anims.length > 0) {
-    playBeep(MERGE_BEEP_FREQ);
-    startAnimations(anims);
-    updateHeatmapLayer();
-  } else {
-    // No animations needed, just show correct level
-    showLevel(toLevel);
-  }
-}
-
-function unmergeStep(fromLevel, toLevel) {
-  const anims = [];
-
-  // Hide levels not involved in the animation
-  for (const node of allNodes) {
-    const lvl = LEVEL_ORDER.indexOf(node.type);
-    if (lvl !== fromLevel && lvl !== toLevel) {
-      entitiesById[node.id].show = false;
-    }
-  }
-
-  // Hide all commander/staff initially
-  hideAllCmdStaff();
-
-  // Fade in nodes at toLevel in place
-  const toNodes = getNodesAtLevel(toLevel);
-  for (const node of toNodes) {
-    const entity = entitiesById[node.id];
-
-    anims.push({
-      entity,
-      from: node.homePosition,
-      to: node.homePosition,
-      duration: ANIM_DURATION,
-      fade: "in",
-      onComplete: () => {
-        entity.position = node.homePosition;
-      },
-    });
-  }
-
-  // Fade out the old parent entities (twice as fast)
-  for (const node of getNodesAtLevel(fromLevel)) {
-    const pe = entitiesById[node.id];
-    pe.position = node.homePosition;
-    anims.push({
-      entity: pe,
-      from: node.homePosition,
-      to: node.homePosition,
-      duration: ANIM_DURATION,
-      fade: "out",
-      popScale: true,
-      fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
-      onComplete: () => {
-        pe.show = false;
-        pe.position = node.homePosition;
-      },
-    });
-  }
-
-  // Fade OUT commander/staff of the old parent level (fromLevel+1) — those units no longer have visible children at fromLevel
-  if (fromLevel + 1 < LEVEL_ORDER.length) {
-    const oldParentType = LEVEL_ORDER[fromLevel + 1];
-    for (const node of allNodes) {
-      if (node.type === oldParentType) {
-        const cmdE = cmdEntitiesById[node.id];
-        if (cmdE) {
-          cmdE.show = true;
-          cmdE.position = node.cmdHomePosition;
-          anims.push({
-            entity: cmdE,
-            from: node.cmdHomePosition,
-            to: node.cmdHomePosition,
-            duration: ANIM_DURATION,
-            fade: "out",
-            fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
-            onComplete: () => { cmdE.show = false; },
-          });
-        }
-        const staffEs = staffEntitiesById[node.id];
-        if (staffEs && node.staffHomePositions) {
-          for (let si = 0; si < staffEs.length; si++) {
-            const se = staffEs[si];
-            se.show = true;
-            se.position = node.staffHomePositions[si];
-            anims.push({
-              entity: se,
-              from: node.staffHomePositions[si],
-              to: node.staffHomePositions[si],
-              duration: ANIM_DURATION,
-              fade: "out",
-              fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
-              onComplete: () => { se.show = false; },
-            });
-          }
-        }
-      }
-    }
-  }
-
-  // Fade IN commander/staff of fromLevel nodes (commander replacing unit symbol)
-  for (const node of getNodesAtLevel(fromLevel)) {
-    const cmdE = cmdEntitiesById[node.id];
-    if (cmdE) {
-      cmdE.position = node.cmdHomePosition;
-      anims.push({
-        entity: cmdE,
-        from: node.cmdHomePosition,
-        to: node.cmdHomePosition,
-        duration: ANIM_DURATION,
-        fade: "in",
-        fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
-        fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
-        onComplete: () => { cmdE.position = node.cmdHomePosition; },
-      });
-    }
-    const staffEs = staffEntitiesById[node.id];
-    if (staffEs && node.staffHomePositions) {
-      for (let si = 0; si < staffEs.length; si++) {
-        const se = staffEs[si];
-        se.position = node.staffHomePositions[si];
-        anims.push({
-          entity: se,
-          from: node.staffHomePositions[si],
-          to: node.staffHomePositions[si],
-          duration: ANIM_DURATION,
-          fade: "in",
-          fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
-          fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
-          onComplete: () => { se.position = node.staffHomePositions[si]; },
-        });
-      }
-    }
-  }
-
-  if (anims.length > 0) {
-    playBeep(UNMERGE_BEEP_FREQ);
-    startAnimations(anims);
-    updateHeatmapLayer();
-  } else {
-    showLevel(toLevel);
-  }
-}
 
 function setCmdStaffShow(node, show) {
   const cmdE = cmdEntitiesById[node.id];
@@ -1053,28 +732,7 @@ function updateVisualClusters(viewer) {
 
 // --- Heatmap ---
 
-const DOTS_DIRECT_CHILDREN_ONLY = false; // true: dots only for direct child level; false: all hidden people
-
 function getHeatmapPositions() {
-  // Returns array of { position, parentPosition } for each dot
-  if (DOTS_DIRECT_CHILDREN_ONLY) {
-    const results = [];
-    for (const node of allNodes) {
-      if (node.children.length === 0) continue; // leaf nodes don't have children to dot
-      const entity = entitiesById[node.id];
-      if (!entity || !entity.show) continue; // only visible units spawn child dots
-      for (const child of node.children) {
-        const childEntity = entitiesById[child.id];
-        if (!childEntity || childEntity.show) continue; // child visible as unit billboard — no dot
-        // Skip if child's commander is visible (child is unmerged, not collapsed)
-        const cmdE = cmdEntitiesById[child.id];
-        if (cmdE && cmdE.show) continue;
-        results.push({ position: child.position, parentPosition: node.position });
-      }
-    }
-    return results;
-  }
-
   const results = [];
   for (const node of allNodes) {
     const parentPos = node.parent ? node.parent.position : node.position;
@@ -1140,19 +798,12 @@ function updateHeatmapLayer() {
           material: Cesium.Color.fromCssColorString("#2040FF").withAlpha(0.25),
           classificationType: Cesium.ClassificationType.BOTH,
         },
-        polyline: {
-          positions: [...blobGroups[i].boundary, blobGroups[i].boundary[0]],
-          width: 2,
-          material: Cesium.Color.fromCssColorString("#2040FF").withAlpha(0.35),
-          clampToGround: true,
-        },
         show: true,
       });
       blobE._isBlob = true;
       blobEntities.push(blobE);
     } else {
       blobE.polygon.hierarchy = new Cesium.PolygonHierarchy(blobGroups[i].boundary);
-      blobE.polyline.positions = [...blobGroups[i].boundary, blobGroups[i].boundary[0]];
       blobE.show = true;
     }
   }
@@ -1314,7 +965,7 @@ export function handleRightClick(viewer, click) {
       }
     }
 
-    if (anims.length > 0) { manualMode = true; playBeep(MERGE_BEEP_FREQ); startAnimations(anims); }
+    if (anims.length > 0) { playBeep(MERGE_BEEP_FREQ); startAnimations(anims); }
     return true;
   }
 
@@ -1374,7 +1025,7 @@ export function handleRightClick(viewer, click) {
     }
   }
 
-  if (anims.length > 0) { manualMode = true; playBeep(MERGE_BEEP_FREQ); startAnimations(anims); }
+  if (anims.length > 0) { playBeep(MERGE_BEEP_FREQ); startAnimations(anims); }
   return true;
 }
 
@@ -1459,7 +1110,7 @@ export function handleLeftClick(viewer, click) {
     }
   }
 
-  if (anims.length > 0) { manualMode = true; playBeep(UNMERGE_BEEP_FREQ); startAnimations(anims); }
+  if (anims.length > 0) { playBeep(UNMERGE_BEEP_FREQ); startAnimations(anims); }
   return true;
 }
 
@@ -1527,22 +1178,10 @@ function animateMergeAllDescendants(node, targetPos, anims) {
 
 // --- Zoom listener ---
 
-let zoomDebounceTimer = null;
 let clusterDebounceTimer = null;
 
 export function setupZoomListener(viewer) {
   viewer.camera.changed.addEventListener(() => {
-    if (zoomDebounceTimer) clearTimeout(zoomDebounceTimer);
-    zoomDebounceTimer = setTimeout(() => {
-      if (!militaryVisible || manualMode || zoomLevelingDisabled) return;
-      const dist = cameraZoomDist(viewer);
-      if (dist === null) return;
-      const newLevel = levelForDist(dist);
-      if (newLevel !== currentLevel) {
-        setLevel(newLevel, viewer);
-      }
-    }, 50);
-
     // Debounced visual clustering update
     if (clusterDebounceTimer) clearTimeout(clusterDebounceTimer);
     clusterDebounceTimer = setTimeout(() => {
@@ -1582,13 +1221,6 @@ export function handleKeydown(event, viewer) {
       if (staffEs) for (const se of staffEs) se.label.show = labelsEnabled;
     }
     for (const proxy of clusterProxies) proxy.label.show = labelsEnabled;
-    return true;
-  }
-
-  if (event.key >= "1" && event.key <= "5") {
-    manualMode = false;
-    const level = parseInt(event.key) - 1;
-    setLevel(level, viewer);
     return true;
   }
 
