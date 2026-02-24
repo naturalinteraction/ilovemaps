@@ -401,10 +401,19 @@ function computeBlobBoundaries(positions) {
   const edges = marchingSquares(pts, bounds, resolution, METABALL_THRESHOLD);
   const loops = edgesToLoop(edges);
 
-  const result = [];
+  // Collect all contour points from all loops into one set, then compute
+  // a single convex hull so the blob is guaranteed to be one convex shape.
+  const allPts = [];
   for (const loop of loops) {
-    if (loop.length >= 3) {
-      const smoothed = chaikinSmooth(loop, 2);
+    for (const p of loop) allPts.push(p);
+  }
+
+  const result = [];
+  if (allPts.length >= 3) {
+    const hull = convexHull(allPts);
+    if (hull.length >= 3) {
+      hull.push(hull[0]); // close the loop for smoothing
+      const smoothed = chaikinSmooth(hull, 2);
       const converted = fromLocal2D(smoothed, refLat, refLon, cosLat);
       if (converted.length >= 3) {
         result.push(converted);
