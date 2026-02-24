@@ -440,6 +440,7 @@ export async function loadMilitaryUnits(viewer) {
   ro.observe(viewer.canvas);
 
   updateHeatmapLayer();
+  startIndividualMovement();
   return { entitiesById, nodesById, allNodes };
 }
 
@@ -1236,6 +1237,50 @@ export function handleKeydown(event, viewer) {
   }
 
   return false;
+}
+
+// --- Individual movement ---
+
+const MOVE_INTERVAL_MS = 1000;
+const MOVE_DISTANCE_M = 5;
+
+function perturbPosition(pos) {
+  const latRad = pos.lat * Math.PI / 180;
+  const metersPerDegLat = 111320;
+  const metersPerDegLon = 111320 * Math.cos(latRad);
+  const dlat = (Math.random() - 0.5) * 2 * MOVE_DISTANCE_M / metersPerDegLat;
+  const dlon = (Math.random() - 0.5) * 2 * MOVE_DISTANCE_M / metersPerDegLon;
+  pos.lat += dlat;
+  pos.lon += dlon;
+}
+
+let moveIntervalId = null;
+
+export function startIndividualMovement() {
+  if (moveIntervalId) return;
+  moveIntervalId = setInterval(() => {
+    let moved = 0;
+    for (const node of allNodes) {
+      if (node.type !== "individual") continue;
+      perturbPosition(node.position);
+      const entity = entitiesById[node.id];
+      if (entity) {
+        const newCartesian = Cesium.Cartesian3.fromDegrees(
+          node.position.lon, node.position.lat, node.position.alt + HEIGHT_ABOVE_TERRAIN
+        );
+        entity.position = newCartesian;
+      }
+      moved++;
+    }
+    updateHeatmapLayer();
+  }, MOVE_INTERVAL_MS);
+}
+
+export function stopIndividualMovement() {
+  if (moveIntervalId) {
+    clearInterval(moveIntervalId);
+    moveIntervalId = null;
+  }
 }
 
 // --- Pre-render hook ---
