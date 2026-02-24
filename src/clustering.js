@@ -147,11 +147,11 @@ const clusteredEntities = new Set(); // entities hidden by clustering (not by me
 let blobGroups = []; // array of { boundary: [Cartesian3...] } for each visible unit with children
 const blobEntities = []; // pool of Cesium polygon entities for blobs
 
-// --- Blob geometry: Metaballs ---
+// --- Blob geometry: Gaussian Metaballs ---
 
-const METABALL_INFLUENCE_RADIUS = 180;
-const METABALL_THRESHOLD = 0.3;
-const METABALL_GRID_RESOLUTION = 6;
+const METABALL_SIGMA = 15;       // Controls thickness / bridge width (sigma in Gaussian)
+const METABALL_THRESHOLD = 0.02; // Lower = thinner bridges, higher = fatter blob
+const METABALL_GRID_SIZE = 10;    // Meters per cell (lower = smoother but slower)
 
 function collectDescendantLeafPositions(node) {
   const positions = [];
@@ -194,22 +194,13 @@ function fromLocal2D(pts, refLat, refLon, cosLat) {
   }).filter(p => p !== null);
 }
 
-function metaballField(x, y, points, radius) {
+function gaussianField(x, y, points, sigma) {
   let sum = 0;
-  const r2 = radius * radius;
+  const twoSigma2 = 2 * sigma * sigma;
   for (const p of points) {
     const dx = x - p.x;
     const dy = y - p.y;
-    const d2 = dx * dx + dy * dy;
-    if (d2 < r2 * 4) {
-      const d = Math.sqrt(d2);
-      if (d < 0.001) {
-        sum += 1;
-      } else {
-        const influence = 1 - d / radius;
-        sum += influence * influence;
-      }
-    }
+    sum += Math.exp(-(dx * dx + dy * dy) / twoSigma2);
   }
   return sum;
 }
@@ -220,12 +211,23 @@ function marchingSquares(points, bounds, resolution, threshold) {
   const cellH = (maxY - minY) / resolution;
 
   const field = [];
+  let maxVal = 0;
   for (let j = 0; j <= resolution; j++) {
     field[j] = [];
     for (let i = 0; i <= resolution; i++) {
       const x = minX + i * cellW;
       const y = minY + j * cellH;
-      field[j][i] = metaballField(x, y, points, METABALL_INFLUENCE_RADIUS);
+      const val = gaussianField(x, y, points, METABALL_SIGMA);
+      field[j][i] = val;
+      if (val > maxVal) maxVal = val;
+    }
+  }
+
+  if (maxVal > 0) {
+    for (let j = 0; j <= resolution; j++) {
+      for (let i = 0; i <= resolution; i++) {
+        field[j][i] /= maxVal;
+      }
     }
   }
 
@@ -353,7 +355,7 @@ function computeBlobBoundaries(positions) {
   const { pts, refLat, refLon, cosLat } = local;
 
   if (pts.length === 1) {
-    const r = METABALL_INFLUENCE_RADIUS;
+    const r = METABALL_SIGMA;
     const circle = [];
     for (let i = 0; i < 32; i++) {
       const a = (2 * Math.PI * i) / 32;
@@ -369,8 +371,8 @@ function computeBlobBoundaries(positions) {
     const dy = pts[1].y - pts[0].y;
     const dist = Math.sqrt(dx * dx + dy * dy);
     const angle = Math.atan2(dy, dx);
-    const rx = dist / 2 + METABALL_INFLUENCE_RADIUS * 0.8;
-    const ry = METABALL_INFLUENCE_RADIUS * 0.6;
+    const rx = dist / 2 + METABALL_SIGMA * 0.8;
+    const ry = METABALL_SIGMA * 0.6;
     const ellipse = [];
     for (let i = 0; i < 32; i++) {
       const a = (2 * Math.PI * i) / 32;
@@ -392,9 +394,9 @@ function computeBlobBoundaries(positions) {
     if (p.y > maxY) maxY = p.y;
   }
 
-  const padding = METABALL_INFLUENCE_RADIUS * 1.5;
+  const padding = METABALL_SIGMA * 1.5;
   const bounds = { minX: minX - padding, maxX: maxX + padding, minY: minY - padding, maxY: maxY + padding };
-  const resolution = Math.max(32, Math.min(128, Math.ceil((maxX - minX + padding * 2) / METABALL_GRID_RESOLUTION)));
+  const resolution = Math.max(32, Math.min(200, Math.ceil((maxX - minX + padding * 2) / METABALL_GRID_SIZE)));
 
   const edges = marchingSquares(pts, bounds, resolution, METABALL_THRESHOLD);
   const loops = edgesToLoop(edges);
@@ -418,7 +420,7 @@ function computeBlobBoundaries(positions) {
       const expanded = hull.map(p => {
         const dx = p.x - cx, dy = p.y - cy;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const pad = METABALL_INFLUENCE_RADIUS * 0.7;
+        const pad = METABALL_SIGMA * 0.7;
         return { x: p.x + (dx / dist) * pad, y: p.y + (dy / dist) * pad };
       });
       const smoothed = chaikinSmooth(expanded, 2);
@@ -427,7 +429,7 @@ function computeBlobBoundaries(positions) {
     const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length;
     const cy = pts.reduce((s, p) => s + p.y, 0) / pts.length;
     const circle = [];
-    const r = METABALL_INFLUENCE_RADIUS * 0.8;
+    const r = METABALL_SIGMA * 0.8;
     for (let i = 0; i < 32; i++) {
       const a = (2 * Math.PI * i) / 32;
       circle.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
@@ -1431,14 +1433,37 @@ function updateHeatmapLayer() {
     return;
   }
 
-  // Compute blob boundaries for each visible unit with children
+  // Find the lowest level (most detailed) that's currently visible
+  let minLevel = LEVEL_ORDER.length;
+  for (const node of allNodes) {
+    const entity = entitiesById[node.id];
+    if (entity && entity.show) {
+      const lvl = LEVEL_ORDER.indexOf(node.type);
+      if (lvl < minLevel) minLevel = lvl;
+    }
+  }
+
+  // Collect all positions from the lowest visible level
+  const allPositions = [];
   for (const node of allNodes) {
     const entity = entitiesById[node.id];
     if (!entity || !entity.show) continue;
-    if (node.children.length === 0) continue;
-    const leafPositions = collectDescendantLeafPositions(node);
-    if (leafPositions.length < 1) continue;
-    const boundaries = computeBlobBoundaries(leafPositions);
+    const lvl = LEVEL_ORDER.indexOf(node.type);
+    if (lvl !== minLevel) continue;
+    allPositions.push(node.position);
+    // Also include all descendants
+    function addDescendants(n) {
+      for (const child of n.children) {
+        allPositions.push(child.position);
+        addDescendants(child);
+      }
+    }
+    addDescendants(node);
+  }
+
+  // Create one big blob for all units
+  if (allPositions.length > 0) {
+    const boundaries = computeBlobBoundaries(allPositions);
     for (const boundary of boundaries) {
       blobGroups.push({ boundary });
     }
