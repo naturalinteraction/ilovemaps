@@ -147,11 +147,10 @@ const clusteredEntities = new Set(); // entities hidden by clustering (not by me
 let blobGroups = []; // array of { boundary: [Cartesian3...] } for each visible unit with children
 const blobEntities = []; // pool of Cesium polygon entities for blobs
 
-// --- Blob geometry: Gaussian Metaballs ---
+// --- Blob geometry: padded convex hull ---
 
-const METABALL_SIGMA = 150;      // Controls thickness / bridge width (sigma in Gaussian)
-const METABALL_THRESHOLD = 0.02; // Lower = thinner bridges, higher = fatter blob
-const METABALL_GRID_SIZE = 20;   // Meters per cell (lower = smoother but slower)
+const BLOB_RADIUS = 100; // meters of clearance around each point
+const BLOB_CIRCLE_SAMPLES = 12;
 
 function collectDescendantLeafPositions(node) {
   const positions = [];
@@ -194,148 +193,6 @@ function fromLocal2D(pts, refLat, refLon, cosLat) {
   }).filter(p => p !== null);
 }
 
-function gaussianField(x, y, points, sigma) {
-  let sum = 0;
-  const twoSigma2 = 2 * sigma * sigma;
-  for (const p of points) {
-    const dx = x - p.x;
-    const dy = y - p.y;
-    sum += Math.exp(-(dx * dx + dy * dy) / twoSigma2);
-  }
-  return sum;
-}
-
-function marchingSquares(points, bounds, resolution, threshold) {
-  const { minX, maxX, minY, maxY } = bounds;
-  const cellW = (maxX - minX) / resolution;
-  const cellH = (maxY - minY) / resolution;
-
-  const field = [];
-  let maxVal = 0;
-  for (let j = 0; j <= resolution; j++) {
-    field[j] = [];
-    for (let i = 0; i <= resolution; i++) {
-      const x = minX + i * cellW;
-      const y = minY + j * cellH;
-      const val = gaussianField(x, y, points, METABALL_SIGMA);
-      field[j][i] = val;
-      if (val > maxVal) maxVal = val;
-    }
-  }
-
-  if (maxVal > 0) {
-    for (let j = 0; j <= resolution; j++) {
-      for (let i = 0; i <= resolution; i++) {
-        field[j][i] /= maxVal;
-      }
-    }
-  }
-
-  const edges = [];
-
-  function interp(va, vb, pa, pb) {
-    if (Math.abs(va - vb) < 0.0001) return (pa + pb) / 2;
-    const t = (threshold - va) / (vb - va);
-    return { x: pa.x + t * (pb.x - pa.x), y: pa.y + t * (pb.y - pa.y) };
-  }
-
-  for (let j = 0; j < resolution; j++) {
-    for (let i = 0; i < resolution; i++) {
-      const x = minX + i * cellW;
-      const y = minY + j * cellH;
-      const tl = field[j][i], tr = field[j][i + 1];
-      const bl = field[j + 1][i], br = field[j + 1][i + 1];
-
-      const a = (tl > threshold) ? 1 : 0;
-      const b = (tr > threshold) ? 1 : 0;
-      const c = (br > threshold) ? 1 : 0;
-      const d = (bl > threshold) ? 1 : 0;
-      const state = a * 8 + b * 4 + c * 2 + d;
-
-      const pTL = { x, y }, pTR = { x: x + cellW, y };
-      const pBL = { x, y: y + cellH }, pBR = { x: x + cellW, y: y + cellH };
-
-      const top = interp(tl, tr, pTL, pTR);
-      const bottom = interp(bl, br, pBL, pBR);
-      const left = interp(tl, bl, pTL, pBL);
-      const right = interp(tr, br, pTR, pBR);
-
-      const segs = {
-        1: [[left, bottom]], 2: [[bottom, right]], 3: [[left, right]],
-        4: [[top, right]], 5: [[left, top], [bottom, right]], 6: [[top, bottom]],
-        7: [[left, top]], 8: [[left, top]], 9: [[top, bottom]],
-        10: [[left, bottom], [top, right]], 11: [[top, right]],
-        12: [[left, right]], 13: [[bottom, right]], 14: [[left, bottom]]
-      };
-
-      if (segs[state]) {
-        for (const [p1, p2] of segs[state]) {
-          edges.push([p1, p2]);
-        }
-      }
-    }
-  }
-
-  return edges;
-}
-
-function edgesToLoop(edges) {
-  if (edges.length === 0) return [];
-
-  const ptsMap = new Map();
-  for (const [a, b] of edges) {
-    const ka = `${a.x.toFixed(3)},${a.y.toFixed(3)}`;
-    const kb = `${b.x.toFixed(3)},${b.y.toFixed(3)}`;
-    if (!ptsMap.has(ka)) ptsMap.set(ka, a);
-    if (!ptsMap.has(kb)) ptsMap.set(kb, b);
-  }
-
-  const adj = new Map();
-  for (const [a, b] of edges) {
-    const ka = `${a.x.toFixed(3)},${a.y.toFixed(3)}`;
-    const kb = `${b.x.toFixed(3)},${b.y.toFixed(3)}`;
-    if (!adj.has(ka)) adj.set(ka, []);
-    if (!adj.has(kb)) adj.set(kb, []);
-    adj.get(ka).push(kb);
-    adj.get(kb).push(ka);
-  }
-
-  const visited = new Set();
-  const loops = [];
-
-  for (const [startKey] of adj) {
-    if (visited.has(startKey)) continue;
-    const loop = [ptsMap.get(startKey)];
-    let currentKey = startKey;
-    let prevKey = null;
-    let attempts = 0;
-
-    while (attempts < edges.length * 2) {
-      visited.add(currentKey);
-      const neighbors = adj.get(currentKey);
-      let nextKey = null;
-      for (const nb of neighbors) {
-        if (nb !== prevKey && !visited.has(nb)) {
-          nextKey = nb;
-          break;
-        }
-      }
-      if (!nextKey) break;
-      loop.push(ptsMap.get(nextKey));
-      prevKey = currentKey;
-      currentKey = nextKey;
-      attempts++;
-    }
-
-    if (loop.length >= 3) {
-      loop.push(loop[0]);
-      loops.push(loop);
-    }
-  }
-
-  return loops;
-}
-
 function chaikinSmooth(loop, iterations) {
   let pts = loop;
   for (let iter = 0; iter < iterations; iter++) {
@@ -354,46 +211,11 @@ function computeBlobBoundaries(positions) {
   const local = toLocal2D(positions);
   const { pts, refLat, refLon, cosLat } = local;
 
-  if (pts.length === 1) {
-    const r = METABALL_SIGMA;
-    const circle = [];
-    for (let i = 0; i < 32; i++) {
-      const a = (2 * Math.PI * i) / 32;
-      circle.push({ x: pts[0].x + r * Math.cos(a), y: pts[0].y + r * Math.sin(a) });
-    }
-    return [fromLocal2D(circle, refLat, refLon, cosLat)];
-  }
-
-  if (pts.length === 2) {
-    const cx = (pts[0].x + pts[1].x) / 2;
-    const cy = (pts[0].y + pts[1].y) / 2;
-    const dx = pts[1].x - pts[0].x;
-    const dy = pts[1].y - pts[0].y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    const angle = Math.atan2(dy, dx);
-    const rx = dist / 2 + METABALL_SIGMA * 0.8;
-    const ry = METABALL_SIGMA * 0.6;
-    const ellipse = [];
-    for (let i = 0; i < 32; i++) {
-      const a = (2 * Math.PI * i) / 32;
-      const lx = rx * Math.cos(a);
-      const ly = ry * Math.sin(a);
-      ellipse.push({
-        x: cx + lx * Math.cos(angle) - ly * Math.sin(angle),
-        y: cy + lx * Math.sin(angle) + ly * Math.cos(angle),
-      });
-    }
-    return [fromLocal2D(ellipse, refLat, refLon, cosLat)];
-  }
-
-  // Place circle samples (100m radius) around every input point, then convex hull.
-  // This guarantees at least 100m clearance around each individual.
-  const BLOB_RADIUS = 100; // meters
-  const CIRCLE_SAMPLES = 12;
+  // For any number of points: place circle samples around each, then convex hull.
   const padded = [];
   for (const p of pts) {
-    for (let i = 0; i < CIRCLE_SAMPLES; i++) {
-      const a = (2 * Math.PI * i) / CIRCLE_SAMPLES;
+    for (let i = 0; i < BLOB_CIRCLE_SAMPLES; i++) {
+      const a = (2 * Math.PI * i) / BLOB_CIRCLE_SAMPLES;
       padded.push({ x: p.x + BLOB_RADIUS * Math.cos(a), y: p.y + BLOB_RADIUS * Math.sin(a) });
     }
   }
