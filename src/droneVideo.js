@@ -113,11 +113,14 @@ function computeDroneCameraMatrix(pose) {
   //   col1 = (0,   f,  0,                0)
   //   col2 = (0,   0,  (far+near)*nf,   −1)
   //   col3 = (0,   0,  2·far·near·nf,    0)
+  // Cesium.Matrix4 constructor takes row-major args:
+  //   (col0row0, col1row0, col2row0, col3row0, col0row1, ...)
+  // OpenGL perspective: -1 goes at col2row3 (row3, col2 in row-major layout)
   const projMatrix = new Cesium.Matrix4(
-    f / aspect, 0, 0,                    0,
-    0,          f, 0,                    0,
-    0,          0, (far + near) * nf,   -1,
-    0,          0, 2.0 * far * near * nf, 0,
+    f / aspect, 0,  0,                     0,
+    0,          f,  0,                     0,
+    0,          0,  (far + near) * nf,     2.0 * far * near * nf,
+    0,          0, -1,                     0,
   );
 
   const matrix = Cesium.Matrix4.multiply(projMatrix, viewMatrix, new Cesium.Matrix4());
