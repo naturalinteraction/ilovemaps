@@ -213,8 +213,7 @@ export async function setupDroneVideoLayer(viewer) {
 
   // HTML overlay for pose info (always visible regardless of camera)
   const poseOverlay = document.createElement("div");
-  poseOverlay.style.cssText = "position:absolute;top:10px;right:10px;padding:8px 12px;background:rgba(0,0,0,0.7);color:#fff;font:16px monospace;white-space:pre;border-radius:4px;pointer-events:none;z-index:10";
-  poseOverlay.textContent = poseLabel();
+  poseOverlay.style.cssText = "position:absolute;top:10px;right:10px;padding:8px 12px;background:rgba(0,0,0,0.7);color:#fff;font:16px monospace;white-space:pre;border-radius:4px;pointer-events:none;z-index:10;display:none";
   viewer.container.appendChild(poseOverlay);
 
   // --- Per-frame 3D indicators (dot + arrow + frustum lines) ----------------
@@ -370,6 +369,7 @@ export async function setupDroneVideoLayer(viewer) {
       console.log("Switched to frame", currentFrameIndex + 2);
       lookThroughDrone();
     } else if (e.key === "g" || e.key === "G") {
+      poseOverlay.style.display = "";
       lookThroughDrone();
     } else if (e.key === "o" || e.key === "O") {
       const cur = parseFloat(overlay.style.opacity);

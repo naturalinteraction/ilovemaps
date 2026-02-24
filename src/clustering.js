@@ -1646,8 +1646,13 @@ export function setupPreRender(viewer) {
     if (arrowCanvas && arrowCtx) {
       arrowCtx.clearRect(0, 0, arrowCanvas.width, arrowCanvas.height);
       const scene = viewer.scene;
+      const camPos = scene.camera.positionWC;
+      const isValid = (c) => c && isFinite(c.x) && isFinite(c.y) && isFinite(c.z)
+        && (c.x !== 0 || c.y !== 0 || c.z !== 0)
+        && Cesium.Cartesian3.distanceSquared(c, camPos) > 1;
       for (let i = 0; i < canvasArrows.length; i++) {
         const a = canvasArrows[i];
+        if (!isValid(a.base) || !isValid(a.tip)) continue;
         const sBase = scene.cartesianToCanvasCoordinates(a.base);
         const sTip = scene.cartesianToCanvasCoordinates(a.tip);
         if (!sBase || !sTip) continue;
@@ -1686,6 +1691,7 @@ export function setupPreRender(viewer) {
         for (let j = 0; j < f.lines.length; j++) {
           const p0 = f.lines[j][0];
           const p1 = f.lines[j][1];
+          if (!isValid(p0) || !isValid(p1)) continue;
           // Sample points along the line, draw only above-terrain segments
           let prevScreen = null;
           let prevAbove = false;
@@ -1710,6 +1716,7 @@ export function setupPreRender(viewer) {
       // Draw indicator dots on top of arrows and frustum lines
       for (let i = 0; i < canvasDots.length; i++) {
         const d = canvasDots[i];
+        if (!isValid(d.position)) continue;
         const sp = scene.cartesianToCanvasCoordinates(d.position);
         if (!sp) continue;
         const r = d.pixelSize / 2;
