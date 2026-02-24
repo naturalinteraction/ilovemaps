@@ -1463,13 +1463,13 @@ function updateHeatmapLayer() {
       blobE = viewer.entities.add({
         polygon: {
           hierarchy: new Cesium.PolygonHierarchy(blobGroups[i].boundary),
-          material: Cesium.Color.fromCssColorString("#2040FF").withAlpha(0.12),
+          material: Cesium.Color.fromCssColorString("#2040FF").withAlpha(0.25),
           classificationType: Cesium.ClassificationType.BOTH,
         },
         polyline: {
           positions: [...blobGroups[i].boundary, blobGroups[i].boundary[0]],
           width: 2,
-          material: Cesium.Color.fromCssColorString("#2040FF").withAlpha(0.3),
+          material: Cesium.Color.fromCssColorString("#2040FF").withAlpha(0.35),
           clampToGround: true,
         },
         show: true,
