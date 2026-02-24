@@ -104,7 +104,7 @@ function computeDroneCameraMatrix(pose) {
   const aspect  = pose.aspectRatio;
   const vFovRad = 2.0 * Math.atan(Math.tan(hFovRad / 2.0) / aspect);
   const near    = 1.0;
-  const far     = 50000.0;
+  const far     = 300.0;
   const f       = 1.0 / Math.tan(vFovRad / 2.0);
   const nf      = 1.0 / (near - far);
 
@@ -169,27 +169,30 @@ export async function setupDroneVideoLayer(viewer) {
       return new Cesium.Texture({ context: viewer.scene.context, source: img });
     }),
   );
-  let currentTexture = textures[0];
-
   let drone = computeDroneCameraMatrix(DRONE_POSE);
-  let droneAlpha = 0.0;
+  let droneAlpha = 1.0;
 
-  const stage = new Cesium.PostProcessStage({
-    fragmentShader: drapeShaderGLSL,
-    uniforms: {
-      videoTexture:      () => currentTexture,
-      droneEcefPosition: () => drone.ecef,
-      droneCameraMatrix: () => drone.matrix,
-      videoAlpha:        () => droneAlpha,
-    },
+  // One post-process stage per drone frame, all visible simultaneously
+  const droneStates = DRONE_FRAMES.map((frame, i) => {
+    const cam = computeDroneCameraMatrix(frame.pose);
+    const state = { cam, alpha: droneAlpha };
+    const stage = new Cesium.PostProcessStage({
+      fragmentShader: drapeShaderGLSL,
+      uniforms: {
+        videoTexture:      () => textures[i],
+        droneEcefPosition: () => state.cam.ecef,
+        droneCameraMatrix: () => state.cam.matrix,
+        videoAlpha:        () => state.alpha,
+      },
+    });
+    viewer.scene.postProcessStages.add(stage);
+    return state;
   });
-
-  viewer.scene.postProcessStages.add(stage);
 
   // --- 2D overlay of current drone frame -----------------------------------
   const overlay = document.createElement("img");
   overlay.src = DRONE_FRAMES[0].url;
-  overlay.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;opacity:0.5;pointer-events:none;z-index:10";
+  overlay.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;opacity:0.0;pointer-events:none;z-index:10";
   viewer.container.appendChild(overlay);
   let overlayVisible = true;
 
@@ -274,6 +277,7 @@ export async function setupDroneVideoLayer(viewer) {
     arrowPositions = [drone.ecef, arrowTip(drone.ecef, drone.forward)];
     frustumCorners = computeFrustumCorners(drone);
     frustumLinePositions = frustumCorners.map((c) => [drone.ecef, c]);
+    droneStates[currentFrameIndex].cam = drone;
   }
 
   // -------------------------------------------------------------------------
@@ -388,6 +392,7 @@ export async function setupDroneVideoLayer(viewer) {
       overlay.style.opacity = cur < 0.01 ? "0.5" : cur < 0.6 ? "1.0" : "0.0";
     } else if (e.key === "t" || e.key === "T") {
       droneAlpha = droneAlpha < 0.1 ? 0.5 : droneAlpha < 0.6 ? 1.0 : 0.0;
+      for (const s of droneStates) s.alpha = droneAlpha;
     } else if (e.key === "f" || e.key === "F") {
       const scene = viewer.scene;
       if (scene.terrainProvider instanceof Cesium.EllipsoidTerrainProvider) {
@@ -422,9 +427,30 @@ export async function setupDroneVideoLayer(viewer) {
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
       lookThroughDrone();
+    } else if (e.key === "x" || e.key === "X") {
+      const layers = viewer.imageryLayers;
+      const current = layers.get(0).imageryProvider;
+      layers.removeAll();
+      if (current instanceof Cesium.UrlTemplateImageryProvider) {
+        // Currently Google, switch to Bing
+        layers.addImageryProvider(new Cesium.BingMapsImageryProvider({
+          url: "https://dev.virtualearth.net",
+          key: Cesium.BingMapsApi.defaultKey,
+          mapStyle: Cesium.BingMapsStyle.AERIAL,
+        }));
+        console.log("Switched to Bing Maps");
+      } else {
+        // Currently Bing, switch to Google
+        layers.addImageryProvider(new Cesium.UrlTemplateImageryProvider({
+          url: "https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
+          maximumLevel: 20,
+          credit: "Google Maps",
+        }));
+        console.log("Switched to Google Maps");
+      }
     }
   });
 
   lookThroughDrone();
-  return stage;
+  return droneStates;
 }
