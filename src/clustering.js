@@ -104,9 +104,10 @@ const HEIGHT_ABOVE_TERRAIN = 1; // meters above terrain surface
 let currentLevel = 4; // start at battalion level
 let militaryVisible = true;
 let labelsEnabled = true; // when true, text labels are shown on military entities
+let blobsVisible = true; // when true, convex hull blobs are shown
 
 // Dot overlay state (replaces heatmap)
-const DOT_RADIUS_M = 70;  // meters semi-axis for terrain-clamped ellipse
+const DOT_RADIUS_M = 100;  // meters semi-axis for terrain-clamped ellipse
 const DOT_ALPHA = 0.15;   // alpha per dot; overlapping dots sum alphas
 let moduleViewer = null;          // viewer reference for dot updates
 const dotEntities = [];           // pool of Cesium ellipse entities for dots
@@ -134,7 +135,7 @@ const blobEntities = []; // pool of Cesium polygon entities for blobs
 
 // --- Blob geometry: padded convex hull ---
 
-const BLOB_RADIUS = 100; // meters of clearance around each point
+const BLOB_RADIUS = DOT_RADIUS_M * 1.2; // meters of clearance around each point
 const BLOB_CIRCLE_SAMPLES = 12;
 
 function collectDescendantLeafPositions(node) {
@@ -765,81 +766,85 @@ function updateHeatmapLayer() {
   blobGroups = [];
 
   if (!militaryVisible) {
-    // Hide all blob entities when military layer is off
-    for (let i = 0; i < blobEntities.length; i++) blobEntities[i].show = false;
-    // Hide all dot entities when military layer is off
-    for (let i = 0; i < dotEntities.length; i++) dotEntities[i].show = false;
-    return;
-  }
-
-  // Create one blob per visible unit that has children (descendant leaves define the shape)
-  for (const node of allNodes) {
-    if (node.children.length === 0) continue;
-    const entity = entitiesById[node.id];
-    // A unit gets a blob only if its billboard is visible (not unmerged)
-    if (!entity || !entity.show) continue;
-    const positions = collectDescendantLeafPositions(node);
-    // Include the unit's own position so the blob covers the parent marker too
-    positions.push(node.position);
-    if (positions.length < 1) continue;
-    const boundaries = computeBlobBoundaries(positions);
-    for (const boundary of boundaries) {
-      blobGroups.push({ boundary });
-    }
-  }
-
-  // Update terrain-clamped polygon entities for blobs
-  for (let i = 0; i < blobGroups.length; i++) {
-    let blobE = blobEntities[i];
-    if (!blobE) {
-      blobE = viewer.entities.add({
-        polygon: {
-          hierarchy: new Cesium.PolygonHierarchy(blobGroups[i].boundary),
-          material: Cesium.Color.fromCssColorString("#2040FF").withAlpha(0.25),
-          classificationType: Cesium.ClassificationType.BOTH,
-        },
-        show: true,
-      });
-      blobE._isBlob = true;
-      blobEntities.push(blobE);
-    } else {
-      blobE.polygon.hierarchy = new Cesium.PolygonHierarchy(blobGroups[i].boundary);
-      blobE.show = true;
-    }
-  }
-  // Hide unused blob entities
-  for (let i = blobGroups.length; i < blobEntities.length; i++) {
-    blobEntities[i].show = false;
-  }
-
-  const entries = getHeatmapPositions();
-
-  for (let i = 0; i < entries.length; i++) {
-    const { position: p } = entries[i];
-    const childPos = Cesium.Cartesian3.fromDegrees(p.lon, p.lat, HEIGHT_ABOVE_TERRAIN);
-
-    // Create or reuse a terrain-clamped ellipse entity for this dot
-    let dotE = dotEntities[i];
-    if (!dotE) {
-      dotE = viewer.entities.add({
-        position: childPos,
-        ellipse: {
-          semiMinorAxis: DOT_RADIUS_M,
-          semiMajorAxis: DOT_RADIUS_M,
-          material: Cesium.Color.BLUE.withAlpha(DOT_ALPHA),
-          classificationType: Cesium.ClassificationType.BOTH,
-        },
-        show: true,
-      });
-      dotE._isDot = true;
-      dotEntities.push(dotE);
-    } else {
-      dotE.position = childPos;
-      dotE.show = true;
-    }
-
-  }
-  // Hide unused dot entities
+      // Hide all blob entities when military layer is off
+      for (let i = 0; i < blobEntities.length; i++) blobEntities[i].show = false;
+      // Hide all dot entities when military layer is off
+      for (let i = 0; i < dotEntities.length; i++) dotEntities[i].show = false;
+      return;
+      }
+    
+      // If blobs are not visible, hide all blob entities and return early for this part
+      if (!blobsVisible) {
+        for (let i = 0; i < blobEntities.length; i++) blobEntities[i].show = false;
+      } else {
+        // Create one blob per visible unit that has children (descendant leaves define the shape)
+        for (const node of allNodes) {
+          if (node.children.length === 0) continue;
+          const entity = entitiesById[node.id];
+          // A unit gets a blob only if its billboard is visible (not unmerged)
+          if (!entity || !entity.show) continue;
+          const positions = collectDescendantLeafPositions(node);
+          // Include the unit's own position so the blob covers the parent marker too
+          positions.push(node.position);
+          if (positions.length < 1) continue;
+          const boundaries = computeBlobBoundaries(positions);
+          for (const boundary of boundaries) {
+            blobGroups.push({ boundary });
+          }
+        }
+    
+        // Update terrain-clamped polygon entities for blobs
+        for (let i = 0; i < blobGroups.length; i++) {
+          let blobE = blobEntities[i];
+          if (!blobE) {
+            blobE = viewer.entities.add({
+              polygon: {
+                hierarchy: new Cesium.PolygonHierarchy(blobGroups[i].boundary),
+                material: Cesium.Color.fromCssColorString("#2040FF").withAlpha(0.25),
+                classificationType: Cesium.ClassificationType.BOTH,
+              },
+              show: true,
+            });
+            blobE._isBlob = true;
+            blobEntities.push(blobE);
+          } else {
+            blobE.polygon.hierarchy = new Cesium.PolygonHierarchy(blobGroups[i].boundary);
+            blobE.show = true;
+          }
+        }
+      }
+      // Hide unused blob entities
+      for (let i = blobGroups.length; i < blobEntities.length; i++) {
+        blobEntities[i].show = false;
+      }
+    
+      const entries = getHeatmapPositions();
+    
+      for (let i = 0; i < entries.length; i++) {
+        const { position: p } = entries[i];
+        const childPos = Cesium.Cartesian3.fromDegrees(p.lon, p.lat, HEIGHT_ABOVE_TERRAIN);
+    
+        // Create or reuse a terrain-clamped ellipse entity for this dot
+        let dotE = dotEntities[i];
+        if (!dotE) {
+          dotE = viewer.entities.add({
+            position: childPos,
+            ellipse: {
+              semiMinorAxis: DOT_RADIUS_M,
+              semiMajorAxis: DOT_RADIUS_M,
+              material: Cesium.Color.BLUE.withAlpha(DOT_ALPHA),
+              classificationType: Cesium.ClassificationType.BOTH,
+            },
+            show: true,
+          });
+          dotE._isDot = true;
+          dotEntities.push(dotE);
+        } else {
+          dotE.position = childPos;
+          dotE.show = true;
+        }
+    
+      }  // Hide unused dot entities
   for (let i = entries.length; i < dotEntities.length; i++) {
     dotEntities[i].show = false;
   }
@@ -1221,6 +1226,12 @@ export function handleKeydown(event, viewer) {
       if (staffEs) for (const se of staffEs) se.label.show = labelsEnabled;
     }
     for (const proxy of clusterProxies) proxy.label.show = labelsEnabled;
+    return true;
+  }
+
+  if (event.key === "b" || event.key === "B") {
+    blobsVisible = !blobsVisible;
+    updateHeatmapLayer();
     return true;
   }
 
