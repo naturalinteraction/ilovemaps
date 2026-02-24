@@ -900,17 +900,17 @@ function renderHeatmapCanvas(positions) {
   maxLon += lonSpan * pad;
 
   ctx.clearRect(0, 0, W, W);
-  ctx.globalCompositeOperation = "lighter";
+  ctx.globalCompositeOperation = "color";// screen, hue, color
 
-  // Radius scaled to point count so blobs overlap nicely
-  const baseRadius = Math.max(20, Math.min(80, 300 / Math.sqrt(positions.length)));
+  // Radius scaled to point count so blobs overlap nicely, 100 was 80
+  const baseRadius = Math.max(20, Math.min(100, 300 / Math.sqrt(positions.length)));
 
   for (const p of positions) {
     const x = ((p.lon - minLon) / (maxLon - minLon)) * W;
     const y = ((maxLat - p.lat) / (maxLat - minLat)) * W; // flip Y
     const grad = ctx.createRadialGradient(x, y, 0, x, y, baseRadius);
-    grad.addColorStop(0, "rgba(30, 80, 255, 0.35)");
-    grad.addColorStop(0.4, "rgba(30, 80, 255, 0.15)");
+    grad.addColorStop(0, "rgba(30, 80, 255, 0.25)");
+    grad.addColorStop(0.25, "rgba(30, 80, 255, 0.10)");
     grad.addColorStop(1, "rgba(30, 80, 255, 0)");
     ctx.fillStyle = grad;
     ctx.fillRect(x - baseRadius, y - baseRadius, baseRadius * 2, baseRadius * 2);
