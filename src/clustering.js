@@ -143,6 +143,437 @@ const clusterProxies = [];        // pool of proxy entities
 let clusterDirty = true;          // flag to recalculate
 const clusteredEntities = new Set(); // entities hidden by clustering (not by merge/unmerge)
 
+// Blob overlay state — terrain-clamped polygon entities
+let blobGroups = []; // array of { boundary: [Cartesian3...] } for each visible unit with children
+const blobEntities = []; // pool of Cesium polygon entities for blobs
+
+// --- Blob geometry: Alpha Shape + Chaikin Smoothing ---
+
+// Collect all descendant leaf (individual) positions as {lon, lat, alt} from a node
+function collectDescendantLeafPositions(node) {
+  const positions = [];
+  function recurse(n) {
+    if (n.children.length === 0) {
+      positions.push(n.position);
+    } else {
+      for (const child of n.children) recurse(child);
+    }
+  }
+  for (const child of node.children) recurse(child);
+  return positions;
+}
+
+// Convert lat/lon positions to local 2D metric coordinates (meters) using cosine projection
+function toLocal2D(positions) {
+  if (positions.length === 0) return { pts: [], refLat: 0, refLon: 0 };
+  let sumLat = 0, sumLon = 0;
+  for (const p of positions) { sumLat += p.lat; sumLon += p.lon; }
+  const refLat = sumLat / positions.length;
+  const refLon = sumLon / positions.length;
+  const cosLat = Math.cos(refLat * Math.PI / 180);
+  const M_PER_DEG_LAT = 111320;
+  const M_PER_DEG_LON = 111320 * cosLat;
+  const pts = positions.map(p => ({
+    x: (p.lon - refLon) * M_PER_DEG_LON,
+    y: (p.lat - refLat) * M_PER_DEG_LAT,
+  }));
+  return { pts, refLat, refLon, cosLat, M_PER_DEG_LAT, M_PER_DEG_LON };
+}
+
+// Convert local 2D back to Cartesian3
+function fromLocal2D(pts, refLat, refLon, cosLat) {
+  const M_PER_DEG_LAT = 111320;
+  const M_PER_DEG_LON = 111320 * cosLat;
+  return pts.map(p => {
+    const lon = refLon + p.x / M_PER_DEG_LON;
+    const lat = refLat + p.y / M_PER_DEG_LAT;
+    return Cesium.Cartesian3.fromDegrees(lon, lat, HEIGHT_ABOVE_TERRAIN);
+  });
+}
+
+// Bowyer-Watson Delaunay triangulation on 2D points
+// Returns { triangles: [[i,j,k],...], points: [{x,y},...] }
+function delaunayTriangulation(points) {
+  const n = points.length;
+  if (n < 3) return { triangles: [], points };
+
+  // Find bounding box
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const p of points) {
+    if (p.x < minX) minX = p.x;
+    if (p.y < minY) minY = p.y;
+    if (p.x > maxX) maxX = p.x;
+    if (p.y > maxY) maxY = p.y;
+  }
+  const dx = maxX - minX || 1;
+  const dy = maxY - minY || 1;
+  const dmax = Math.max(dx, dy);
+  const midX = (minX + maxX) / 2;
+  const midY = (minY + maxY) / 2;
+
+  // Super-triangle vertices (indices n, n+1, n+2)
+  const st0 = { x: midX - 20 * dmax, y: midY - dmax };
+  const st1 = { x: midX, y: midY + 20 * dmax };
+  const st2 = { x: midX + 20 * dmax, y: midY - dmax };
+  const allPts = [...points, st0, st1, st2];
+
+  // Each triangle: { v: [i,j,k], cx, cy, rSq }
+  function circumcircle(i, j, k) {
+    const ax = allPts[i].x, ay = allPts[i].y;
+    const bx = allPts[j].x, by = allPts[j].y;
+    const cx = allPts[k].x, cy = allPts[k].y;
+    const D = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by));
+    if (Math.abs(D) < 1e-12) return null;
+    const ux = ((ax * ax + ay * ay) * (by - cy) + (bx * bx + by * by) * (cy - ay) + (cx * cx + cy * cy) * (ay - by)) / D;
+    const uy = ((ax * ax + ay * ay) * (cx - bx) + (bx * bx + by * by) * (ax - cx) + (cx * cx + cy * cy) * (bx - ax)) / D;
+    const rSq = (ax - ux) * (ax - ux) + (ay - uy) * (ay - uy);
+    return { v: [i, j, k], cx: ux, cy: uy, rSq };
+  }
+
+  let triangles = [];
+  const st = circumcircle(n, n + 1, n + 2);
+  if (st) triangles.push(st);
+
+  for (let i = 0; i < n; i++) {
+    const px = allPts[i].x, py = allPts[i].y;
+    const bad = [];
+    const good = [];
+    for (const tri of triangles) {
+      const dx = px - tri.cx;
+      const dy = py - tri.cy;
+      if (dx * dx + dy * dy < tri.rSq) {
+        bad.push(tri);
+      } else {
+        good.push(tri);
+      }
+    }
+
+    // Find boundary edges of the "bad" polygon hole
+    const edgeCount = new Map();
+    const edgeKey = (a, b) => a < b ? a + "," + b : b + "," + a;
+    for (const tri of bad) {
+      const edges = [[tri.v[0], tri.v[1]], [tri.v[1], tri.v[2]], [tri.v[2], tri.v[0]]];
+      for (const [a, b] of edges) {
+        const key = edgeKey(a, b);
+        edgeCount.set(key, (edgeCount.get(key) || 0) + 1);
+      }
+    }
+
+    // Boundary edges: appear exactly once
+    const boundary = [];
+    for (const tri of bad) {
+      const edges = [[tri.v[0], tri.v[1]], [tri.v[1], tri.v[2]], [tri.v[2], tri.v[0]]];
+      for (const [a, b] of edges) {
+        if (edgeCount.get(edgeKey(a, b)) === 1) {
+          boundary.push([a, b]);
+        }
+      }
+    }
+
+    triangles = good;
+    for (const [a, b] of boundary) {
+      const tri = circumcircle(a, b, i);
+      if (tri) triangles.push(tri);
+    }
+  }
+
+  // Remove triangles using super-triangle vertices
+  const result = [];
+  for (const tri of triangles) {
+    if (tri.v[0] >= n || tri.v[1] >= n || tri.v[2] >= n) continue;
+    result.push(tri);
+  }
+
+  return { triangles: result, points };
+}
+
+// Extract alpha shape boundary from Delaunay triangulation
+// Returns array of closed loops: [[{x,y},...], ...]
+function alphaShape(delaunay, alpha) {
+  const { triangles, points } = delaunay;
+  if (triangles.length === 0) return [];
+
+  // Filter triangles by circumradius
+  const kept = [];
+  for (const tri of triangles) {
+    if (Math.sqrt(tri.rSq) <= alpha) {
+      kept.push(tri);
+    }
+  }
+
+  if (kept.length === 0) return [];
+
+  // Count edge occurrences among kept triangles
+  const edgeCount = new Map();
+  const edgeKey = (a, b) => a < b ? a + "," + b : b + "," + a;
+  for (const tri of kept) {
+    const edges = [[tri.v[0], tri.v[1]], [tri.v[1], tri.v[2]], [tri.v[2], tri.v[0]]];
+    for (const [a, b] of edges) {
+      const key = edgeKey(a, b);
+      edgeCount.set(key, (edgeCount.get(key) || 0) + 1);
+    }
+  }
+
+  // Boundary edges: appear in exactly one kept triangle
+  const boundaryEdges = [];
+  for (const tri of kept) {
+    const edges = [[tri.v[0], tri.v[1]], [tri.v[1], tri.v[2]], [tri.v[2], tri.v[0]]];
+    for (const [a, b] of edges) {
+      if (edgeCount.get(edgeKey(a, b)) === 1) {
+        boundaryEdges.push([a, b]);
+      }
+    }
+  }
+
+  if (boundaryEdges.length === 0) return [];
+
+  // Build adjacency: for each vertex, list of connected vertices in boundary edges
+  const adj = new Map();
+  for (const [a, b] of boundaryEdges) {
+    if (!adj.has(a)) adj.set(a, []);
+    if (!adj.has(b)) adj.set(b, []);
+    adj.get(a).push(b);
+    adj.get(b).push(a);
+  }
+
+  // Walk closed loops
+  const visited = new Set();
+  const loops = [];
+  for (const [start] of adj) {
+    if (visited.has(start)) continue;
+    const loop = [];
+    let current = start;
+    let prev = -1;
+    let steps = 0;
+    while (steps < boundaryEdges.length * 2) {
+      visited.add(current);
+      loop.push(points[current]);
+      const neighbors = adj.get(current);
+      let next = -1;
+      for (const nb of neighbors) {
+        if (nb !== prev && !visited.has(nb)) { next = nb; break; }
+      }
+      if (next === -1) {
+        // Try to close the loop back to start
+        for (const nb of neighbors) {
+          if (nb === start && loop.length > 2) { next = start; break; }
+        }
+        if (next === -1) break;
+      }
+      if (next === start) break;
+      prev = current;
+      current = next;
+      steps++;
+    }
+    if (loop.length >= 3) loops.push(loop);
+  }
+
+  return loops;
+}
+
+// Compute auto alpha value: generous enough to keep the shape connected
+// Uses max of (median NN × 3) and (90th percentile NN × 2)
+function autoAlpha(points) {
+  if (points.length < 2) return Infinity;
+  const dists = [];
+  for (let i = 0; i < points.length; i++) {
+    let minD = Infinity;
+    for (let j = 0; j < points.length; j++) {
+      if (i === j) continue;
+      const dx = points[i].x - points[j].x;
+      const dy = points[i].y - points[j].y;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d < minD) minD = d;
+    }
+    dists.push(minD);
+  }
+  dists.sort((a, b) => a - b);
+  const median = dists[Math.floor(dists.length / 2)];
+  const p90 = dists[Math.floor(dists.length * 0.9)];
+  return Math.max(median * 3, p90 * 2);
+}
+
+// Pad boundary outward along average edge normals
+function padBoundary(loop, distance) {
+  const n = loop.length;
+  if (n < 3) return loop;
+  const result = [];
+  for (let i = 0; i < n; i++) {
+    const prev = loop[(i - 1 + n) % n];
+    const curr = loop[i];
+    const next = loop[(i + 1) % n];
+    // Edge normals (pointing outward for CCW loop)
+    const dx1 = curr.x - prev.x, dy1 = curr.y - prev.y;
+    const dx2 = next.x - curr.x, dy2 = next.y - curr.y;
+    const len1 = Math.sqrt(dx1 * dx1 + dy1 * dy1) || 1;
+    const len2 = Math.sqrt(dx2 * dx2 + dy2 * dy2) || 1;
+    // Outward normal: rotate edge 90° CW (for CCW polygon, this points outward)
+    let nx = (dy1 / len1 + dy2 / len2) / 2;
+    let ny = (-dx1 / len1 + -dx2 / len2) / 2;
+    const nlen = Math.sqrt(nx * nx + ny * ny) || 1;
+    nx /= nlen;
+    ny /= nlen;
+    result.push({ x: curr.x + nx * distance, y: curr.y + ny * distance });
+  }
+
+  // Check winding: if padding inverted the polygon, flip normals
+  const area = polygonArea(result);
+  const origArea = polygonArea(loop);
+  if ((origArea > 0 && area < 0) || (origArea < 0 && area > 0)) {
+    // Normals went inward, flip
+    for (let i = 0; i < n; i++) {
+      const prev = loop[(i - 1 + n) % n];
+      const curr = loop[i];
+      const next = loop[(i + 1) % n];
+      const dx1 = curr.x - prev.x, dy1 = curr.y - prev.y;
+      const dx2 = next.x - curr.x, dy2 = next.y - curr.y;
+      const len1 = Math.sqrt(dx1 * dx1 + dy1 * dy1) || 1;
+      const len2 = Math.sqrt(dx2 * dx2 + dy2 * dy2) || 1;
+      let nx = (-dy1 / len1 + -dy2 / len2) / 2;
+      let ny = (dx1 / len1 + dx2 / len2) / 2;
+      const nlen = Math.sqrt(nx * nx + ny * ny) || 1;
+      nx /= nlen;
+      ny /= nlen;
+      result[i] = { x: curr.x + nx * distance, y: curr.y + ny * distance };
+    }
+  }
+
+  return result;
+}
+
+function polygonArea(pts) {
+  let area = 0;
+  for (let i = 0; i < pts.length; i++) {
+    const j = (i + 1) % pts.length;
+    area += pts[i].x * pts[j].y - pts[j].x * pts[i].y;
+  }
+  return area / 2;
+}
+
+// Chaikin corner-cutting smoothing
+function chaikinSmooth(loop, iterations) {
+  let pts = loop;
+  for (let iter = 0; iter < iterations; iter++) {
+    const next = [];
+    for (let i = 0; i < pts.length; i++) {
+      const j = (i + 1) % pts.length;
+      next.push({ x: 0.75 * pts[i].x + 0.25 * pts[j].x, y: 0.75 * pts[i].y + 0.25 * pts[j].y });
+      next.push({ x: 0.25 * pts[i].x + 0.75 * pts[j].x, y: 0.25 * pts[i].y + 0.75 * pts[j].y });
+    }
+    pts = next;
+  }
+  return pts;
+}
+
+// For nodes with only 1-2 leaf positions, generate an ellipse blob
+function generateEllipseBlob(positions, padDist) {
+  if (positions.length === 1) {
+    // Circle around single point
+    const pts = [];
+    const N = 24;
+    for (let i = 0; i < N; i++) {
+      const angle = (2 * Math.PI * i) / N;
+      pts.push({ x: positions[0].x + padDist * Math.cos(angle), y: positions[0].y + padDist * Math.sin(angle) });
+    }
+    return pts;
+  }
+  // 2 positions: ellipse between them
+  const cx = (positions[0].x + positions[1].x) / 2;
+  const cy = (positions[0].y + positions[1].y) / 2;
+  const dx = positions[1].x - positions[0].x;
+  const dy = positions[1].y - positions[0].y;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  const angle = Math.atan2(dy, dx);
+  const rx = dist / 2 + padDist;
+  const ry = padDist;
+  const pts = [];
+  const N = 32;
+  for (let i = 0; i < N; i++) {
+    const a = (2 * Math.PI * i) / N;
+    const lx = rx * Math.cos(a);
+    const ly = ry * Math.sin(a);
+    pts.push({
+      x: cx + lx * Math.cos(angle) - ly * Math.sin(angle),
+      y: cy + lx * Math.sin(angle) + ly * Math.cos(angle),
+    });
+  }
+  return pts;
+}
+
+// Compute blob boundary for a set of lat/lon positions
+// Returns array of Cartesian3 closed loops
+function computeBlobBoundaries(positions) {
+  const PAD_DIST = 150; // meters
+  const local = toLocal2D(positions);
+  const { pts, refLat, refLon, cosLat } = local;
+
+  if (pts.length < 3) {
+    // Use ellipse fallback for 1-2 points
+    const ellipse = generateEllipseBlob(pts, PAD_DIST);
+    return [fromLocal2D(ellipse, refLat, refLon, cosLat)];
+  }
+
+  // Deduplicate points that are very close (within 1m)
+  const unique = [pts[0]];
+  for (let i = 1; i < pts.length; i++) {
+    let dup = false;
+    for (let j = 0; j < unique.length; j++) {
+      const dx = pts[i].x - unique[j].x;
+      const dy = pts[i].y - unique[j].y;
+      if (dx * dx + dy * dy < 1) { dup = true; break; }
+    }
+    if (!dup) unique.push(pts[i]);
+  }
+
+  if (unique.length < 3) {
+    const ellipse = generateEllipseBlob(unique, PAD_DIST);
+    return [fromLocal2D(ellipse, refLat, refLon, cosLat)];
+  }
+
+  const del = delaunayTriangulation(unique);
+  const alpha = autoAlpha(unique);
+  const loops = alphaShape(del, alpha);
+
+  if (loops.length === 0) {
+    // Fallback: convex hull as single loop
+    const hull = convexHull2D(unique);
+    if (hull.length >= 3) {
+      const padded = padBoundary(hull, PAD_DIST);
+      const smoothed = chaikinSmooth(padded, 3);
+      return [fromLocal2D(smoothed, refLat, refLon, cosLat)];
+    }
+    return [];
+  }
+
+  const result = [];
+  for (const loop of loops) {
+    const padded = padBoundary(loop, PAD_DIST);
+    const smoothed = chaikinSmooth(padded, 3);
+    result.push(fromLocal2D(smoothed, refLat, refLon, cosLat));
+  }
+  return result;
+}
+
+// Simple convex hull (Graham scan) as fallback
+function convexHull2D(points) {
+  const pts = [...points].sort((a, b) => a.x - b.x || a.y - b.y);
+  if (pts.length < 3) return pts;
+  const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+  const lower = [];
+  for (const p of pts) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop();
+    lower.push(p);
+  }
+  const upper = [];
+  for (let i = pts.length - 1; i >= 0; i--) {
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], pts[i]) <= 0) upper.pop();
+    upper.push(pts[i]);
+  }
+  lower.pop();
+  upper.pop();
+  return lower.concat(upper);
+}
+
 // --- Sound effects ---
 
 let audioCtx = null;
@@ -1109,8 +1540,57 @@ function updateHeatmapLayer() {
 
   dotWorldPositions = [];
   dotWorldLines = [];
+  blobGroups = [];
 
-  if (!militaryVisible) return;
+  if (!militaryVisible) {
+    // Hide all blob entities when military layer is off
+    for (let i = 0; i < blobEntities.length; i++) blobEntities[i].show = false;
+    return;
+  }
+
+  // Compute blob boundaries for each visible unit with children
+  for (const node of allNodes) {
+    const entity = entitiesById[node.id];
+    if (!entity || !entity.show) continue;
+    if (node.children.length === 0) continue;
+    const leafPositions = collectDescendantLeafPositions(node);
+    if (leafPositions.length < 1) continue;
+    const boundaries = computeBlobBoundaries(leafPositions);
+    for (const boundary of boundaries) {
+      blobGroups.push({ boundary });
+    }
+  }
+
+  // Update terrain-clamped polygon entities for blobs
+  for (let i = 0; i < blobGroups.length; i++) {
+    let blobE = blobEntities[i];
+    if (!blobE) {
+      blobE = viewer.entities.add({
+        polygon: {
+          hierarchy: new Cesium.PolygonHierarchy(blobGroups[i].boundary),
+          material: Cesium.Color.fromCssColorString("#2040FF").withAlpha(0.12),
+          classificationType: Cesium.ClassificationType.BOTH,
+        },
+        polyline: {
+          positions: [...blobGroups[i].boundary, blobGroups[i].boundary[0]],
+          width: 2,
+          material: Cesium.Color.fromCssColorString("#2040FF").withAlpha(0.3),
+          clampToGround: true,
+        },
+        show: true,
+      });
+      blobE._isBlob = true;
+      blobEntities.push(blobE);
+    } else {
+      blobE.polygon.hierarchy = new Cesium.PolygonHierarchy(blobGroups[i].boundary);
+      blobE.polyline.positions = [...blobGroups[i].boundary, blobGroups[i].boundary[0]];
+      blobE.show = true;
+    }
+  }
+  // Hide unused blob entities
+  for (let i = blobGroups.length; i < blobEntities.length; i++) {
+    blobEntities[i].show = false;
+  }
 
   const entries = getHeatmapPositions();
 
@@ -1182,7 +1662,7 @@ function resolvePickedEntity(viewer, click) {
   for (const picked of picks) {
     if (!(picked.id instanceof Cesium.Entity)) continue;
     let entity = picked.id;
-    if (entity._isDot || entity._isDotLine) continue; // skip dot overlay entities
+    if (entity._isDot || entity._isDotLine || entity._isBlob) continue; // skip overlay entities
     // Resolve proxy to its representative entity
     if (entity._isClusterProxy) {
       entity = entity._clusterRepEntity;
