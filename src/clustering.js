@@ -105,6 +105,7 @@ let currentLevel = 4; // start at battalion level
 let militaryVisible = true;
 let labelsEnabled = true; // when true, text labels are shown on military entities
 let blobsVisible = true; // when true, convex hull blobs are shown
+let heatmapVisible = true; // when true, show heatmap; when false, show circles
 
 // Dot overlay state (replaces heatmap)
 const DOT_RADIUS_M = 100;  // meters semi-axis for terrain-clamped ellipse
@@ -951,36 +952,53 @@ function updateHeatmapLayer() {
     
       // Commented out: circle rendering
       // for (let i = 0; i < entries.length; i++) {
-      //   const { position: p } = entries[i];
-      //   const childPos = Cesium.Cartesian3.fromDegrees(p.lon, p.lat, HEIGHT_ABOVE_TERRAIN);
-      //
-      //   // Create or reuse a terrain-clamped ellipse entity for this dot
-      //   let dotE = dotEntities[i];
-      //   if (!dotE) {
-      //     dotE = viewer.entities.add({
-      //       position: childPos,
-      //       ellipse: {
-      //         semiMinorAxis: DOT_RADIUS_M,
-      //         semiMajorAxis: DOT_RADIUS_M,
-      //         material: Cesium.Color.BLUE.withAlpha(DOT_ALPHA),
-      //         classificationType: Cesium.ClassificationType.BOTH,
-      //       },
-      //       show: true,
-      //     });
-      //     dotE._isDot = true;
-      //     dotEntities.push(dotE);
-      //   } else {
-      //     dotE.position = childPos;
-      //     dotE.show = true;
-      //   }
-      //
-      // }  // Hide unused dot entities
-      // for (let i = entries.length; i < dotEntities.length; i++) {
-      //   dotEntities[i].show = false;
-      // }
+  // Show circles OR heatmap based on toggle
+  if (!heatmapVisible) {
+    // Show circles
+    for (let i = 0; i < entries.length; i++) {
+      const { position: p } = entries[i];
+      const childPos = Cesium.Cartesian3.fromDegrees(p.lon, p.lat, HEIGHT_ABOVE_TERRAIN);
 
-  // Also update canvas-based heatmap layer
-  updateCesiumHeatmapLayer();
+      // Create or reuse a terrain-clamped ellipse entity for this dot
+      let dotE = dotEntities[i];
+      if (!dotE) {
+        dotE = viewer.entities.add({
+          position: childPos,
+          ellipse: {
+            semiMinorAxis: DOT_RADIUS_M,
+            semiMajorAxis: DOT_RADIUS_M,
+            material: Cesium.Color.BLUE.withAlpha(DOT_ALPHA),
+            classificationType: Cesium.ClassificationType.BOTH,
+          },
+          show: true,
+        });
+        dotE._isDot = true;
+        dotEntities.push(dotE);
+      } else {
+        dotE.position = childPos;
+        dotE.show = true;
+      }
+
+    }  // Hide unused dot entities
+    for (let i = entries.length; i < dotEntities.length; i++) {
+      dotEntities[i].show = false;
+    }
+    // Hide heatmap layer
+    if (heatmapLayer) {
+      heatmapLayer.show = false;
+    }
+  } else {
+    // Hide circles
+    for (let i = 0; i < dotEntities.length; i++) {
+      dotEntities[i].show = false;
+    }
+    // Show heatmap layer
+    if (heatmapLayer) {
+      heatmapLayer.show = true;
+    }
+    // Also update canvas-based heatmap layer
+    updateCesiumHeatmapLayer();
+  }
 }
 
 function showLevel(levelIdx) {
@@ -1364,6 +1382,12 @@ export function handleKeydown(event, viewer) {
 
   if (event.key === "b" || event.key === "B") {
     blobsVisible = !blobsVisible;
+    updateHeatmapLayer();
+    return true;
+  }
+
+  if (event.key === "h" || event.key === "H") {
+    heatmapVisible = !heatmapVisible;
     updateHeatmapLayer();
     return true;
   }
