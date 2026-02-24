@@ -127,6 +127,16 @@ let dotCtx = null;
 let dotWorldPositions = [];       // array of Cartesian3 positions for canvas dots
 let dotWorldLines = [];           // array of [Cartesian3, Cartesian3] pairs for canvas lines
 
+// Canvas overlay for drone arrows (full opacity, drawn on top of post-process stages)
+let arrowCanvas = null;
+let arrowCtx = null;
+// Each entry: { base: Cartesian3, tip: Cartesian3, color: string }
+export const canvasArrows = [];
+// Each entry: { lines: [[Cartesian3,Cartesian3],...], color: string, width: number }
+export const canvasFrustumLines = [];
+// Each entry: { position: Cartesian3, color: string, outlineColor: string, pixelSize: number, outlineWidth: number }
+export const canvasDots = [];
+
 // Visual clustering state
 const CLUSTER_PIXEL_RANGE = 80;
 const clusterProxies = [];        // pool of proxy entities
@@ -402,10 +412,31 @@ export async function loadMilitaryUnits(viewer) {
   };
   container.appendChild(dotCanvas);
   dotCtx = dotCanvas.getContext("2d");
+
+  // Arrow canvas (full opacity, renders on top of everything)
+  arrowCanvas = document.createElement("canvas");
+  arrowCanvas.style.position = "absolute";
+  arrowCanvas.style.top = "0";
+  arrowCanvas.style.left = "0";
+  arrowCanvas.style.pointerEvents = "none";
+  container.appendChild(arrowCanvas);
+  arrowCtx = arrowCanvas.getContext("2d");
+
+  const syncCanvasSizes = () => {
+    const cw = viewer.canvas.clientWidth;
+    const ch = viewer.canvas.clientHeight;
+    const dpr = window.devicePixelRatio || 1;
+    arrowCanvas.style.width = cw + "px";
+    arrowCanvas.style.height = ch + "px";
+    arrowCanvas.width = cw * dpr;
+    arrowCanvas.height = ch * dpr;
+    arrowCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
   syncCanvasSize();
+  syncCanvasSizes();
 
   // Keep canvas size in sync with Cesium canvas
-  const ro = new ResizeObserver(syncCanvasSize);
+  const ro = new ResizeObserver(() => { syncCanvasSize(); syncCanvasSizes(); });
   ro.observe(viewer.canvas);
 
   updateHeatmapLayer();
@@ -1556,18 +1587,144 @@ export function setupPreRender(viewer) {
           }
           dotCtx.stroke();
         }
-        // Draw dots
+        // Draw dots with heatmap density coloring
         if (dotWorldPositions.length > 0) {
-          dotCtx.fillStyle = "#2040FF";
-          dotCtx.beginPath();
+          const DENSITY_RADIUS_M = 30; // 30 meters diameter around each dot
+          const DENSITY_RADIUS_M_SQ = DENSITY_RADIUS_M * DENSITY_RADIUS_M;
+          // Project all dots to screen coordinates
+          const screenPts = [];
           for (let i = 0; i < dotWorldPositions.length; i++) {
-            const screen = scene.cartesianToCanvasCoordinates(dotWorldPositions[i]);
-            if (!screen) continue;
-            dotCtx.moveTo(screen.x + DOT_SIZE, screen.y);
-            dotCtx.arc(screen.x, screen.y, DOT_SIZE, 0, Math.PI * 2);
+            const s = scene.cartesianToCanvasCoordinates(dotWorldPositions[i]);
+            screenPts.push(s); // null if off-screen
           }
-          dotCtx.fill();
+          // Compute per-dot neighbor count using world-space (meters) distances
+          const counts = new Uint16Array(dotWorldPositions.length);
+          let maxCount = 0;
+          for (let i = 0; i < dotWorldPositions.length; i++) {
+            if (!screenPts[i]) continue;
+            for (let j = i + 1; j < dotWorldPositions.length; j++) {
+              if (!screenPts[j]) continue;
+              const distSq = Cesium.Cartesian3.distanceSquared(dotWorldPositions[i], dotWorldPositions[j]);
+              if (distSq <= DENSITY_RADIUS_M_SQ) {
+                counts[i]++;
+                counts[j]++;
+              }
+            }
+            if (counts[i] > maxCount) maxCount = counts[i];
+          }
+          // Final pass for maxCount (j>i increments may update later)
+          if (maxCount === 0) maxCount = 1;
+          for (let i = 0; i < counts.length; i++) {
+            if (counts[i] > maxCount) maxCount = counts[i];
+          }
+          // Compute meters-per-pixel for perspective projection
+          const camPos = scene.camera.positionWC;
+          const fov = scene.camera.frustum.fovy || scene.camera.frustum.fov;
+          const canvasHeight = scene.canvas.height;
+          const DOT_RADIUS_M = 15; // 30m diameter = 15m radius
+          // Light blue (min) -> deep blue (max)
+          // min: rgb(140, 200, 255), max: rgb(32, 64, 255)
+          for (let i = 0; i < screenPts.length; i++) {
+            if (!screenPts[i]) continue;
+            const dist = Cesium.Cartesian3.distance(camPos, dotWorldPositions[i]);
+            const metersPerPixel = 2 * dist * Math.tan(fov * 0.5) / canvasHeight;
+            const pixelRadius = DOT_RADIUS_M / metersPerPixel;
+            if (pixelRadius < 0.5) continue; // too small to see
+            const t = counts[i] / maxCount;
+            const r = Math.round(140 + (32 - 140) * t);
+            const g = Math.round(200 + (64 - 200) * t);
+            const b = 255;
+            dotCtx.fillStyle = `rgb(${r},${g},${b})`;
+            dotCtx.beginPath();
+            dotCtx.arc(screenPts[i].x, screenPts[i].y, pixelRadius, 0, Math.PI * 2);
+            dotCtx.fill();
+          }
         }
+      }
+    }
+    // Draw drone arrows on full-opacity canvas
+    if (arrowCanvas && arrowCtx) {
+      arrowCtx.clearRect(0, 0, arrowCanvas.width, arrowCanvas.height);
+      const scene = viewer.scene;
+      for (let i = 0; i < canvasArrows.length; i++) {
+        const a = canvasArrows[i];
+        const sBase = scene.cartesianToCanvasCoordinates(a.base);
+        const sTip = scene.cartesianToCanvasCoordinates(a.tip);
+        if (!sBase || !sTip) continue;
+        const dx = sTip.x - sBase.x;
+        const dy = sTip.y - sBase.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        if (len < 2) continue;
+        // Draw shaft
+        arrowCtx.strokeStyle = a.color;
+        arrowCtx.lineWidth = 4;
+        arrowCtx.beginPath();
+        arrowCtx.moveTo(sBase.x, sBase.y);
+        arrowCtx.lineTo(sTip.x, sTip.y);
+        arrowCtx.stroke();
+        // Draw arrowhead
+        const headLen = Math.min(14, len * 0.4);
+        const ux = dx / len;
+        const uy = dy / len;
+        arrowCtx.fillStyle = a.color;
+        arrowCtx.beginPath();
+        arrowCtx.moveTo(sTip.x, sTip.y);
+        arrowCtx.lineTo(sTip.x - headLen * ux + headLen * 0.4 * uy, sTip.y - headLen * uy - headLen * 0.4 * ux);
+        arrowCtx.lineTo(sTip.x - headLen * ux - headLen * 0.4 * uy, sTip.y - headLen * uy + headLen * 0.4 * ux);
+        arrowCtx.closePath();
+        arrowCtx.fill();
+      }
+      // Draw frustum lines (between arrows and dots), clipped against terrain
+      const globe = scene.globe;
+      const scratchCarto = new Cesium.Cartographic();
+      const scratchLerp = new Cesium.Cartesian3();
+      const FRUSTUM_SEGMENTS = 20;
+      for (let i = 0; i < canvasFrustumLines.length; i++) {
+        const f = canvasFrustumLines[i];
+        arrowCtx.strokeStyle = f.color;
+        arrowCtx.lineWidth = f.width;
+        for (let j = 0; j < f.lines.length; j++) {
+          const p0 = f.lines[j][0];
+          const p1 = f.lines[j][1];
+          // Sample points along the line, draw only above-terrain segments
+          let prevScreen = null;
+          let prevAbove = false;
+          for (let s = 0; s <= FRUSTUM_SEGMENTS; s++) {
+            const t = s / FRUSTUM_SEGMENTS;
+            Cesium.Cartesian3.lerp(p0, p1, t, scratchLerp);
+            Cesium.Cartographic.fromCartesian(scratchLerp, Cesium.Ellipsoid.WGS84, scratchCarto);
+            const terrainH = globe.getHeight(scratchCarto);
+            const above = terrainH == null || scratchCarto.height >= terrainH - 1;
+            const screen = scene.cartesianToCanvasCoordinates(scratchLerp);
+            if (screen && prevScreen && above && prevAbove) {
+              arrowCtx.beginPath();
+              arrowCtx.moveTo(prevScreen.x, prevScreen.y);
+              arrowCtx.lineTo(screen.x, screen.y);
+              arrowCtx.stroke();
+            }
+            prevScreen = screen;
+            prevAbove = above;
+          }
+        }
+      }
+      // Draw indicator dots on top of arrows and frustum lines
+      for (let i = 0; i < canvasDots.length; i++) {
+        const d = canvasDots[i];
+        const sp = scene.cartesianToCanvasCoordinates(d.position);
+        if (!sp) continue;
+        const r = d.pixelSize / 2;
+        // Outline
+        if (d.outlineWidth > 0) {
+          arrowCtx.fillStyle = d.outlineColor;
+          arrowCtx.beginPath();
+          arrowCtx.arc(sp.x, sp.y, r + d.outlineWidth, 0, Math.PI * 2);
+          arrowCtx.fill();
+        }
+        // Fill
+        arrowCtx.fillStyle = d.color;
+        arrowCtx.beginPath();
+        arrowCtx.arc(sp.x, sp.y, r, 0, Math.PI * 2);
+        arrowCtx.fill();
       }
     }
   });

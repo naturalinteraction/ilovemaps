@@ -1,5 +1,6 @@
 import * as Cesium from "cesium";
 import drapeShaderGLSL from "./drapeShader.glsl?raw";
+import { canvasArrows, canvasFrustumLines, canvasDots } from "./clustering.js";
 
 // ---------------------------------------------------------------------------
 // Hardcoded 6-DOF pose 
@@ -224,49 +225,38 @@ export async function setupDroneVideoLayer(viewer) {
     let corners = computeFrustumCorners(cam);
     let frustumPos = corners.map((c) => [cam.ecef, c]);
 
-    const dot = viewer.entities.add({
+    // Register dot on shared canvas overlay (drawn on top of arrows)
+    const indicatorColor = INDICATOR_COLORS[i];
+    const canvasDotEntry = {
       position: cam.ecef,
-      point: {
-        pixelSize: 14,
-        color: INDICATOR_COLORS[i],
-        outlineColor: Cesium.Color.ORANGE,
-        outlineWidth: 2,
-        disableDepthTestDistance: Number.POSITIVE_INFINITY,
-      },
-    });
+      color: indicatorColor.toCssColorString(),
+      outlineColor: Cesium.Color.ORANGE.toCssColorString(),
+      pixelSize: 14,
+      outlineWidth: 2,
+    };
+    canvasDots.push(canvasDotEntry);
 
-    const arrow = viewer.entities.add({
-      polyline: {
-        positions: new Cesium.CallbackProperty(() => arrowPos, false),
-        width: 16,
-        material: new Cesium.PolylineArrowMaterialProperty(Cesium.Color.RED),
-        arcType: Cesium.ArcType.NONE,
-      },
-    });
+    // Register arrow on shared canvas overlay (renders above post-process stages)
+    const canvasArrowEntry = { base: arrowPos[0], tip: arrowPos[1], color: "red" };
+    canvasArrows.push(canvasArrowEntry);
 
-    const frustumLines = frustumPos.map((_, j) =>
-      viewer.entities.add({
-        polyline: {
-          positions: new Cesium.CallbackProperty(() => frustumPos[j], false),
-          width: 2,
-          material: INDICATOR_COLORS[i].withAlpha(0.7),
-          arcType: Cesium.ArcType.NONE,
-        },
-      }),
-    );
+    // Register frustum lines on shared canvas overlay (between arrows and dots)
+    const cssColor = indicatorColor.withAlpha(0.7).toCssColorString();
+    const canvasFrustumEntry = { lines: frustumPos, color: cssColor, width: 2 };
+    canvasFrustumLines.push(canvasFrustumEntry);
 
     return {
-      dot, arrow, frustumLines,
+      canvasDotEntry, canvasArrowEntry, canvasFrustumEntry,
       get arrowPos() { return arrowPos; },
-      set arrowPos(v) { arrowPos = v; },
+      set arrowPos(v) { arrowPos = v; canvasArrowEntry.base = v[0]; canvasArrowEntry.tip = v[1]; },
       get frustumPos() { return frustumPos; },
-      set frustumPos(v) { frustumPos = v; },
+      set frustumPos(v) { frustumPos = v; canvasFrustumEntry.lines = v; },
     };
   });
 
   function refreshIndicator() {
     const ind = indicators[currentFrameIndex];
-    ind.dot.position = drone.ecef;
+    ind.canvasDotEntry.position = drone.ecef;
     ind.arrowPos = [drone.ecef, arrowTip(drone.ecef, drone.forward)];
     const corners = computeFrustumCorners(drone);
     ind.frustumPos = corners.map((c) => [drone.ecef, c]);
@@ -445,6 +435,5 @@ export async function setupDroneVideoLayer(viewer) {
     }
   });
 
-  lookThroughDrone();
   return droneStates;
 }
