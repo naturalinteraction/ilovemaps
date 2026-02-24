@@ -385,6 +385,20 @@ export async function setupDroneVideoLayer(viewer) {
       overlay.style.opacity = cur < 0.01 ? "0.5" : cur < 0.6 ? "1.0" : "0.0";
     } else if (e.key === "t" || e.key === "T") {
       droneAlpha = droneAlpha < 0.1 ? 0.5 : droneAlpha < 0.6 ? 1.0 : 0.0;
+    } else if (e.key === "f" || e.key === "F") {
+      const scene = viewer.scene;
+      if (scene.terrainProvider instanceof Cesium.EllipsoidTerrainProvider) {
+        scene.setTerrain(Cesium.Terrain.fromWorldTerrain({ requestWaterMask: true }));
+        DRONE_POSE.alt += 800;
+        scene.globe.depthTestAgainstTerrain = true;
+      } else {
+        scene.terrainProvider = new Cesium.EllipsoidTerrainProvider();
+        DRONE_POSE.alt -= 800;
+        scene.globe.depthTestAgainstTerrain = false;
+      }
+      drone = computeDroneCameraMatrix(DRONE_POSE);
+      refreshIndicator();
+      lookThroughDrone();
     } else if (e.key === "-") {
       DRONE_POSE.hFovDeg -= 0.5;
       drone = computeDroneCameraMatrix(DRONE_POSE);
