@@ -118,14 +118,11 @@ let parentLinesEnabled = false; // when true, polylines connect units to their p
 let labelsEnabled = true; // when true, text labels are shown on military entities
 
 // Dot overlay state (replaces heatmap)
-const DOT_USE_ELLIPSE = false; // false: pixel-sized point; true: 9m semi-transparent circle
+const DOT_RADIUS_M = 70;  // meters semi-axis for terrain-clamped ellipse
+const DOT_ALPHA = 0.15;   // alpha per dot; overlapping dots sum alphas
 let moduleViewer = null;          // viewer reference for dot updates
+const dotEntities = [];           // pool of Cesium ellipse entities for dots
 
-// Canvas overlay for dots (avoids alpha accumulation on overlap)
-let dotCanvas = null;
-let dotCtx = null;
-let dotWorldPositions = [];       // array of Cartesian3 positions for canvas dots
-let dotWorldLines = [];           // array of [Cartesian3, Cartesian3] pairs for canvas lines
 
 // Canvas overlay for drone arrows (full opacity, drawn on top of post-process stages)
 let arrowCanvas = null;
@@ -498,28 +495,8 @@ export async function loadMilitaryUnits(viewer) {
     linesById[node.id] = lineEntity;
   }
 
-  // Create canvas overlay for dots
-  const container = document.getElementById("cesiumContainer");
-  dotCanvas = document.createElement("canvas");
-  dotCanvas.style.position = "absolute";
-  dotCanvas.style.top = "0";
-  dotCanvas.style.left = "0";
-  dotCanvas.style.pointerEvents = "none";
-  dotCanvas.style.opacity = "0.3";
-  const syncCanvasSize = () => {
-    const cw = viewer.canvas.clientWidth;
-    const ch = viewer.canvas.clientHeight;
-    const dpr = window.devicePixelRatio || 1;
-    dotCanvas.style.width = cw + "px";
-    dotCanvas.style.height = ch + "px";
-    dotCanvas.width = cw * dpr;
-    dotCanvas.height = ch * dpr;
-    dotCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  };
-  container.appendChild(dotCanvas);
-  dotCtx = dotCanvas.getContext("2d");
-
   // Arrow canvas (full opacity, renders on top of everything)
+  const container = document.getElementById("cesiumContainer");
   arrowCanvas = document.createElement("canvas");
   arrowCanvas.style.position = "absolute";
   arrowCanvas.style.top = "0";
@@ -528,7 +505,7 @@ export async function loadMilitaryUnits(viewer) {
   container.appendChild(arrowCanvas);
   arrowCtx = arrowCanvas.getContext("2d");
 
-  const syncCanvasSizes = () => {
+  const syncCanvasSize = () => {
     const cw = viewer.canvas.clientWidth;
     const ch = viewer.canvas.clientHeight;
     const dpr = window.devicePixelRatio || 1;
@@ -539,10 +516,9 @@ export async function loadMilitaryUnits(viewer) {
     arrowCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
   };
   syncCanvasSize();
-  syncCanvasSizes();
 
   // Keep canvas size in sync with Cesium canvas
-  const ro = new ResizeObserver(() => { syncCanvasSize(); syncCanvasSizes(); });
+  const ro = new ResizeObserver(() => { syncCanvasSize(); });
   ro.observe(viewer.canvas);
 
   updateHeatmapLayer();
@@ -1204,22 +1180,18 @@ function getHeatmapPositions() {
   return results;
 }
 
-//const DOT_SIZE  = 10;  // 10
-//const DOT_ALPHA = 0.3;  // 1.0
-const DOT_SIZE  = 100;  // 10
-const DOT_ALPHA = 0.3;  // 1.0
 
 function updateHeatmapLayer() {
   const viewer = moduleViewer;
   if (!viewer) return;
 
-  dotWorldPositions = [];
-  dotWorldLines = [];
   blobGroups = [];
 
   if (!militaryVisible) {
     // Hide all blob entities when military layer is off
     for (let i = 0; i < blobEntities.length; i++) blobEntities[i].show = false;
+    // Hide all dot entities when military layer is off
+    for (let i = 0; i < dotEntities.length; i++) dotEntities[i].show = false;
     return;
   }
 
@@ -1273,39 +1245,33 @@ function updateHeatmapLayer() {
   const entries = getHeatmapPositions();
 
   for (let i = 0; i < entries.length; i++) {
-    const { position: p, parentPosition: pp } = entries[i];
-    const childPos = Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt + HEIGHT_ABOVE_TERRAIN);
-    const parentPos = Cesium.Cartesian3.fromDegrees(pp.lon, pp.lat, pp.alt + HEIGHT_ABOVE_TERRAIN);
+    const { position: p } = entries[i];
+    const childPos = Cesium.Cartesian3.fromDegrees(p.lon, p.lat, HEIGHT_ABOVE_TERRAIN);
 
-    // Store position for canvas drawing
-    dotWorldPositions.push(childPos);
-    dotWorldLines.push([parentPos, childPos]);
-  }
-
-  // Lines connecting visible billboards (or unmerged commanders) to their parent's position
-  for (const node of allNodes) {
-    if (!node.parent) continue;
-    const entity = entitiesById[node.id];
-    const cmdE = cmdEntitiesById[node.id];
-    const visible = (entity && entity.show) || (cmdE && cmdE.show);
-    if (!visible) continue;
-    dotWorldLines.push([node.parent.homePosition, node.homePosition]);
-  }
-
-  // Lines connecting visible commander/staff to their unit's position
-  for (const node of allNodes) {
-    const cmdE = cmdEntitiesById[node.id];
-    if (cmdE && cmdE.show) {
-      dotWorldLines.push([node.homePosition, node.cmdHomePosition]);
+    // Create or reuse a terrain-clamped ellipse entity for this dot
+    let dotE = dotEntities[i];
+    if (!dotE) {
+      dotE = viewer.entities.add({
+        position: childPos,
+        ellipse: {
+          semiMinorAxis: DOT_RADIUS_M,
+          semiMajorAxis: DOT_RADIUS_M,
+          material: Cesium.Color.BLUE.withAlpha(DOT_ALPHA),
+          classificationType: Cesium.ClassificationType.BOTH,
+        },
+        show: true,
+      });
+      dotE._isDot = true;
+      dotEntities.push(dotE);
+    } else {
+      dotE.position = childPos;
+      dotE.show = true;
     }
-    const staffEs = staffEntitiesById[node.id];
-    if (staffEs && node.staffHomePositions) {
-      for (let si = 0; si < staffEs.length; si++) {
-        if (staffEs[si].show) {
-          dotWorldLines.push([node.homePosition, node.staffHomePositions[si]]);
-        }
-      }
-    }
+
+  }
+  // Hide unused dot entities
+  for (let i = entries.length; i < dotEntities.length; i++) {
+    dotEntities[i].show = false;
   }
 }
 
@@ -1672,7 +1638,6 @@ export function setupZoomListener(viewer) {
 export function handleKeydown(event, viewer) {
   if (event.key === "m" || event.key === "M") {
     militaryVisible = !militaryVisible;
-    if (dotCanvas) dotCanvas.style.display = militaryVisible ? "" : "none";
     if (!animating) {
       if (militaryVisible) {
         showLevel(currentLevel);
@@ -1725,80 +1690,6 @@ export function setupPreRender(viewer) {
     for (const node of allNodes) {
       const line = linesById[node.id];
       if (line) line.show = parentLinesEnabled && entitiesById[node.id].show;
-    }
-    // Draw dots on canvas overlay
-    if (dotCanvas && dotCtx) {
-      dotCtx.clearRect(0, 0, dotCanvas.width, dotCanvas.height);
-      if (militaryVisible) {
-        const scene = viewer.scene;
-        // Draw lines
-        if (dotWorldLines.length > 0) {
-          dotCtx.strokeStyle = "#2040FF";
-          dotCtx.lineWidth = 2;
-          dotCtx.beginPath();
-          for (let i = 0; i < dotWorldLines.length; i++) {
-            const a = scene.cartesianToCanvasCoordinates(dotWorldLines[i][0]);
-            const b = scene.cartesianToCanvasCoordinates(dotWorldLines[i][1]);
-            if (!a || !b) continue;
-            dotCtx.moveTo(a.x, a.y);
-            dotCtx.lineTo(b.x, b.y);
-          }
-          dotCtx.stroke();
-        }
-        // Draw dots with heatmap density coloring
-        if (dotWorldPositions.length > 0) {
-          const DENSITY_RADIUS_M = 60; // 30m radius per dot, overlap at 60m
-          const DENSITY_RADIUS_M_SQ = DENSITY_RADIUS_M * DENSITY_RADIUS_M;
-          // Project all dots to screen coordinates
-          const screenPts = [];
-          for (let i = 0; i < dotWorldPositions.length; i++) {
-            const s = scene.cartesianToCanvasCoordinates(dotWorldPositions[i]);
-            screenPts.push(s); // null if off-screen
-          }
-          // Compute per-dot neighbor count using world-space (meters) distances
-          const counts = new Uint16Array(dotWorldPositions.length);
-          let maxCount = 0;
-          for (let i = 0; i < dotWorldPositions.length; i++) {
-            if (!screenPts[i]) continue;
-            for (let j = i + 1; j < dotWorldPositions.length; j++) {
-              if (!screenPts[j]) continue;
-              const distSq = Cesium.Cartesian3.distanceSquared(dotWorldPositions[i], dotWorldPositions[j]);
-              if (distSq <= DENSITY_RADIUS_M_SQ) {
-                counts[i]++;
-                counts[j]++;
-              }
-            }
-            if (counts[i] > maxCount) maxCount = counts[i];
-          }
-          // Final pass for maxCount (j>i increments may update later)
-          if (maxCount === 0) maxCount = 1;
-          for (let i = 0; i < counts.length; i++) {
-            if (counts[i] > maxCount) maxCount = counts[i];
-          }
-          // Compute meters-per-pixel for perspective projection
-          const camPos = scene.camera.positionWC;
-          const fov = scene.camera.frustum.fovy || scene.camera.frustum.fov;
-          const canvasHeight = scene.canvas.height;
-          const DOT_RADIUS_M = 30; // 30m radius
-          // Light blue (min) -> deep blue (max)
-          // min: rgb(140, 200, 255), max: rgb(32, 64, 255)
-          for (let i = 0; i < screenPts.length; i++) {
-            if (!screenPts[i]) continue;
-            const dist = Cesium.Cartesian3.distance(camPos, dotWorldPositions[i]);
-            const metersPerPixel = 2 * dist * Math.tan(fov * 0.5) / canvasHeight;
-            const pixelRadius = DOT_RADIUS_M / metersPerPixel;
-            if (pixelRadius < 0.5) continue; // too small to see
-            const t = counts[i] / maxCount;
-            const r = Math.round(140 + (32 - 140) * t);
-            const g = Math.round(200 + (64 - 200) * t);
-            const b = 255;
-            dotCtx.fillStyle = `rgb(${r},${g},${b})`;
-            dotCtx.beginPath();
-            dotCtx.arc(screenPts[i].x, screenPts[i].y, pixelRadius, 0, Math.PI * 2);
-            dotCtx.fill();
-          }
-        }
-      }
     }
     // Draw drone arrows on full-opacity canvas
     if (arrowCanvas && arrowCtx) {
