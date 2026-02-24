@@ -530,28 +530,12 @@ function computeBlobBoundaries(positions) {
     return [fromLocal2D(ellipse, refLat, refLon, cosLat)];
   }
 
-  const del = delaunayTriangulation(unique);
-  const alpha = autoAlpha(unique);
-  const loops = alphaShape(del, alpha);
-
-  if (loops.length === 0) {
-    // Fallback: convex hull as single loop
-    const hull = convexHull2D(unique);
-    if (hull.length >= 3) {
-      const padded = padBoundary(hull, PAD_DIST);
-      const smoothed = chaikinSmooth(padded, 3);
-      return [fromLocal2D(smoothed, refLat, refLon, cosLat)];
-    }
-    return [];
-  }
-
-  const result = [];
-  for (const loop of loops) {
-    const padded = padBoundary(loop, PAD_DIST);
-    const smoothed = chaikinSmooth(padded, 3);
-    result.push(fromLocal2D(smoothed, refLat, refLon, cosLat));
-  }
-  return result;
+  // Always use convex hull → guaranteed single blob
+  const hull = convexHull2D(unique);
+  if (hull.length < 3) return [];
+  const padded = padBoundary(hull, PAD_DIST);
+  const smoothed = chaikinSmooth(padded, 3);
+  return [fromLocal2D(smoothed, refLat, refLon, cosLat)];
 }
 
 // Simple convex hull (Graham scan) as fallback
