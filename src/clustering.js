@@ -149,9 +149,9 @@ const blobEntities = []; // pool of Cesium polygon entities for blobs
 
 // --- Blob geometry: Gaussian Metaballs ---
 
-const METABALL_SIGMA = 15;       // Controls thickness / bridge width (sigma in Gaussian)
+const METABALL_SIGMA = 150;      // Controls thickness / bridge width (sigma in Gaussian)
 const METABALL_THRESHOLD = 0.02; // Lower = thinner bridges, higher = fatter blob
-const METABALL_GRID_SIZE = 10;    // Meters per cell (lower = smoother but slower)
+const METABALL_GRID_SIZE = 20;   // Meters per cell (lower = smoother but slower)
 
 function collectDescendantLeafPositions(node) {
   const positions = [];
@@ -1433,37 +1433,24 @@ function updateHeatmapLayer() {
     return;
   }
 
-  // Find the lowest level (most detailed) that's currently visible
-  let minLevel = LEVEL_ORDER.length;
-  for (const node of allNodes) {
-    const entity = entitiesById[node.id];
-    if (entity && entity.show) {
-      const lvl = LEVEL_ORDER.indexOf(node.type);
-      if (lvl < minLevel) minLevel = lvl;
-    }
-  }
-
-  // Collect all positions from the lowest visible level
+  // Collect ALL unit positions - not just visible ones - into ONE blob
   const allPositions = [];
   for (const node of allNodes) {
-    const entity = entitiesById[node.id];
-    if (!entity || !entity.show) continue;
-    const lvl = LEVEL_ORDER.indexOf(node.type);
-    if (lvl !== minLevel) continue;
-    allPositions.push(node.position);
-    // Also include all descendants
-    function addDescendants(n) {
-      for (const child of n.children) {
-        allPositions.push(child.position);
-        addDescendants(child);
-      }
+    // Include all military units regardless of visibility
+    if (node.type !== "individual") {
+      allPositions.push(node.position);
     }
-    addDescendants(node);
+    // Include all individuals
+    if (node.type === "individual") {
+      allPositions.push(node.position);
+    }
   }
+  console.log("blob: total positions:", allPositions.length);
 
-  // Create one big blob for all units
-  if (allPositions.length > 0) {
+  // Create ONE big blob for ALL units
+  if (allPositions.length >= 1) {
     const boundaries = computeBlobBoundaries(allPositions);
+    console.log("blob: boundaries:", boundaries.length, "pts:", boundaries[0]?.length);
     for (const boundary of boundaries) {
       blobGroups.push({ boundary });
     }
