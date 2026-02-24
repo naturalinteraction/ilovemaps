@@ -1242,7 +1242,7 @@ export function handleKeydown(event, viewer) {
 // --- Individual movement ---
 
 const MOVE_INTERVAL_MS = 1000;
-const MOVE_DISTANCE_M = 5;
+const MOVE_DISTANCE_M = 45;
 
 function perturbPosition(pos) {
   const latRad = pos.lat * Math.PI / 180;
@@ -1259,18 +1259,35 @@ let moveIntervalId = null;
 export function startIndividualMovement() {
   if (moveIntervalId) return;
   moveIntervalId = setInterval(() => {
-    let moved = 0;
     for (const node of allNodes) {
-      if (node.type !== "individual") continue;
-      perturbPosition(node.position);
-      const entity = entitiesById[node.id];
-      if (entity) {
-        const newCartesian = Cesium.Cartesian3.fromDegrees(
+      if (node.type === "individual") {
+        perturbPosition(node.position);
+        const entity = entitiesById[node.id];
+        if (entity) {
+          entity.position = Cesium.Cartesian3.fromDegrees(
+            node.position.lon, node.position.lat, node.position.alt + HEIGHT_ABOVE_TERRAIN
+          );
+        }
+      }
+      const cmdE = cmdEntitiesById[node.id];
+      if (cmdE && cmdE.show) {
+        perturbPosition(node.position);
+        cmdE.position = Cesium.Cartesian3.fromDegrees(
           node.position.lon, node.position.lat, node.position.alt + HEIGHT_ABOVE_TERRAIN
         );
-        entity.position = newCartesian;
       }
-      moved++;
+      const staffEs = staffEntitiesById[node.id];
+      if (staffEs && node.staff && node.staffHomePositions) {
+        for (let i = 0; i < staffEs.length; i++) {
+          if (staffEs[i].show) {
+            const staffPos = node.staff[i].position;
+            perturbPosition(staffPos);
+            staffEs[i].position = Cesium.Cartesian3.fromDegrees(
+              staffPos.lon, staffPos.lat, staffPos.alt + HEIGHT_ABOVE_TERRAIN
+            );
+          }
+        }
+      }
     }
     updateHeatmapLayer();
   }, MOVE_INTERVAL_MS);
