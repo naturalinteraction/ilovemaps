@@ -386,67 +386,26 @@ function computeBlobBoundaries(positions) {
     return [fromLocal2D(ellipse, refLat, refLon, cosLat)];
   }
 
-  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  // Place circle samples (100m radius) around every input point, then convex hull.
+  // This guarantees at least 100m clearance around each individual.
+  const BLOB_RADIUS = 100; // meters
+  const CIRCLE_SAMPLES = 12;
+  const padded = [];
   for (const p of pts) {
-    if (p.x < minX) minX = p.x;
-    if (p.x > maxX) maxX = p.x;
-    if (p.y < minY) minY = p.y;
-    if (p.y > maxY) maxY = p.y;
-  }
-
-  const padding = METABALL_SIGMA * 1.5;
-  const bounds = { minX: minX - padding, maxX: maxX + padding, minY: minY - padding, maxY: maxY + padding };
-  const resolution = Math.max(32, Math.min(200, Math.ceil((maxX - minX + padding * 2) / METABALL_GRID_SIZE)));
-
-  const edges = marchingSquares(pts, bounds, resolution, METABALL_THRESHOLD);
-  const loops = edgesToLoop(edges);
-
-  // Collect all contour points from all loops into one set, then compute
-  // a single convex hull so the blob is guaranteed to be one convex shape.
-  const allPts = [];
-  for (const loop of loops) {
-    for (const p of loop) allPts.push(p);
-  }
-
-  const result = [];
-  if (allPts.length >= 3) {
-    const hull = convexHull(allPts);
-    if (hull.length >= 3) {
-      hull.push(hull[0]); // close the loop for smoothing
-      const smoothed = chaikinSmooth(hull, 2);
-      const converted = fromLocal2D(smoothed, refLat, refLon, cosLat);
-      if (converted.length >= 3) {
-        result.push(converted);
-      }
+    for (let i = 0; i < CIRCLE_SAMPLES; i++) {
+      const a = (2 * Math.PI * i) / CIRCLE_SAMPLES;
+      padded.push({ x: p.x + BLOB_RADIUS * Math.cos(a), y: p.y + BLOB_RADIUS * Math.sin(a) });
     }
   }
-
-  if (result.length === 0 || result[0].length < 3) {
-    const hull = convexHull(pts);
-    if (hull.length >= 3) {
-      const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length;
-      const cy = pts.reduce((s, p) => s + p.y, 0) / pts.length;
-      const expanded = hull.map(p => {
-        const dx = p.x - cx, dy = p.y - cy;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const pad = METABALL_SIGMA * 0.7;
-        return { x: p.x + (dx / dist) * pad, y: p.y + (dy / dist) * pad };
-      });
-      const smoothed = chaikinSmooth(expanded, 2);
-      return [fromLocal2D(smoothed, refLat, refLon, cosLat)];
-    }
-    const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length;
-    const cy = pts.reduce((s, p) => s + p.y, 0) / pts.length;
-    const circle = [];
-    const r = METABALL_SIGMA * 0.8;
-    for (let i = 0; i < 32; i++) {
-      const a = (2 * Math.PI * i) / 32;
-      circle.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
-    }
-    return [fromLocal2D(circle, refLat, refLon, cosLat)];
+  const hull = convexHull(padded);
+  if (hull.length >= 3) {
+    hull.push(hull[0]); // close the loop
+    const smoothed = chaikinSmooth(hull, 2);
+    const converted = fromLocal2D(smoothed, refLat, refLon, cosLat);
+    if (converted.length >= 3) return [converted];
   }
 
-  return result;
+  return [];
 }
 
 function convexHull(points) {
