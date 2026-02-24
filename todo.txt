@@ -1,3 +1,5 @@
+- sembra che AR debba essere 1.0 per il draping
+
 - gps puo' avere svarioni e mandare un commander in africa
 - assumiamo che tutti abbiano la radio+gps, se i commander non la avessero, in particolare, sarebbe un casino
 - come rappresento il fatto che una squadra ha 7 persone senza gps?
