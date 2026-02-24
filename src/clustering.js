@@ -1589,7 +1589,7 @@ export function setupPreRender(viewer) {
         }
         // Draw dots with heatmap density coloring
         if (dotWorldPositions.length > 0) {
-          const DENSITY_RADIUS_M = 30; // 30 meters diameter around each dot
+          const DENSITY_RADIUS_M = 60; // 30m radius per dot, overlap at 60m
           const DENSITY_RADIUS_M_SQ = DENSITY_RADIUS_M * DENSITY_RADIUS_M;
           // Project all dots to screen coordinates
           const screenPts = [];
@@ -1621,7 +1621,7 @@ export function setupPreRender(viewer) {
           const camPos = scene.camera.positionWC;
           const fov = scene.camera.frustum.fovy || scene.camera.frustum.fov;
           const canvasHeight = scene.canvas.height;
-          const DOT_RADIUS_M = 15; // 30m diameter = 15m radius
+          const DOT_RADIUS_M = 30; // 30m radius
           // Light blue (min) -> deep blue (max)
           // min: rgb(140, 200, 255), max: rgb(32, 64, 255)
           for (let i = 0; i < screenPts.length; i++) {
