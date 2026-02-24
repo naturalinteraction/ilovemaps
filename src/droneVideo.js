@@ -12,19 +12,19 @@ const DRONE_POSE_3 = {
   heading: 201,         // degrees, 0 = North, clockwise
   pitch: 43,       // degrees, 0 = horizontal, positive = looking down, 90 = straight down
   roll: -2,          // degrees
-  hFovDeg: 59.60,      // horizontal field of view
+  hFovDeg: 71.20,      // horizontal field of view
   aspectRatio: 4 / 3,
 };
 
 const DRONE_POSE_2 = {
-  lat: 46.3301,       // degrees
-  lon: 10.3289,        // degrees
-  alt: 1004.0,        // metres above ellipsoid
-  heading: 208,       // degrees, 0 = North, clockwise
-  pitch: 51,       // degrees, 0 = horizontal, positive = looking down, 90 = straight down
+  lat: 46.33074181,       // degrees
+  lon: 10.32905519,        // degrees
+  alt: 1006.6,        // metres above ellipsoid
+  heading: 200,       // degrees, 0 = North, clockwise
+  pitch: 45,       // degrees, 0 = horizontal, positive = looking down, 90 = straight down
   roll: 0,          // degrees
-  hFovDeg: 59.60,      // horizontal field of view
-  aspectRatio: 4 / 3,
+  hFovDeg: 71.20,      // horizontal field of view
+  aspectRatio: 1.0,
 };
 
 const DRONE_FRAMES = [
@@ -208,7 +208,7 @@ export async function setupDroneVideoLayer(viewer) {
   });
 
   function poseLabel() {
-    return `${DRONE_POSE.lat.toFixed(4)}, ${DRONE_POSE.lon.toFixed(4)}, ${DRONE_POSE.alt.toFixed(1)}m\nH:${DRONE_POSE.heading.toFixed(1)}° P:${DRONE_POSE.pitch.toFixed(1)}° R:${DRONE_POSE.roll.toFixed(1)}°`;
+    return `${DRONE_POSE.lat.toFixed(4)}, ${DRONE_POSE.lon.toFixed(4)}, ${DRONE_POSE.alt.toFixed(1)}m\nH:${DRONE_POSE.heading.toFixed(1)}° P:${DRONE_POSE.pitch.toFixed(1)}° R:${DRONE_POSE.roll.toFixed(1)}° FOV:${DRONE_POSE.hFovDeg.toFixed(1)}° AR:${DRONE_POSE.aspectRatio.toFixed(2)}`;
   }
 
   // Always-visible point + label at the drone location.
@@ -271,6 +271,20 @@ export async function setupDroneVideoLayer(viewer) {
   }
 
   // -------------------------------------------------------------------------
+
+  function lookThroughDrone() {
+    viewer.camera.setView({
+      destination: Cesium.Cartesian3.fromDegrees(DRONE_POSE.lon, DRONE_POSE.lat, DRONE_POSE.alt),
+      orientation: {
+        heading: Cesium.Math.toRadians(DRONE_POSE.heading),
+        pitch: Cesium.Math.toRadians(-DRONE_POSE.pitch),
+        roll: Cesium.Math.toRadians(DRONE_POSE.roll),
+      },
+    });
+    const hFovRad = Cesium.Math.toRadians(DRONE_POSE.hFovDeg);
+    viewer.camera.frustum.fov = 2.0 * Math.atan(Math.tan(hFovRad / 2.0) / DRONE_POSE.aspectRatio);
+    viewer.camera.frustum.aspectRatio = DRONE_POSE.aspectRatio;
+  }
 
   window.addEventListener("keydown", (e) => {
     const headRad = Cesium.Math.toRadians(DRONE_POSE.heading);
@@ -347,16 +361,30 @@ export async function setupDroneVideoLayer(viewer) {
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
       console.log("Switched to frame", currentFrameIndex + 2);
+    } else if (e.key === "g" || e.key === "G") {
+      lookThroughDrone();
     } else if (e.key === "t" || e.key === "T") {
       droneAlpha = droneAlpha < 0.1 ? 0.5 : droneAlpha < 0.6 ? 1.0 : 0.0;
+    } else if (e.key === "-") {
+      DRONE_POSE.hFovDeg -= 2;
+      drone = computeDroneCameraMatrix(DRONE_POSE);
+      refreshIndicator();
+      lookThroughDrone();
+    } else if (e.key === "=") {
+      DRONE_POSE.hFovDeg += 2;
+      drone = computeDroneCameraMatrix(DRONE_POSE);
+      refreshIndicator();
+      lookThroughDrone();
     } else if (e.key === "[") {
       DRONE_POSE.aspectRatio -= 0.05;
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
+      lookThroughDrone();
     } else if (e.key === "]") {
       DRONE_POSE.aspectRatio += 0.05;
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
+      lookThroughDrone();
     }
   });
 

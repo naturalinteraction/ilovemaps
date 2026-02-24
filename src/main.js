@@ -128,16 +128,7 @@ async function loadCameraView() {
 loadCameraView();
 
 // Military unit clustering
-loadMilitaryUnits(viewer).then(({ allNodes }) => {
-  const battalion = allNodes.find(n => n.type === "battalion");
-  if (battalion) {
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(
-        battalion.position.lon, battalion.position.lat, 100000
-      ),
-    });
-  }
-});
+loadMilitaryUnits(viewer).catch(console.error);
 setupZoomListener(viewer);
 setupPreRender(viewer);
 
@@ -926,4 +917,14 @@ if (CLAUDE_PANEL_ENABLED) {
   });
 }
 
-setupDroneVideoLayer(viewer).catch(console.error);
+setupDroneVideoLayer(viewer).then(() => {
+  // Start looking at the drone area
+  viewer.camera.setView({
+    destination: Cesium.Cartesian3.fromDegrees(10.3289, 46.3301, 3000),
+    orientation: {
+      heading: Cesium.Math.toRadians(200),
+      pitch: Cesium.Math.toRadians(-45),
+      roll: 0,
+    },
+  });
+}).catch(console.error);
