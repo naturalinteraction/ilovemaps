@@ -5,7 +5,7 @@
   "position": {
     "lat": 46.572,
     "lon": 8.01,
-    "alt": 3246.0
+    "alt": 3246
   },
   "children": [
     {
@@ -15,7 +15,7 @@
       "position": {
         "lat": 46.554,
         "lon": 7.965,
-        "alt": 2837.0
+        "alt": 2837
       },
       "children": [
         {
@@ -25,7 +25,7 @@
           "position": {
             "lat": 46.583,
             "lon": 7.965,
-            "alt": 2088.0
+            "alt": 2088
           },
           "children": [
             {
@@ -35,7 +35,7 @@
               "position": {
                 "lat": 46.589,
                 "lon": 7.948,
-                "alt": 2343.0
+                "alt": 2343
               },
               "children": [
                 {
@@ -45,7 +45,7 @@
                   "position": {
                     "lat": 46.589562,
                     "lon": 7.948163,
-                    "alt": 2343.0
+                    "alt": 2343
                   },
                   "children": []
                 },
@@ -56,7 +56,7 @@
                   "position": {
                     "lat": 46.590401,
                     "lon": 7.949453,
-                    "alt": 2382.0
+                    "alt": 2382
                   },
                   "children": []
                 },
@@ -67,7 +67,7 @@
                   "position": {
                     "lat": 46.588426,
                     "lon": 7.948395,
-                    "alt": 2343.0
+                    "alt": 2343
                   },
                   "children": []
                 },
@@ -78,7 +78,7 @@
                   "position": {
                     "lat": 46.590094,
                     "lon": 7.947661,
-                    "alt": 2374.0
+                    "alt": 2374
                   },
                   "children": []
                 },
@@ -89,7 +89,7 @@
                   "position": {
                     "lat": 46.588451,
                     "lon": 7.94914,
-                    "alt": 2343.0
+                    "alt": 2343
                   },
                   "children": []
                 }
@@ -97,27 +97,7 @@
               "commander": {
                 "id": "cmd10",
                 "name": "Cmd. Cobra"
-              },
-              "staff": [
-                {
-                  "id": "staff11",
-                  "name": "Stf. Hawk",
-                  "position": {
-                    "lat": 46.588722,
-                    "lon": 7.946754,
-                    "alt": 2313.0
-                  }
-                },
-                {
-                  "id": "staff12",
-                  "name": "Stf. Reaper",
-                  "position": {
-                    "lat": 46.589031,
-                    "lon": 7.946691,
-                    "alt": 2313.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq2",
@@ -126,7 +106,7 @@
               "position": {
                 "lat": 46.577,
                 "lon": 7.974,
-                "alt": 2285.0
+                "alt": 2285
               },
               "children": [
                 {
@@ -136,7 +116,7 @@
                   "position": {
                     "lat": 46.576519,
                     "lon": 7.974099,
-                    "alt": 2285.0
+                    "alt": 2285
                   },
                   "children": []
                 },
@@ -147,7 +127,7 @@
                   "position": {
                     "lat": 46.577354,
                     "lon": 7.975103,
-                    "alt": 2191.0
+                    "alt": 2191
                   },
                   "children": []
                 },
@@ -158,7 +138,7 @@
                   "position": {
                     "lat": 46.575953,
                     "lon": 7.97336,
-                    "alt": 2285.0
+                    "alt": 2285
                   },
                   "children": []
                 },
@@ -169,7 +149,7 @@
                   "position": {
                     "lat": 46.57696,
                     "lon": 7.973324,
-                    "alt": 2285.0
+                    "alt": 2285
                   },
                   "children": []
                 },
@@ -180,7 +160,7 @@
                   "position": {
                     "lat": 46.577814,
                     "lon": 7.974715,
-                    "alt": 2153.0
+                    "alt": 2153
                   },
                   "children": []
                 }
@@ -188,27 +168,7 @@
               "commander": {
                 "id": "cmd13",
                 "name": "Cmd. Frost"
-              },
-              "staff": [
-                {
-                  "id": "staff14",
-                  "name": "Stf. Maverick",
-                  "position": {
-                    "lat": 46.57751,
-                    "lon": 7.972921,
-                    "alt": 2153.0
-                  }
-                },
-                {
-                  "id": "staff15",
-                  "name": "Stf. Rogue",
-                  "position": {
-                    "lat": 46.577733,
-                    "lon": 7.97324,
-                    "alt": 2153.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq3",
@@ -217,7 +177,7 @@
               "position": {
                 "lat": 46.586,
                 "lon": 7.959,
-                "alt": 2081.0
+                "alt": 2081
               },
               "children": [
                 {
@@ -227,7 +187,7 @@
                   "position": {
                     "lat": 46.585058,
                     "lon": 7.96004,
-                    "alt": 2059.0
+                    "alt": 2059
                   },
                   "children": []
                 },
@@ -238,7 +198,7 @@
                   "position": {
                     "lat": 46.586134,
                     "lon": 7.958914,
-                    "alt": 2081.0
+                    "alt": 2081
                   },
                   "children": []
                 },
@@ -249,7 +209,7 @@
                   "position": {
                     "lat": 46.586,
                     "lon": 7.96018,
-                    "alt": 2081.0
+                    "alt": 2081
                   },
                   "children": []
                 },
@@ -260,7 +220,7 @@
                   "position": {
                     "lat": 46.585763,
                     "lon": 7.958828,
-                    "alt": 2081.0
+                    "alt": 2081
                   },
                   "children": []
                 },
@@ -271,7 +231,7 @@
                   "position": {
                     "lat": 46.586652,
                     "lon": 7.959054,
-                    "alt": 2081.0
+                    "alt": 2081
                   },
                   "children": []
                 }
@@ -279,27 +239,7 @@
               "commander": {
                 "id": "cmd16",
                 "name": "Cmd. Delta"
-              },
-              "staff": [
-                {
-                  "id": "staff17",
-                  "name": "Stf. Echo",
-                  "position": {
-                    "lat": 46.586899,
-                    "lon": 7.958931,
-                    "alt": 2081.0
-                  }
-                },
-                {
-                  "id": "staff18",
-                  "name": "Stf. Foxtrot",
-                  "position": {
-                    "lat": 46.586861,
-                    "lon": 7.959383,
-                    "alt": 2081.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq4",
@@ -308,7 +248,7 @@
               "position": {
                 "lat": 46.58,
                 "lon": 7.982,
-                "alt": 2297.0
+                "alt": 2297
               },
               "children": [
                 {
@@ -318,7 +258,7 @@
                   "position": {
                     "lat": 46.579003,
                     "lon": 7.980793,
-                    "alt": 2269.0
+                    "alt": 2269
                   },
                   "children": []
                 },
@@ -329,7 +269,7 @@
                   "position": {
                     "lat": 46.579626,
                     "lon": 7.982985,
-                    "alt": 2297.0
+                    "alt": 2297
                   },
                   "children": []
                 },
@@ -340,7 +280,7 @@
                   "position": {
                     "lat": 46.58055,
                     "lon": 7.980754,
-                    "alt": 2240.0
+                    "alt": 2240
                   },
                   "children": []
                 },
@@ -351,7 +291,7 @@
                   "position": {
                     "lat": 46.579311,
                     "lon": 7.9826,
-                    "alt": 2297.0
+                    "alt": 2297
                   },
                   "children": []
                 },
@@ -362,7 +302,7 @@
                   "position": {
                     "lat": 46.581068,
                     "lon": 7.982378,
-                    "alt": 2297.0
+                    "alt": 2297
                   },
                   "children": []
                 }
@@ -370,27 +310,7 @@
               "commander": {
                 "id": "cmd19",
                 "name": "Cmd. Romeo"
-              },
-              "staff": [
-                {
-                  "id": "staff20",
-                  "name": "Stf. Whiskey",
-                  "position": {
-                    "lat": 46.580585,
-                    "lon": 7.982996,
-                    "alt": 2297.0
-                  }
-                },
-                {
-                  "id": "staff21",
-                  "name": "Stf. Yankee",
-                  "position": {
-                    "lat": 46.580315,
-                    "lon": 7.983226,
-                    "alt": 2297.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq5",
@@ -399,7 +319,7 @@
               "position": {
                 "lat": 46.592,
                 "lon": 7.969,
-                "alt": 1895.0
+                "alt": 1895
               },
               "children": [
                 {
@@ -409,7 +329,7 @@
                   "position": {
                     "lat": 46.593164,
                     "lon": 7.968535,
-                    "alt": 1936.0
+                    "alt": 1936
                   },
                   "children": []
                 },
@@ -420,7 +340,7 @@
                   "position": {
                     "lat": 46.592382,
                     "lon": 7.968219,
-                    "alt": 1936.0
+                    "alt": 1936
                   },
                   "children": []
                 },
@@ -431,7 +351,7 @@
                   "position": {
                     "lat": 46.591336,
                     "lon": 7.96828,
-                    "alt": 1915.0
+                    "alt": 1915
                   },
                   "children": []
                 },
@@ -442,7 +362,7 @@
                   "position": {
                     "lat": 46.592057,
                     "lon": 7.968964,
-                    "alt": 1895.0
+                    "alt": 1895
                   },
                   "children": []
                 },
@@ -453,7 +373,7 @@
                   "position": {
                     "lat": 46.590827,
                     "lon": 7.969846,
-                    "alt": 1890.0
+                    "alt": 1890
                   },
                   "children": []
                 }
@@ -461,27 +381,7 @@
               "commander": {
                 "id": "cmd22",
                 "name": "Cmd. Ember"
-              },
-              "staff": [
-                {
-                  "id": "staff23",
-                  "name": "Stf. Flint",
-                  "position": {
-                    "lat": 46.591813,
-                    "lon": 7.970281,
-                    "alt": 1895.0
-                  }
-                },
-                {
-                  "id": "staff24",
-                  "name": "Stf. Granite",
-                  "position": {
-                    "lat": 46.591523,
-                    "lon": 7.970111,
-                    "alt": 1890.0
-                  }
-                }
-              ]
+              }
             }
           ],
           "commander": {
@@ -495,7 +395,7 @@
               "position": {
                 "lat": 46.582152,
                 "lon": 7.964563,
-                "alt": 2102.0
+                "alt": 2102
               }
             },
             {
@@ -504,7 +404,7 @@
               "position": {
                 "lat": 46.582306,
                 "lon": 7.964167,
-                "alt": 2102.0
+                "alt": 2102
               }
             }
           ]
@@ -516,7 +416,7 @@
           "position": {
             "lat": 46.539,
             "lon": 7.99,
-            "alt": 3217.0
+            "alt": 3217
           },
           "children": [
             {
@@ -526,7 +426,7 @@
               "position": {
                 "lat": 46.545,
                 "lon": 7.978,
-                "alt": 3425.0
+                "alt": 3425
               },
               "children": [
                 {
@@ -536,7 +436,7 @@
                   "position": {
                     "lat": 46.546256,
                     "lon": 7.97685,
-                    "alt": 3510.0
+                    "alt": 3510
                   },
                   "children": []
                 },
@@ -547,7 +447,7 @@
                   "position": {
                     "lat": 46.543599,
                     "lon": 7.977522,
-                    "alt": 3424.0
+                    "alt": 3424
                   },
                   "children": []
                 },
@@ -558,7 +458,7 @@
                   "position": {
                     "lat": 46.54419,
                     "lon": 7.979471,
-                    "alt": 3381.0
+                    "alt": 3381
                   },
                   "children": []
                 },
@@ -569,7 +469,7 @@
                   "position": {
                     "lat": 46.54602,
                     "lon": 7.977525,
-                    "alt": 3462.0
+                    "alt": 3462
                   },
                   "children": []
                 },
@@ -580,7 +480,7 @@
                   "position": {
                     "lat": 46.543596,
                     "lon": 7.978704,
-                    "alt": 3424.0
+                    "alt": 3424
                   },
                   "children": []
                 }
@@ -588,27 +488,7 @@
               "commander": {
                 "id": "cmd28",
                 "name": "Cmd. Panther"
-              },
-              "staff": [
-                {
-                  "id": "staff29",
-                  "name": "Stf. Quartz",
-                  "position": {
-                    "lat": 46.544198,
-                    "lon": 7.977406,
-                    "alt": 3425.0
-                  }
-                },
-                {
-                  "id": "staff30",
-                  "name": "Stf. Raven",
-                  "position": {
-                    "lat": 46.544386,
-                    "lon": 7.977043,
-                    "alt": 3462.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq7",
@@ -617,7 +497,7 @@
               "position": {
                 "lat": 46.532,
                 "lon": 8.005,
-                "alt": 3074.0
+                "alt": 3074
               },
               "children": [
                 {
@@ -627,7 +507,7 @@
                   "position": {
                     "lat": 46.531628,
                     "lon": 8.004113,
-                    "alt": 3062.0
+                    "alt": 3062
                   },
                   "children": []
                 },
@@ -638,7 +518,7 @@
                   "position": {
                     "lat": 46.532015,
                     "lon": 8.003914,
-                    "alt": 3062.0
+                    "alt": 3062
                   },
                   "children": []
                 },
@@ -649,7 +529,7 @@
                   "position": {
                     "lat": 46.532818,
                     "lon": 8.004795,
-                    "alt": 3074.0
+                    "alt": 3074
                   },
                   "children": []
                 },
@@ -660,7 +540,7 @@
                   "position": {
                     "lat": 46.532876,
                     "lon": 8.004981,
-                    "alt": 3074.0
+                    "alt": 3074
                   },
                   "children": []
                 },
@@ -671,7 +551,7 @@
                   "position": {
                     "lat": 46.531026,
                     "lon": 8.003936,
-                    "alt": 3022.0
+                    "alt": 3022
                   },
                   "children": []
                 }
@@ -679,27 +559,7 @@
               "commander": {
                 "id": "cmd31",
                 "name": "Cmd. Bolt"
-              },
-              "staff": [
-                {
-                  "id": "staff32",
-                  "name": "Stf. Cipher",
-                  "position": {
-                    "lat": 46.531836,
-                    "lon": 8.003714,
-                    "alt": 3062.0
-                  }
-                },
-                {
-                  "id": "staff33",
-                  "name": "Stf. Drake",
-                  "position": {
-                    "lat": 46.532149,
-                    "lon": 8.00371,
-                    "alt": 3062.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq8",
@@ -708,7 +568,7 @@
               "position": {
                 "lat": 46.542,
                 "lon": 7.996,
-                "alt": 3363.0
+                "alt": 3363
               },
               "children": [
                 {
@@ -718,7 +578,7 @@
                   "position": {
                     "lat": 46.542524,
                     "lon": 7.99512,
-                    "alt": 3363.0
+                    "alt": 3363
                   },
                   "children": []
                 },
@@ -729,7 +589,7 @@
                   "position": {
                     "lat": 46.541224,
                     "lon": 7.994905,
-                    "alt": 3277.0
+                    "alt": 3277
                   },
                   "children": []
                 },
@@ -740,7 +600,7 @@
                   "position": {
                     "lat": 46.542308,
                     "lon": 7.996166,
-                    "alt": 3363.0
+                    "alt": 3363
                   },
                   "children": []
                 },
@@ -751,7 +611,7 @@
                   "position": {
                     "lat": 46.543266,
                     "lon": 7.996065,
-                    "alt": 3363.0
+                    "alt": 3363
                   },
                   "children": []
                 },
@@ -762,7 +622,7 @@
                   "position": {
                     "lat": 46.54065,
                     "lon": 7.997373,
-                    "alt": 3287.0
+                    "alt": 3287
                   },
                   "children": []
                 }
@@ -770,27 +630,7 @@
               "commander": {
                 "id": "cmd34",
                 "name": "Cmd. Kraken"
-              },
-              "staff": [
-                {
-                  "id": "staff35",
-                  "name": "Stf. Legion",
-                  "position": {
-                    "lat": 46.542602,
-                    "lon": 7.995028,
-                    "alt": 3363.0
-                  }
-                },
-                {
-                  "id": "staff36",
-                  "name": "Stf. Mirage",
-                  "position": {
-                    "lat": 46.542795,
-                    "lon": 7.995386,
-                    "alt": 3363.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq9",
@@ -799,7 +639,7 @@
               "position": {
                 "lat": 46.536,
                 "lon": 7.982,
-                "alt": 3312.0
+                "alt": 3312
               },
               "children": [
                 {
@@ -809,7 +649,7 @@
                   "position": {
                     "lat": 46.535352,
                     "lon": 7.980641,
-                    "alt": 3367.0
+                    "alt": 3367
                   },
                   "children": []
                 },
@@ -820,7 +660,7 @@
                   "position": {
                     "lat": 46.536636,
                     "lon": 7.982783,
-                    "alt": 3312.0
+                    "alt": 3312
                   },
                   "children": []
                 },
@@ -831,7 +671,7 @@
                   "position": {
                     "lat": 46.537088,
                     "lon": 7.981867,
-                    "alt": 3312.0
+                    "alt": 3312
                   },
                   "children": []
                 },
@@ -842,7 +682,7 @@
                   "position": {
                     "lat": 46.536428,
                     "lon": 7.982023,
-                    "alt": 3312.0
+                    "alt": 3312
                   },
                   "children": []
                 },
@@ -853,7 +693,7 @@
                   "position": {
                     "lat": 46.537057,
                     "lon": 7.980762,
-                    "alt": 3363.0
+                    "alt": 3363
                   },
                   "children": []
                 }
@@ -861,27 +701,7 @@
               "commander": {
                 "id": "cmd37",
                 "name": "Cmd. Trident"
-              },
-              "staff": [
-                {
-                  "id": "staff38",
-                  "name": "Stf. Vanguard",
-                  "position": {
-                    "lat": 46.536897,
-                    "lon": 7.982103,
-                    "alt": 3312.0
-                  }
-                },
-                {
-                  "id": "staff39",
-                  "name": "Stf. Wraith",
-                  "position": {
-                    "lat": 46.536819,
-                    "lon": 7.982543,
-                    "alt": 3312.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq10",
@@ -890,7 +710,7 @@
               "position": {
                 "lat": 46.529,
                 "lon": 7.999,
-                "alt": 2988.0
+                "alt": 2988
               },
               "children": [
                 {
@@ -900,7 +720,7 @@
                   "position": {
                     "lat": 46.530485,
                     "lon": 7.998135,
-                    "alt": 3046.0
+                    "alt": 3046
                   },
                   "children": []
                 },
@@ -911,7 +731,7 @@
                   "position": {
                     "lat": 46.529026,
                     "lon": 7.999359,
-                    "alt": 2988.0
+                    "alt": 2988
                   },
                   "children": []
                 },
@@ -922,7 +742,7 @@
                   "position": {
                     "lat": 46.529523,
                     "lon": 7.997975,
-                    "alt": 3046.0
+                    "alt": 3046
                   },
                   "children": []
                 },
@@ -933,7 +753,7 @@
                   "position": {
                     "lat": 46.529988,
                     "lon": 7.998539,
-                    "alt": 3046.0
+                    "alt": 3046
                   },
                   "children": []
                 },
@@ -944,7 +764,7 @@
                   "position": {
                     "lat": 46.529054,
                     "lon": 7.999787,
-                    "alt": 2988.0
+                    "alt": 2988
                   },
                   "children": []
                 }
@@ -952,27 +772,7 @@
               "commander": {
                 "id": "cmd40",
                 "name": "Cmd. Forge"
-              },
-              "staff": [
-                {
-                  "id": "staff41",
-                  "name": "Stf. Gladius",
-                  "position": {
-                    "lat": 46.52949,
-                    "lon": 8.000097,
-                    "alt": 3036.0
-                  }
-                },
-                {
-                  "id": "staff42",
-                  "name": "Stf. Havoc",
-                  "position": {
-                    "lat": 46.529202,
-                    "lon": 8.000275,
-                    "alt": 3036.0
-                  }
-                }
-              ]
+              }
             }
           ],
           "commander": {
@@ -986,7 +786,7 @@
               "position": {
                 "lat": 46.538188,
                 "lon": 7.990563,
-                "alt": 3217.0
+                "alt": 3217
               }
             },
             {
@@ -995,7 +795,7 @@
               "position": {
                 "lat": 46.538104,
                 "lon": 7.990125,
-                "alt": 3217.0
+                "alt": 3217
               }
             }
           ]
@@ -1007,7 +807,7 @@
           "position": {
             "lat": 46.539,
             "lon": 7.94,
-            "alt": 3114.0
+            "alt": 3114
           },
           "children": [
             {
@@ -1017,7 +817,7 @@
               "position": {
                 "lat": 46.544,
                 "lon": 7.93,
-                "alt": 2510.0
+                "alt": 2510
               },
               "children": [
                 {
@@ -1027,7 +827,7 @@
                   "position": {
                     "lat": 46.543956,
                     "lon": 7.929257,
-                    "alt": 2510.0
+                    "alt": 2510
                   },
                   "children": []
                 },
@@ -1038,7 +838,7 @@
                   "position": {
                     "lat": 46.542604,
                     "lon": 7.931085,
-                    "alt": 2552.0
+                    "alt": 2552
                   },
                   "children": []
                 },
@@ -1049,7 +849,7 @@
                   "position": {
                     "lat": 46.543778,
                     "lon": 7.929255,
-                    "alt": 2510.0
+                    "alt": 2510
                   },
                   "children": []
                 },
@@ -1060,7 +860,7 @@
                   "position": {
                     "lat": 46.542623,
                     "lon": 7.930498,
-                    "alt": 2552.0
+                    "alt": 2552
                   },
                   "children": []
                 },
@@ -1071,7 +871,7 @@
                   "position": {
                     "lat": 46.545203,
                     "lon": 7.93079,
-                    "alt": 2510.0
+                    "alt": 2510
                   },
                   "children": []
                 }
@@ -1079,27 +879,7 @@
               "commander": {
                 "id": "cmd46",
                 "name": "Cmd. Revenant"
-              },
-              "staff": [
-                {
-                  "id": "staff47",
-                  "name": "Stf. Spectre",
-                  "position": {
-                    "lat": 46.543144,
-                    "lon": 7.930404,
-                    "alt": 2552.0
-                  }
-                },
-                {
-                  "id": "staff48",
-                  "name": "Stf. Torque",
-                  "position": {
-                    "lat": 46.543101,
-                    "lon": 7.929954,
-                    "alt": 2552.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq22",
@@ -1108,7 +888,7 @@
               "position": {
                 "lat": 46.533,
                 "lon": 7.947,
-                "alt": 3135.0
+                "alt": 3135
               },
               "children": [
                 {
@@ -1118,7 +898,7 @@
                   "position": {
                     "lat": 46.53393,
                     "lon": 7.945661,
-                    "alt": 3018.0
+                    "alt": 3018
                   },
                   "children": []
                 },
@@ -1129,7 +909,7 @@
                   "position": {
                     "lat": 46.533147,
                     "lon": 7.946945,
-                    "alt": 3135.0
+                    "alt": 3135
                   },
                   "children": []
                 },
@@ -1140,7 +920,7 @@
                   "position": {
                     "lat": 46.532926,
                     "lon": 7.946852,
-                    "alt": 3135.0
+                    "alt": 3135
                   },
                   "children": []
                 },
@@ -1151,7 +931,7 @@
                   "position": {
                     "lat": 46.531549,
                     "lon": 7.947625,
-                    "alt": 3135.0
+                    "alt": 3135
                   },
                   "children": []
                 },
@@ -1162,7 +942,7 @@
                   "position": {
                     "lat": 46.533573,
                     "lon": 7.94605,
-                    "alt": 3209.0
+                    "alt": 3209
                   },
                   "children": []
                 }
@@ -1170,27 +950,7 @@
               "commander": {
                 "id": "cmd49",
                 "name": "Cmd. Corsair"
-              },
-              "staff": [
-                {
-                  "id": "staff50",
-                  "name": "Stf. Dynamo",
-                  "position": {
-                    "lat": 46.532258,
-                    "lon": 7.946259,
-                    "alt": 3135.0
-                  }
-                },
-                {
-                  "id": "staff51",
-                  "name": "Stf. Eclipse",
-                  "position": {
-                    "lat": 46.532477,
-                    "lon": 7.945935,
-                    "alt": 3135.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq23",
@@ -1199,7 +959,7 @@
               "position": {
                 "lat": 46.541,
                 "lon": 7.935,
-                "alt": 2826.0
+                "alt": 2826
               },
               "children": [
                 {
@@ -1209,7 +969,7 @@
                   "position": {
                     "lat": 46.541677,
                     "lon": 7.936293,
-                    "alt": 3122.0
+                    "alt": 3122
                   },
                   "children": []
                 },
@@ -1220,7 +980,7 @@
                   "position": {
                     "lat": 46.541354,
                     "lon": 7.936208,
-                    "alt": 2965.0
+                    "alt": 2965
                   },
                   "children": []
                 },
@@ -1231,7 +991,7 @@
                   "position": {
                     "lat": 46.539637,
                     "lon": 7.935202,
-                    "alt": 2826.0
+                    "alt": 2826
                   },
                   "children": []
                 },
@@ -1242,7 +1002,7 @@
                   "position": {
                     "lat": 46.540826,
                     "lon": 7.934905,
-                    "alt": 2826.0
+                    "alt": 2826
                   },
                   "children": []
                 },
@@ -1253,7 +1013,7 @@
                   "position": {
                     "lat": 46.539864,
                     "lon": 7.935645,
-                    "alt": 2965.0
+                    "alt": 2965
                   },
                   "children": []
                 }
@@ -1261,27 +1021,7 @@
               "commander": {
                 "id": "cmd52",
                 "name": "Cmd. Kestrel"
-              },
-              "staff": [
-                {
-                  "id": "staff53",
-                  "name": "Stf. Leopard",
-                  "position": {
-                    "lat": 46.540953,
-                    "lon": 7.933693,
-                    "alt": 2826.0
-                  }
-                },
-                {
-                  "id": "staff54",
-                  "name": "Stf. Mustang",
-                  "position": {
-                    "lat": 46.541263,
-                    "lon": 7.933749,
-                    "alt": 2826.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq24",
@@ -1290,7 +1030,7 @@
               "position": {
                 "lat": 46.536,
                 "lon": 7.952,
-                "alt": 3506.0
+                "alt": 3506
               },
               "children": [
                 {
@@ -1300,7 +1040,7 @@
                   "position": {
                     "lat": 46.537337,
                     "lon": 7.952999,
-                    "alt": 3670.0
+                    "alt": 3670
                   },
                   "children": []
                 },
@@ -1311,7 +1051,7 @@
                   "position": {
                     "lat": 46.534525,
                     "lon": 7.953231,
-                    "alt": 3579.0
+                    "alt": 3579
                   },
                   "children": []
                 },
@@ -1322,7 +1062,7 @@
                   "position": {
                     "lat": 46.536048,
                     "lon": 7.95196,
-                    "alt": 3506.0
+                    "alt": 3506
                   },
                   "children": []
                 },
@@ -1333,7 +1073,7 @@
                   "position": {
                     "lat": 46.536165,
                     "lon": 7.95233,
-                    "alt": 3670.0
+                    "alt": 3670
                   },
                   "children": []
                 },
@@ -1344,7 +1084,7 @@
                   "position": {
                     "lat": 46.536493,
                     "lon": 7.953453,
-                    "alt": 3670.0
+                    "alt": 3670
                   },
                   "children": []
                 }
@@ -1352,27 +1092,7 @@
               "commander": {
                 "id": "cmd55",
                 "name": "Cmd. Scorpion"
-              },
-              "staff": [
-                {
-                  "id": "staff56",
-                  "name": "Stf. Thunderbolt",
-                  "position": {
-                    "lat": 46.536684,
-                    "lon": 7.95115,
-                    "alt": 3506.0
-                  }
-                },
-                {
-                  "id": "staff57",
-                  "name": "Stf. Uppercut",
-                  "position": {
-                    "lat": 46.536843,
-                    "lon": 7.951542,
-                    "alt": 3506.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq25",
@@ -1381,7 +1101,7 @@
               "position": {
                 "lat": 46.547,
                 "lon": 7.942,
-                "alt": 3027.0
+                "alt": 3027
               },
               "children": [
                 {
@@ -1391,7 +1111,7 @@
                   "position": {
                     "lat": 46.548401,
                     "lon": 7.942935,
-                    "alt": 2830.0
+                    "alt": 2830
                   },
                   "children": []
                 },
@@ -1402,7 +1122,7 @@
                   "position": {
                     "lat": 46.547934,
                     "lon": 7.940978,
-                    "alt": 2730.0
+                    "alt": 2730
                   },
                   "children": []
                 },
@@ -1413,7 +1133,7 @@
                   "position": {
                     "lat": 46.548479,
                     "lon": 7.940604,
-                    "alt": 2730.0
+                    "alt": 2730
                   },
                   "children": []
                 },
@@ -1424,7 +1144,7 @@
                   "position": {
                     "lat": 46.548123,
                     "lon": 7.942538,
-                    "alt": 2830.0
+                    "alt": 2830
                   },
                   "children": []
                 },
@@ -1435,7 +1155,7 @@
                   "position": {
                     "lat": 46.546483,
                     "lon": 7.943022,
-                    "alt": 3027.0
+                    "alt": 3027
                   },
                   "children": []
                 }
@@ -1443,27 +1163,7 @@
               "commander": {
                 "id": "cmd58",
                 "name": "Cmd. Ace"
-              },
-              "staff": [
-                {
-                  "id": "staff59",
-                  "name": "Stf. Barrage",
-                  "position": {
-                    "lat": 46.54788,
-                    "lon": 7.942272,
-                    "alt": 3027.0
-                  }
-                },
-                {
-                  "id": "staff60",
-                  "name": "Stf. Cyclone",
-                  "position": {
-                    "lat": 46.547763,
-                    "lon": 7.942693,
-                    "alt": 3027.0
-                  }
-                }
-              ]
+              }
             }
           ],
           "commander": {
@@ -1477,7 +1177,7 @@
               "position": {
                 "lat": 46.5387,
                 "lon": 7.941233,
-                "alt": 3114.0
+                "alt": 3114
               }
             },
             {
@@ -1486,7 +1186,7 @@
               "position": {
                 "lat": 46.538428,
                 "lon": 7.94101,
-                "alt": 3114.0
+                "alt": 3114
               }
             }
           ]
@@ -1503,7 +1203,7 @@
           "position": {
             "lat": 46.553245,
             "lon": 7.965713,
-            "alt": 2837.0
+            "alt": 2837
           }
         },
         {
@@ -1512,7 +1212,7 @@
           "position": {
             "lat": 46.553123,
             "lon": 7.965294,
-            "alt": 2837.0
+            "alt": 2837
           }
         }
       ]
@@ -1524,7 +1224,7 @@
       "position": {
         "lat": 46.591,
         "lon": 8.052,
-        "alt": 1716.0
+        "alt": 1716
       },
       "children": [
         {
@@ -1534,7 +1234,7 @@
           "position": {
             "lat": 46.617,
             "lon": 8.052,
-            "alt": 1151.0
+            "alt": 1151
           },
           "children": [
             {
@@ -1544,7 +1244,7 @@
               "position": {
                 "lat": 46.613,
                 "lon": 8.039,
-                "alt": 1009.0
+                "alt": 1009
               },
               "children": [
                 {
@@ -1554,7 +1254,7 @@
                   "position": {
                     "lat": 46.614269,
                     "lon": 8.039467,
-                    "alt": 1009.0
+                    "alt": 1009
                   },
                   "children": []
                 },
@@ -1565,7 +1265,7 @@
                   "position": {
                     "lat": 46.611968,
                     "lon": 8.038623,
-                    "alt": 1161.0
+                    "alt": 1161
                   },
                   "children": []
                 },
@@ -1576,7 +1276,7 @@
                   "position": {
                     "lat": 46.611651,
                     "lon": 8.037914,
-                    "alt": 1161.0
+                    "alt": 1161
                   },
                   "children": []
                 },
@@ -1587,7 +1287,7 @@
                   "position": {
                     "lat": 46.613363,
                     "lon": 8.038623,
-                    "alt": 1009.0
+                    "alt": 1009
                   },
                   "children": []
                 },
@@ -1598,7 +1298,7 @@
                   "position": {
                     "lat": 46.614423,
                     "lon": 8.038729,
-                    "alt": 1009.0
+                    "alt": 1009
                   },
                   "children": []
                 }
@@ -1606,27 +1306,7 @@
               "commander": {
                 "id": "cmd67",
                 "name": "Cmd. Overlord"
-              },
-              "staff": [
-                {
-                  "id": "staff68",
-                  "name": "Stf. Prowler",
-                  "position": {
-                    "lat": 46.612115,
-                    "lon": 8.039239,
-                    "alt": 1161.0
-                  }
-                },
-                {
-                  "id": "staff69",
-                  "name": "Stf. Rampart",
-                  "position": {
-                    "lat": 46.612112,
-                    "lon": 8.038784,
-                    "alt": 1161.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq12",
@@ -1635,7 +1315,7 @@
               "position": {
                 "lat": 46.623,
                 "lon": 8.063,
-                "alt": 1194.0
+                "alt": 1194
               },
               "children": [
                 {
@@ -1645,7 +1325,7 @@
                   "position": {
                     "lat": 46.623718,
                     "lon": 8.061548,
-                    "alt": 1182.0
+                    "alt": 1182
                   },
                   "children": []
                 },
@@ -1656,7 +1336,7 @@
                   "position": {
                     "lat": 46.624126,
                     "lon": 8.062263,
-                    "alt": 1182.0
+                    "alt": 1182
                   },
                   "children": []
                 },
@@ -1667,7 +1347,7 @@
                   "position": {
                     "lat": 46.624198,
                     "lon": 8.062901,
-                    "alt": 1194.0
+                    "alt": 1194
                   },
                   "children": []
                 },
@@ -1678,7 +1358,7 @@
                   "position": {
                     "lat": 46.624026,
                     "lon": 8.063394,
-                    "alt": 1194.0
+                    "alt": 1194
                   },
                   "children": []
                 },
@@ -1689,7 +1369,7 @@
                   "position": {
                     "lat": 46.622894,
                     "lon": 8.063088,
-                    "alt": 1292.0
+                    "alt": 1292
                   },
                   "children": []
                 }
@@ -1697,27 +1377,7 @@
               "commander": {
                 "id": "cmd70",
                 "name": "Cmd. Bulldog"
-              },
-              "staff": [
-                {
-                  "id": "staff71",
-                  "name": "Stf. Viper",
-                  "position": {
-                    "lat": 46.622331,
-                    "lon": 8.062123,
-                    "alt": 1275.0
-                  }
-                },
-                {
-                  "id": "staff72",
-                  "name": "Stf. Falcon",
-                  "position": {
-                    "lat": 46.622577,
-                    "lon": 8.061843,
-                    "alt": 1275.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq13",
@@ -1726,7 +1386,7 @@
               "position": {
                 "lat": 46.619,
                 "lon": 8.046,
-                "alt": 982.0
+                "alt": 982
               },
               "children": [
                 {
@@ -1736,7 +1396,7 @@
                   "position": {
                     "lat": 46.618018,
                     "lon": 8.046284,
-                    "alt": 1014.0
+                    "alt": 1014
                   },
                   "children": []
                 },
@@ -1747,7 +1407,7 @@
                   "position": {
                     "lat": 46.619432,
                     "lon": 8.046886,
-                    "alt": 982.0
+                    "alt": 982
                   },
                   "children": []
                 },
@@ -1758,7 +1418,7 @@
                   "position": {
                     "lat": 46.619289,
                     "lon": 8.047004,
-                    "alt": 982.0
+                    "alt": 982
                   },
                   "children": []
                 },
@@ -1769,7 +1429,7 @@
                   "position": {
                     "lat": 46.619267,
                     "lon": 8.045007,
-                    "alt": 977.0
+                    "alt": 977
                   },
                   "children": []
                 },
@@ -1780,7 +1440,7 @@
                   "position": {
                     "lat": 46.618044,
                     "lon": 8.046538,
-                    "alt": 1014.0
+                    "alt": 1014
                   },
                   "children": []
                 }
@@ -1788,27 +1448,7 @@
               "commander": {
                 "id": "cmd73",
                 "name": "Cmd. Eagle"
-              },
-              "staff": [
-                {
-                  "id": "staff74",
-                  "name": "Stf. Wolf",
-                  "position": {
-                    "lat": 46.619071,
-                    "lon": 8.044694,
-                    "alt": 977.0
-                  }
-                },
-                {
-                  "id": "staff75",
-                  "name": "Stf. Cobra",
-                  "position": {
-                    "lat": 46.619373,
-                    "lon": 8.044808,
-                    "alt": 977.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq14",
@@ -1817,7 +1457,7 @@
               "position": {
                 "lat": 46.611,
                 "lon": 8.059,
-                "alt": 2027.0
+                "alt": 2027
               },
               "children": [
                 {
@@ -1827,7 +1467,7 @@
                   "position": {
                     "lat": 46.6112,
                     "lon": 8.05914,
-                    "alt": 2027.0
+                    "alt": 2027
                   },
                   "children": []
                 },
@@ -1838,7 +1478,7 @@
                   "position": {
                     "lat": 46.612188,
                     "lon": 8.059815,
-                    "alt": 2027.0
+                    "alt": 2027
                   },
                   "children": []
                 },
@@ -1849,7 +1489,7 @@
                   "position": {
                     "lat": 46.609681,
                     "lon": 8.057787,
-                    "alt": 1825.0
+                    "alt": 1825
                   },
                   "children": []
                 },
@@ -1860,7 +1500,7 @@
                   "position": {
                     "lat": 46.6095,
                     "lon": 8.057604,
-                    "alt": 1825.0
+                    "alt": 1825
                   },
                   "children": []
                 },
@@ -1871,7 +1511,7 @@
                   "position": {
                     "lat": 46.609672,
                     "lon": 8.059735,
-                    "alt": 2013.0
+                    "alt": 2013
                   },
                   "children": []
                 }
@@ -1879,27 +1519,7 @@
               "commander": {
                 "id": "cmd76",
                 "name": "Cmd. Striker"
-              },
-              "staff": [
-                {
-                  "id": "staff77",
-                  "name": "Stf. Blaze",
-                  "position": {
-                    "lat": 46.611755,
-                    "lon": 8.058286,
-                    "alt": 1804.0
-                  }
-                },
-                {
-                  "id": "staff78",
-                  "name": "Stf. Frost",
-                  "position": {
-                    "lat": 46.611877,
-                    "lon": 8.058705,
-                    "alt": 2027.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq15",
@@ -1908,7 +1528,7 @@
               "position": {
                 "lat": 46.626,
                 "lon": 8.042,
-                "alt": 1096.0
+                "alt": 1096
               },
               "children": [
                 {
@@ -1918,7 +1538,7 @@
                   "position": {
                     "lat": 46.624505,
                     "lon": 8.041717,
-                    "alt": 1046.0
+                    "alt": 1046
                   },
                   "children": []
                 },
@@ -1929,7 +1549,7 @@
                   "position": {
                     "lat": 46.625537,
                     "lon": 8.041095,
-                    "alt": 1109.0
+                    "alt": 1109
                   },
                   "children": []
                 },
@@ -1940,7 +1560,7 @@
                   "position": {
                     "lat": 46.626458,
                     "lon": 8.04065,
-                    "alt": 1109.0
+                    "alt": 1109
                   },
                   "children": []
                 },
@@ -1951,7 +1571,7 @@
                   "position": {
                     "lat": 46.626269,
                     "lon": 8.043053,
-                    "alt": 1096.0
+                    "alt": 1096
                   },
                   "children": []
                 },
@@ -1962,7 +1582,7 @@
                   "position": {
                     "lat": 46.625745,
                     "lon": 8.042264,
-                    "alt": 1096.0
+                    "alt": 1096
                   },
                   "children": []
                 }
@@ -1970,27 +1590,7 @@
               "commander": {
                 "id": "cmd79",
                 "name": "Cmd. Sierra"
-              },
-              "staff": [
-                {
-                  "id": "staff80",
-                  "name": "Stf. Tango",
-                  "position": {
-                    "lat": 46.626848,
-                    "lon": 8.042437,
-                    "alt": 1096.0
-                  }
-                },
-                {
-                  "id": "staff81",
-                  "name": "Stf. Delta",
-                  "position": {
-                    "lat": 46.626694,
-                    "lon": 8.042834,
-                    "alt": 1096.0
-                  }
-                }
-              ]
+              }
             }
           ],
           "commander": {
@@ -2004,7 +1604,7 @@
               "position": {
                 "lat": 46.616591,
                 "lon": 8.053167,
-                "alt": 1245.0
+                "alt": 1245
               }
             },
             {
@@ -2013,7 +1613,7 @@
               "position": {
                 "lat": 46.616342,
                 "lon": 8.052894,
-                "alt": 1245.0
+                "alt": 1245
               }
             }
           ]
@@ -2025,7 +1625,7 @@
           "position": {
             "lat": 46.578,
             "lon": 8.074,
-            "alt": 2315.0
+            "alt": 2315
           },
           "children": [
             {
@@ -2035,7 +1635,7 @@
               "position": {
                 "lat": 46.583,
                 "lon": 8.061,
-                "alt": 1838.0
+                "alt": 1838
               },
               "children": [
                 {
@@ -2045,7 +1645,7 @@
                   "position": {
                     "lat": 46.583271,
                     "lon": 8.060084,
-                    "alt": 1871.0
+                    "alt": 1871
                   },
                   "children": []
                 },
@@ -2056,7 +1656,7 @@
                   "position": {
                     "lat": 46.583622,
                     "lon": 8.061698,
-                    "alt": 1742.0
+                    "alt": 1742
                   },
                   "children": []
                 },
@@ -2067,7 +1667,7 @@
                   "position": {
                     "lat": 46.58427,
                     "lon": 8.06233,
-                    "alt": 1742.0
+                    "alt": 1742
                   },
                   "children": []
                 },
@@ -2078,7 +1678,7 @@
                   "position": {
                     "lat": 46.583289,
                     "lon": 8.060515,
-                    "alt": 1838.0
+                    "alt": 1838
                   },
                   "children": []
                 },
@@ -2089,7 +1689,7 @@
                   "position": {
                     "lat": 46.584437,
                     "lon": 8.062174,
-                    "alt": 1742.0
+                    "alt": 1742
                   },
                   "children": []
                 }
@@ -2097,27 +1697,7 @@
               "commander": {
                 "id": "cmd85",
                 "name": "Cmd. Whiskey"
-              },
-              "staff": [
-                {
-                  "id": "staff86",
-                  "name": "Stf. Yankee",
-                  "position": {
-                    "lat": 46.58249,
-                    "lon": 8.062079,
-                    "alt": 1838.0
-                  }
-                },
-                {
-                  "id": "staff87",
-                  "name": "Stf. Zulu",
-                  "position": {
-                    "lat": 46.582267,
-                    "lon": 8.06176,
-                    "alt": 1838.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq17",
@@ -2126,7 +1706,7 @@
               "position": {
                 "lat": 46.573,
                 "lon": 8.089,
-                "alt": 2559.0
+                "alt": 2559
               },
               "children": [
                 {
@@ -2136,7 +1716,7 @@
                   "position": {
                     "lat": 46.57253,
                     "lon": 8.090228,
-                    "alt": 2588.0
+                    "alt": 2588
                   },
                   "children": []
                 },
@@ -2147,7 +1727,7 @@
                   "position": {
                     "lat": 46.574252,
                     "lon": 8.0882,
-                    "alt": 2559.0
+                    "alt": 2559
                   },
                   "children": []
                 },
@@ -2158,7 +1738,7 @@
                   "position": {
                     "lat": 46.57246,
                     "lon": 8.090448,
-                    "alt": 2588.0
+                    "alt": 2588
                   },
                   "children": []
                 },
@@ -2169,7 +1749,7 @@
                   "position": {
                     "lat": 46.574428,
                     "lon": 8.087564,
-                    "alt": 2559.0
+                    "alt": 2559
                   },
                   "children": []
                 },
@@ -2180,7 +1760,7 @@
                   "position": {
                     "lat": 46.57331,
                     "lon": 8.090466,
-                    "alt": 2505.0
+                    "alt": 2505
                   },
                   "children": []
                 }
@@ -2188,27 +1768,7 @@
               "commander": {
                 "id": "cmd88",
                 "name": "Cmd. Flint"
-              },
-              "staff": [
-                {
-                  "id": "staff89",
-                  "name": "Stf. Granite",
-                  "position": {
-                    "lat": 46.572101,
-                    "lon": 8.089069,
-                    "alt": 2626.0
-                  }
-                },
-                {
-                  "id": "staff90",
-                  "name": "Stf. Hammer",
-                  "position": {
-                    "lat": 46.572139,
-                    "lon": 8.088617,
-                    "alt": 2626.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq18",
@@ -2217,7 +1777,7 @@
               "position": {
                 "lat": 46.581,
                 "lon": 8.078,
-                "alt": 2188.0
+                "alt": 2188
               },
               "children": [
                 {
@@ -2227,7 +1787,7 @@
                   "position": {
                     "lat": 46.58239,
                     "lon": 8.077172,
-                    "alt": 2062.0
+                    "alt": 2062
                   },
                   "children": []
                 },
@@ -2238,7 +1798,7 @@
                   "position": {
                     "lat": 46.580419,
                     "lon": 8.078037,
-                    "alt": 2188.0
+                    "alt": 2188
                   },
                   "children": []
                 },
@@ -2249,7 +1809,7 @@
                   "position": {
                     "lat": 46.580151,
                     "lon": 8.077363,
-                    "alt": 2188.0
+                    "alt": 2188
                   },
                   "children": []
                 },
@@ -2260,7 +1820,7 @@
                   "position": {
                     "lat": 46.581381,
                     "lon": 8.077448,
-                    "alt": 2062.0
+                    "alt": 2062
                   },
                   "children": []
                 },
@@ -2271,7 +1831,7 @@
                   "position": {
                     "lat": 46.580594,
                     "lon": 8.077838,
-                    "alt": 2188.0
+                    "alt": 2188
                   },
                   "children": []
                 }
@@ -2279,27 +1839,7 @@
               "commander": {
                 "id": "cmd91",
                 "name": "Cmd. Nitro"
-              },
-              "staff": [
-                {
-                  "id": "staff92",
-                  "name": "Stf. Onyx",
-                  "position": {
-                    "lat": 46.580415,
-                    "lon": 8.077004,
-                    "alt": 2168.0
-                  }
-                },
-                {
-                  "id": "staff93",
-                  "name": "Stf. Panther",
-                  "position": {
-                    "lat": 46.580685,
-                    "lon": 8.076774,
-                    "alt": 2168.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq19",
@@ -2308,7 +1848,7 @@
               "position": {
                 "lat": 46.576,
                 "lon": 8.066,
-                "alt": 2278.0
+                "alt": 2278
               },
               "children": [
                 {
@@ -2318,7 +1858,7 @@
                   "position": {
                     "lat": 46.576211,
                     "lon": 8.067199,
-                    "alt": 2345.0
+                    "alt": 2345
                   },
                   "children": []
                 },
@@ -2329,7 +1869,7 @@
                   "position": {
                     "lat": 46.576122,
                     "lon": 8.067166,
-                    "alt": 2345.0
+                    "alt": 2345
                   },
                   "children": []
                 },
@@ -2340,7 +1880,7 @@
                   "position": {
                     "lat": 46.577063,
                     "lon": 8.065831,
-                    "alt": 2278.0
+                    "alt": 2278
                   },
                   "children": []
                 },
@@ -2351,7 +1891,7 @@
                   "position": {
                     "lat": 46.575865,
                     "lon": 8.066264,
-                    "alt": 2278.0
+                    "alt": 2278
                   },
                   "children": []
                 },
@@ -2362,7 +1902,7 @@
                   "position": {
                     "lat": 46.576377,
                     "lon": 8.065726,
-                    "alt": 2278.0
+                    "alt": 2278
                   },
                   "children": []
                 }
@@ -2370,27 +1910,7 @@
               "commander": {
                 "id": "cmd94",
                 "name": "Cmd. Warden"
-              },
-              "staff": [
-                {
-                  "id": "staff95",
-                  "name": "Stf. Apex",
-                  "position": {
-                    "lat": 46.576187,
-                    "lon": 8.064719,
-                    "alt": 2278.0
-                  }
-                },
-                {
-                  "id": "staff96",
-                  "name": "Stf. Bolt",
-                  "position": {
-                    "lat": 46.576477,
-                    "lon": 8.06489,
-                    "alt": 2278.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq20",
@@ -2399,7 +1919,7 @@
               "position": {
                 "lat": 46.585,
                 "lon": 8.084,
-                "alt": 2009.0
+                "alt": 2009
               },
               "children": [
                 {
@@ -2409,7 +1929,7 @@
                   "position": {
                     "lat": 46.583516,
                     "lon": 8.08463,
-                    "alt": 2009.0
+                    "alt": 2009
                   },
                   "children": []
                 },
@@ -2420,7 +1940,7 @@
                   "position": {
                     "lat": 46.58448,
                     "lon": 8.082557,
-                    "alt": 1940.0
+                    "alt": 1940
                   },
                   "children": []
                 },
@@ -2431,7 +1951,7 @@
                   "position": {
                     "lat": 46.585447,
                     "lon": 8.083343,
-                    "alt": 1939.0
+                    "alt": 1939
                   },
                   "children": []
                 },
@@ -2442,7 +1962,7 @@
                   "position": {
                     "lat": 46.584879,
                     "lon": 8.084599,
-                    "alt": 2009.0
+                    "alt": 2009
                   },
                   "children": []
                 },
@@ -2453,7 +1973,7 @@
                   "position": {
                     "lat": 46.585625,
                     "lon": 8.083146,
-                    "alt": 1890.0
+                    "alt": 1890
                   },
                   "children": []
                 }
@@ -2461,27 +1981,7 @@
               "commander": {
                 "id": "cmd97",
                 "name": "Cmd. Inferno"
-              },
-              "staff": [
-                {
-                  "id": "staff98",
-                  "name": "Stf. Jaguar",
-                  "position": {
-                    "lat": 46.585812,
-                    "lon": 8.083436,
-                    "alt": 1939.0
-                  }
-                },
-                {
-                  "id": "staff99",
-                  "name": "Stf. Kraken",
-                  "position": {
-                    "lat": 46.585896,
-                    "lon": 8.083874,
-                    "alt": 1939.0
-                  }
-                }
-              ]
+              }
             }
           ],
           "commander": {
@@ -2495,7 +1995,7 @@
               "position": {
                 "lat": 46.578278,
                 "lon": 8.075245,
-                "alt": 2327.0
+                "alt": 2327
               }
             },
             {
@@ -2504,7 +2004,7 @@
               "position": {
                 "lat": 46.577969,
                 "lon": 8.075309,
-                "alt": 2327.0
+                "alt": 2327
               }
             }
           ]
@@ -2516,7 +2016,7 @@
           "position": {
             "lat": 46.578,
             "lon": 8.03,
-            "alt": 2735.0
+            "alt": 2735
           },
           "children": [
             {
@@ -2526,7 +2026,7 @@
               "position": {
                 "lat": 46.583,
                 "lon": 8.024,
-                "alt": 3159.0
+                "alt": 3159
               },
               "children": [
                 {
@@ -2536,7 +2036,7 @@
                   "position": {
                     "lat": 46.583362,
                     "lon": 8.023521,
-                    "alt": 3254.0
+                    "alt": 3254
                   },
                   "children": []
                 },
@@ -2547,7 +2047,7 @@
                   "position": {
                     "lat": 46.583348,
                     "lon": 8.023903,
-                    "alt": 3254.0
+                    "alt": 3254
                   },
                   "children": []
                 },
@@ -2558,7 +2058,7 @@
                   "position": {
                     "lat": 46.581753,
                     "lon": 8.023098,
-                    "alt": 3159.0
+                    "alt": 3159
                   },
                   "children": []
                 },
@@ -2569,7 +2069,7 @@
                   "position": {
                     "lat": 46.584154,
                     "lon": 8.025075,
-                    "alt": 3199.0
+                    "alt": 3199
                   },
                   "children": []
                 },
@@ -2580,7 +2080,7 @@
                   "position": {
                     "lat": 46.582897,
                     "lon": 8.023023,
-                    "alt": 3159.0
+                    "alt": 3159
                   },
                   "children": []
                 }
@@ -2588,27 +2088,7 @@
               "commander": {
                 "id": "cmd103",
                 "name": "Cmd. Vanguard"
-              },
-              "staff": [
-                {
-                  "id": "staff104",
-                  "name": "Stf. Wraith",
-                  "position": {
-                    "lat": 46.583164,
-                    "lon": 8.025288,
-                    "alt": 3055.0
-                  }
-                },
-                {
-                  "id": "staff105",
-                  "name": "Stf. Atlas",
-                  "position": {
-                    "lat": 46.582851,
-                    "lon": 8.025292,
-                    "alt": 3055.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq27",
@@ -2617,7 +2097,7 @@
               "position": {
                 "lat": 46.574,
                 "lon": 8.037,
-                "alt": 2649.0
+                "alt": 2649
               },
               "children": [
                 {
@@ -2627,7 +2107,7 @@
                   "position": {
                     "lat": 46.574336,
                     "lon": 8.037756,
-                    "alt": 2622.0
+                    "alt": 2622
                   },
                   "children": []
                 },
@@ -2638,7 +2118,7 @@
                   "position": {
                     "lat": 46.573716,
                     "lon": 8.036628,
-                    "alt": 2649.0
+                    "alt": 2649
                   },
                   "children": []
                 },
@@ -2649,7 +2129,7 @@
                   "position": {
                     "lat": 46.575205,
                     "lon": 8.03722,
-                    "alt": 2629.0
+                    "alt": 2629
                   },
                   "children": []
                 },
@@ -2660,7 +2140,7 @@
                   "position": {
                     "lat": 46.572604,
                     "lon": 8.038072,
-                    "alt": 2613.0
+                    "alt": 2613
                   },
                   "children": []
                 },
@@ -2671,7 +2151,7 @@
                   "position": {
                     "lat": 46.574104,
                     "lon": 8.037068,
-                    "alt": 2649.0
+                    "alt": 2649
                   },
                   "children": []
                 }
@@ -2679,27 +2159,7 @@
               "commander": {
                 "id": "cmd106",
                 "name": "Cmd. Gladius"
-              },
-              "staff": [
-                {
-                  "id": "staff107",
-                  "name": "Stf. Havoc",
-                  "position": {
-                    "lat": 46.573398,
-                    "lon": 8.037973,
-                    "alt": 2622.0
-                  }
-                },
-                {
-                  "id": "staff108",
-                  "name": "Stf. Impulse",
-                  "position": {
-                    "lat": 46.573205,
-                    "lon": 8.037615,
-                    "alt": 2622.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq28",
@@ -2708,7 +2168,7 @@
               "position": {
                 "lat": 46.58,
                 "lon": 8.028,
-                "alt": 2943.0
+                "alt": 2943
               },
               "children": [
                 {
@@ -2718,7 +2178,7 @@
                   "position": {
                     "lat": 46.581428,
                     "lon": 8.028078,
-                    "alt": 2943.0
+                    "alt": 2943
                   },
                   "children": []
                 },
@@ -2729,7 +2189,7 @@
                   "position": {
                     "lat": 46.580073,
                     "lon": 8.029202,
-                    "alt": 2940.0
+                    "alt": 2940
                   },
                   "children": []
                 },
@@ -2740,7 +2200,7 @@
                   "position": {
                     "lat": 46.578764,
                     "lon": 8.027176,
-                    "alt": 2749.0
+                    "alt": 2749
                   },
                   "children": []
                 },
@@ -2751,7 +2211,7 @@
                   "position": {
                     "lat": 46.579664,
                     "lon": 8.02861,
-                    "alt": 2943.0
+                    "alt": 2943
                   },
                   "children": []
                 },
@@ -2762,7 +2222,7 @@
                   "position": {
                     "lat": 46.579822,
                     "lon": 8.027473,
-                    "alt": 2943.0
+                    "alt": 2943
                   },
                   "children": []
                 }
@@ -2770,27 +2230,7 @@
               "commander": {
                 "id": "cmd109",
                 "name": "Cmd. Outlaw"
-              },
-              "staff": [
-                {
-                  "id": "staff110",
-                  "name": "Stf. Phalanx",
-                  "position": {
-                    "lat": 46.579103,
-                    "lon": 8.027897,
-                    "alt": 2749.0
-                  }
-                },
-                {
-                  "id": "staff111",
-                  "name": "Stf. Revenant",
-                  "position": {
-                    "lat": 46.579181,
-                    "lon": 8.027457,
-                    "alt": 2943.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq29",
@@ -2799,7 +2239,7 @@
               "position": {
                 "lat": 46.576,
                 "lon": 8.042,
-                "alt": 2553.0
+                "alt": 2553
               },
               "children": [
                 {
@@ -2809,7 +2249,7 @@
                   "position": {
                     "lat": 46.575508,
                     "lon": 8.042435,
-                    "alt": 2553.0
+                    "alt": 2553
                   },
                   "children": []
                 },
@@ -2820,7 +2260,7 @@
                   "position": {
                     "lat": 46.577144,
                     "lon": 8.041215,
-                    "alt": 2567.0
+                    "alt": 2567
                   },
                   "children": []
                 },
@@ -2831,7 +2271,7 @@
                   "position": {
                     "lat": 46.575977,
                     "lon": 8.04205,
-                    "alt": 2553.0
+                    "alt": 2553
                   },
                   "children": []
                 },
@@ -2842,7 +2282,7 @@
                   "position": {
                     "lat": 46.576215,
                     "lon": 8.041726,
-                    "alt": 2553.0
+                    "alt": 2553
                   },
                   "children": []
                 },
@@ -2853,7 +2293,7 @@
                   "position": {
                     "lat": 46.575165,
                     "lon": 8.041787,
-                    "alt": 2553.0
+                    "alt": 2553
                   },
                   "children": []
                 }
@@ -2861,27 +2301,7 @@
               "commander": {
                 "id": "cmd112",
                 "name": "Cmd. Arsenal"
-              },
-              "staff": [
-                {
-                  "id": "staff113",
-                  "name": "Stf. Breaker",
-                  "position": {
-                    "lat": 46.57551,
-                    "lon": 8.040902,
-                    "alt": 2568.0
-                  }
-                },
-                {
-                  "id": "staff114",
-                  "name": "Stf. Corsair",
-                  "position": {
-                    "lat": 46.575798,
-                    "lon": 8.040724,
-                    "alt": 2568.0
-                  }
-                }
-              ]
+              }
             },
             {
               "id": "sq30",
@@ -2890,7 +2310,7 @@
               "position": {
                 "lat": 46.585,
                 "lon": 8.032,
-                "alt": 2815.0
+                "alt": 2815
               },
               "children": [
                 {
@@ -2900,7 +2320,7 @@
                   "position": {
                     "lat": 46.583964,
                     "lon": 8.030645,
-                    "alt": 2850.0
+                    "alt": 2850
                   },
                   "children": []
                 },
@@ -2911,7 +2331,7 @@
                   "position": {
                     "lat": 46.584517,
                     "lon": 8.032797,
-                    "alt": 2815.0
+                    "alt": 2815
                   },
                   "children": []
                 },
@@ -2922,7 +2342,7 @@
                   "position": {
                     "lat": 46.584854,
                     "lon": 8.031637,
-                    "alt": 2815.0
+                    "alt": 2815
                   },
                   "children": []
                 },
@@ -2933,7 +2353,7 @@
                   "position": {
                     "lat": 46.585678,
                     "lon": 8.031816,
-                    "alt": 2798.0
+                    "alt": 2798
                   },
                   "children": []
                 },
@@ -2944,7 +2364,7 @@
                   "position": {
                     "lat": 46.585748,
                     "lon": 8.031375,
-                    "alt": 2798.0
+                    "alt": 2798
                   },
                   "children": []
                 }
@@ -2952,27 +2372,7 @@
               "commander": {
                 "id": "cmd115",
                 "name": "Cmd. Icarus"
-              },
-              "staff": [
-                {
-                  "id": "staff116",
-                  "name": "Stf. Juggernaut",
-                  "position": {
-                    "lat": 46.5853,
-                    "lon": 8.030766,
-                    "alt": 2850.0
-                  }
-                },
-                {
-                  "id": "staff117",
-                  "name": "Stf. Kestrel",
-                  "position": {
-                    "lat": 46.585572,
-                    "lon": 8.03099,
-                    "alt": 3011.0
-                  }
-                }
-              ]
+              }
             }
           ],
           "commander": {
@@ -2986,7 +2386,7 @@
               "position": {
                 "lat": 46.578802,
                 "lon": 8.030594,
-                "alt": 2735.0
+                "alt": 2735
               }
             },
             {
@@ -2995,7 +2395,7 @@
               "position": {
                 "lat": 46.578614,
                 "lon": 8.030958,
-                "alt": 2735.0
+                "alt": 2735
               }
             }
           ]
@@ -3012,7 +2412,7 @@
           "position": {
             "lat": 46.591387,
             "lon": 8.053182,
-            "alt": 1638.0
+            "alt": 1638
           }
         },
         {
@@ -3021,7 +2421,7 @@
           "position": {
             "lat": 46.591086,
             "lon": 8.053304,
-            "alt": 1638.0
+            "alt": 1638
           }
         }
       ]
@@ -3038,7 +2438,7 @@
       "position": {
         "lat": 46.571929,
         "lon": 8.011305,
-        "alt": 3114.0
+        "alt": 3114
       }
     },
     {
@@ -3047,7 +2447,7 @@
       "position": {
         "lat": 46.571627,
         "lon": 8.011191,
-        "alt": 3114.0
+        "alt": 3114
       }
     }
   ]
