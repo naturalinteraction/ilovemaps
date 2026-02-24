@@ -1446,10 +1446,8 @@ function updateHeatmapLayer() {
   for (const node of allNodes) {
     if (node.children.length === 0) continue;
     const entity = entitiesById[node.id];
-    // A unit gets a blob if its billboard is visible OR its commander is visible (unmerged)
-    const cmdE = cmdEntitiesById[node.id];
-    const isVisible = (entity && entity.show) || (cmdE && cmdE.show);
-    if (!isVisible) continue;
+    // A unit gets a blob only if its billboard is visible (not unmerged)
+    if (!entity || !entity.show) continue;
     const positions = collectDescendantLeafPositions(node);
     // Include the unit's own position so the blob covers the parent marker too
     positions.push(node.position);
