@@ -1442,24 +1442,19 @@ function updateHeatmapLayer() {
     return;
   }
 
-  // Collect ALL unit positions - not just visible ones - into ONE blob
-  const allPositions = [];
+  // Create one blob per visible unit that has children (descendant leaves define the shape)
   for (const node of allNodes) {
-    // Include all military units regardless of visibility
-    if (node.type !== "individual") {
-      allPositions.push(node.position);
-    }
-    // Include all individuals
-    if (node.type === "individual") {
-      allPositions.push(node.position);
-    }
-  }
-  console.log("blob: total positions:", allPositions.length);
-
-  // Create ONE big blob for ALL units
-  if (allPositions.length >= 1) {
-    const boundaries = computeBlobBoundaries(allPositions);
-    console.log("blob: boundaries:", boundaries.length, "pts:", boundaries[0]?.length);
+    if (node.children.length === 0) continue;
+    const entity = entitiesById[node.id];
+    // A unit gets a blob if its billboard is visible OR its commander is visible (unmerged)
+    const cmdE = cmdEntitiesById[node.id];
+    const isVisible = (entity && entity.show) || (cmdE && cmdE.show);
+    if (!isVisible) continue;
+    const positions = collectDescendantLeafPositions(node);
+    // Include the unit's own position so the blob covers the parent marker too
+    positions.push(node.position);
+    if (positions.length < 1) continue;
+    const boundaries = computeBlobBoundaries(positions);
     for (const boundary of boundaries) {
       blobGroups.push({ boundary });
     }
