@@ -1432,6 +1432,29 @@ export function startIndividualMovement() {
         }
       }
     }
+    for (const node of allNodes) {
+      if (node.children.length > 0) {
+        let sumLat = 0, sumLon = 0, sumAlt = 0, count = 0;
+        for (const child of node.children) {
+          sumLat += child.position.lat;
+          sumLon += child.position.lon;
+          sumAlt += child.position.alt;
+          count++;
+        }
+        if (count > 0) {
+          node.position.lat = sumLat / count;
+          node.position.lon = sumLon / count;
+          node.position.alt = sumAlt / count;
+          node.homePosition = Cesium.Cartesian3.fromDegrees(
+            node.position.lon, node.position.lat, node.position.alt + HEIGHT_ABOVE_TERRAIN
+          );
+          const entity = entitiesById[node.id];
+          if (entity) {
+            entity.position = node.homePosition;
+          }
+        }
+      }
+    }
     updateDotEntities();
   }, MOVE_INTERVAL_MS);
 }
