@@ -66,6 +66,19 @@ function drawMilitarySymbol(type, hq) {
       ctx.moveTo(cx - 5, ry - 2); ctx.lineTo(cx - 5, ry - 12);
       ctx.moveTo(cx + 5, ry - 2); ctx.lineTo(cx + 5, ry - 12);
     });
+  } else if (type === "regiment") {
+    // III — three vertical lines
+    outlinedStroke(ctx, () => {
+      ctx.moveTo(cx - 10, ry - 2); ctx.lineTo(cx - 10, ry - 12);
+      ctx.moveTo(cx, ry - 2); ctx.lineTo(cx, ry - 12);
+      ctx.moveTo(cx + 10, ry - 2); ctx.lineTo(cx + 10, ry - 12);
+    });
+  } else if (type === "brigade") {
+    // X — two crossing diagonal lines
+    outlinedStroke(ctx, () => {
+      ctx.moveTo(cx - 8, ry - 2); ctx.lineTo(cx + 8, ry - 14);
+      ctx.moveTo(cx + 8, ry - 2); ctx.lineTo(cx - 8, ry - 14);
+    });
   }
 
   return canvas;
@@ -83,7 +96,7 @@ function getSymbolImage(type, hq) {
 
 // --- Data structures ---
 
-const LEVEL_ORDER = ["individual", "squad", "platoon", "company", "battalion"];
+const LEVEL_ORDER = ["individual", "squad", "platoon", "company", "battalion", "regiment", "brigade"];
 
 // All nodes indexed by id
 const nodesById = {};
@@ -101,7 +114,7 @@ const staffEntitiesById = {};
 const HEIGHT_ABOVE_TERRAIN = 1; // meters above terrain surface
 
 // Current visible level index (0=squad, 3=battalion)
-let currentLevel = 4; // start at battalion level
+let currentLevel = 6; // start at brigade level
 let militaryVisible = true;
 let labelsEnabled = true; // when true, text labels are shown on military entities
 let blobsVisible = true; // when true, convex hull blobs are shown

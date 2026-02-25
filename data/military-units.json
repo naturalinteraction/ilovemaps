@@ -1,13 +1,33 @@
 {
-  "id": "bn1",
-  "name": "1 Bn",
-  "type": "battalion",
+  "id": "bde1",
+  "name": "1 Bde",
+  "type": "brigade",
   "position": {
-    "lat": 46.572,
+    "lat": 46.575,
     "lon": 8.01,
-    "alt": 3246
+    "alt": 2500
   },
   "children": [
+    {
+      "id": "rgt1",
+      "name": "1 Rgt",
+      "type": "regiment",
+      "position": {
+        "lat": 46.575,
+        "lon": 8.01,
+        "alt": 2500
+      },
+      "children": [
+        {
+          "id": "bn1",
+          "name": "1 Bn",
+          "type": "battalion",
+          "position": {
+            "lat": 46.572,
+            "lon": 8.01,
+            "alt": 3246
+          },
+          "children": [
     {
       "id": "co1",
       "name": "A Co",
@@ -2448,6 +2468,58 @@
         "lat": 46.571627,
         "lon": 8.011191,
         "alt": 3114
+      }
+    }
+  ]
+        }
+      ],
+      "commander": {
+        "id": "cmd_rgt1",
+        "name": "Cmd. Centurion"
+      },
+      "staff": [
+        {
+          "id": "staff_rgt1",
+          "name": "Stf. Condor",
+          "position": {
+            "lat": 46.575200,
+            "lon": 8.010500,
+            "alt": 2500
+          }
+        },
+        {
+          "id": "staff_rgt2",
+          "name": "Stf. Harrier",
+          "position": {
+            "lat": 46.574800,
+            "lon": 8.010500,
+            "alt": 2500
+          }
+        }
+      ]
+    }
+  ],
+  "commander": {
+    "id": "cmd_bde1",
+    "name": "Cmd. Praetor"
+  },
+  "staff": [
+    {
+      "id": "staff_bde1",
+      "name": "Stf. Monarch",
+      "position": {
+        "lat": 46.575400,
+        "lon": 8.010800,
+        "alt": 2500
+      }
+    },
+    {
+      "id": "staff_bde2",
+      "name": "Stf. Sovereign",
+      "position": {
+        "lat": 46.574600,
+        "lon": 8.010800,
+        "alt": 2500
       }
     }
   ]
