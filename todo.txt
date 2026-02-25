@@ -1,3 +1,9 @@
+- Possiamo assumere che tutti i comandanti, ad ogni livello, abbiano il gps? Come gestire un comandante che non avesse gps?
+- Immaginiamo che una squadra abbia 4 individui con gps e 4 senza. Come gestiamo questa cosa?
+- Forzare la continuita' della heatmap in modo che tutti siano parte di un unico blob crea dei casi ambigui. Nel caso le sottoparti siano molto distanti tra loro possiamo accettare la separazione in piu' chiazze?
+- Immaginiamo uno scenario di uso pesante di Argo. Che estensione potrebbe avere lo scenario? 5km x 5km? 10km x 10km ? 20km x 20km? ...? 
+- Quante persone ci sarebbero in questo scenario? 100? 1000? 5000? ...?
+
 - sembra che AR debba essere 1.0 per il draping
 
 - gps puo' avere svarioni e mandare un commander in africa
