@@ -1387,6 +1387,14 @@ export function handleKeydown(event, viewer) {
     return true;
   }
 
+  // Number keys 1-7: jump to level (1=individual, 2=squad, ..., 7=brigade)
+  const digit = parseInt(event.key, 10);
+  if (digit >= 1 && digit <= LEVEL_ORDER.length) {
+    currentLevel = digit - 1;
+    showLevel(currentLevel);
+    return true;
+  }
+
   if (event.key === " ") {
     updateHeatmapLayer();
     return true;

@@ -17,10 +17,10 @@ const M_PER_DEG_LON = M_PER_DEG_LAT * COS_LAT;
 // Enemy is NORTH. "Behind" = south = decreasing lat.
 // Define the curve as a quadratic bezier: SE endpoint, control point (south), NW endpoint.
 
-const P0 = { lat: 46.51, lon: 8.11 };   // SE end
-const P2 = { lat: 46.65, lon: 7.87 };   // NW end
+const P0 = { lat: 46.51, lon: 8.10 };   // SE end
+const P2 = { lat: 46.65, lon: 7.88 };   // NW end
 // Control point south of midpoint for concave shape
-const P1 = { lat: 46.54, lon: 7.99 };   // pulls the center south
+const P1 = { lat: 46.46, lon: 7.99 };   // pulls the center south (3x curvature)
 
 function bezier(t) {
   const u = 1 - t;
