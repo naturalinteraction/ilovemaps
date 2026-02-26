@@ -769,22 +769,32 @@ function updateVisualClusters(viewer) {
 // --- Heatmap ---
 
 function getHeatmapPositions() {
-  // Always include all humans: individuals, commanders, and staff
+  // Include humans whose billboard is NOT currently visible
   const results = [];
   for (const node of allNodes) {
     // Individuals
     if (node.type === "individual") {
-      results.push({ position: node.position });
+      const entity = entitiesById[node.id];
+      if (!entity || !entity.show) {
+        results.push({ position: node.position });
+      }
       continue;
     }
     // Commander
     if (node.commander && node.commander.position) {
-      results.push({ position: node.commander.position });
+      const cmdE = cmdEntitiesById[node.id];
+      if (!cmdE || !cmdE.show) {
+        results.push({ position: node.commander.position });
+      }
     }
     // Staff
     if (node.staff) {
-      for (const s of node.staff) {
-        results.push({ position: s.position });
+      const staffEs = staffEntitiesById[node.id];
+      for (let i = 0; i < node.staff.length; i++) {
+        const visible = staffEs && staffEs[i] && staffEs[i].show;
+        if (!visible) {
+          results.push({ position: node.staff[i].position });
+        }
       }
     }
   }
