@@ -282,17 +282,33 @@ function makeIndividuals(squadIdx, squadDepthOffset) {
   return individuals;
 }
 
-// Place commander behind (south of) the front line midpoint for this unit
-function makeCommander(behindM, t) {
+// --- Global "behind" and "along" directions based on overall front (P0→P2) ---
+// This avoids local bumps flipping the direction
+const FRONT_DX = (P2.lon - P0.lon) * M_PER_DEG_LON; // overall front line in meters (x)
+const FRONT_DY = (P2.lat - P0.lat) * M_PER_DEG_LAT; // overall front line in meters (y)
+const FRONT_LEN = Math.sqrt(FRONT_DX * FRONT_DX + FRONT_DY * FRONT_DY);
+// Unit vectors along the front line
+const ALONG_X = FRONT_DX / FRONT_LEN;
+const ALONG_Y = FRONT_DY / FRONT_LEN;
+// Perpendicular "behind" direction (away from enemy)
+// Rotate 90° clockwise: (y, -x), then pick the one pointing south (negative lat)
+let BEHIND_X = FRONT_DY / FRONT_LEN;
+let BEHIND_Y = -FRONT_DX / FRONT_LEN;
+if (BEHIND_Y > 0) { BEHIND_X = -BEHIND_X; BEHIND_Y = -BEHIND_Y; }
+
+// Place commander behind the front line midpoint for this unit
+// Uses global behind/along directions so bumps can't flip the offset
+function makeCommander(behindM, t, lateralM) {
   const ref = frontLine(t);
-  const pos = offsetPoint(ref.lat, ref.lon, t, behindM, 0);
-  const alt = getAltitude(pos.lat, pos.lon);
+  const lat = ref.lat + (BEHIND_Y * behindM + ALONG_Y * (lateralM || 0)) / M_PER_DEG_LAT;
+  const lon = ref.lon + (BEHIND_X * behindM + ALONG_X * (lateralM || 0)) / M_PER_DEG_LON;
+  const alt = getAltitude(lat, lon);
   return {
     id: nextId("cmd"),
     name: `Cmd. ${nextCallsign()}`,
     position: {
-      lat: parseFloat(pos.lat.toFixed(6)),
-      lon: parseFloat(pos.lon.toFixed(6)),
+      lat: parseFloat(lat.toFixed(6)),
+      lon: parseFloat(lon.toFixed(6)),
       alt,
     },
   };
@@ -308,7 +324,7 @@ function generateSquad() {
   const squadDepthOffset = randRange(-50, 50);
   const individuals = makeIndividuals(idx, squadDepthOffset);
   const front = squadFrontPositions[idx];
-  const commander = makeCommander(randRange(50, 100), front.t);
+  const commander = makeCommander(randRange(100, 200), front.t, randRange(-40, 40));
 
   return {
     id: nextId("sq"),
@@ -328,7 +344,7 @@ function generatePlatoon(platoonNum) {
   }
   const midIdx = Math.floor((firstIdx + squadGlobalIdx - 1) / 2);
   const t = squadFrontPositions[Math.min(midIdx, TOTAL_SQUADS - 1)].t;
-  const commander = makeCommander(randRange(80, 150), t);
+  const commander = makeCommander(randRange(160, 300), t, randRange(-100, 100));
 
   return {
     id: nextId("pl"),
@@ -348,7 +364,7 @@ function generateCompany(companyNum) {
   }
   const midIdx = Math.floor((firstIdx + squadGlobalIdx - 1) / 2);
   const t = squadFrontPositions[Math.min(midIdx, TOTAL_SQUADS - 1)].t;
-  const commander = makeCommander(randRange(150, 250), t);
+  const commander = makeCommander(randRange(300, 500), t, randRange(-250, 250));
 
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   return {
@@ -369,7 +385,7 @@ function generateBattalion(bnNum) {
   }
   const midIdx = Math.floor((firstIdx + squadGlobalIdx - 1) / 2);
   const t = squadFrontPositions[Math.min(midIdx, TOTAL_SQUADS - 1)].t;
-  const commander = makeCommander(randRange(300, 500), t);
+  const commander = makeCommander(randRange(600, 1000), t, randRange(-500, 500));
 
   return {
     id: nextId("bn"),
@@ -389,7 +405,7 @@ function generateRegiment(rgtNum) {
   }
   const midIdx = Math.floor((firstIdx + squadGlobalIdx - 1) / 2);
   const t = squadFrontPositions[Math.min(midIdx, TOTAL_SQUADS - 1)].t;
-  const commander = makeCommander(randRange(500, 800), t);
+  const commander = makeCommander(randRange(1000, 1600), t, randRange(-800, 800));
 
   return {
     id: nextId("rgt"),
@@ -409,7 +425,7 @@ function generateBrigade() {
   }
   const midIdx = Math.floor((firstIdx + squadGlobalIdx - 1) / 2);
   const t = squadFrontPositions[Math.min(midIdx, TOTAL_SQUADS - 1)].t;
-  const commander = makeCommander(randRange(800, 1200), t);
+  const commander = makeCommander(randRange(1600, 2400), t, randRange(-1500, 1500));
 
   return {
     id: nextId("bde"),
