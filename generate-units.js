@@ -39,9 +39,14 @@ function bezierTangent(t) {
 }
 
 // --- Bumpy front line ---
-// Add sinusoidal perpendicular offset to the base Bezier to create 9 bumps
-const BUMP_AMPLITUDE = 300; // meters
-const BUMP_COUNT = 9; // number of half-wave bumps
+// Multiple harmonics for an irregular, natural-looking front line
+const BUMPS = [
+  { freq: 9,   amp: 280, phase: 0 },
+  { freq: 15,  amp: 150, phase: 1.3 },
+  { freq: 23,  amp: 90,  phase: 2.7 },
+  { freq: 37,  amp: 50,  phase: 0.8 },
+  { freq: 53,  amp: 30,  phase: 4.1 },
+].map(b => ({ ...b, amp: b.amp * (1 + Math.random() * 2) }));
 
 function frontLine(t) {
   const base = bezier(t);
@@ -52,7 +57,10 @@ function frontLine(t) {
   // Perpendicular direction (consistent side)
   const nx = -ty / len;
   const ny = tx / len;
-  const bumpOffset = Math.sin(BUMP_COUNT * Math.PI * t) * BUMP_AMPLITUDE;
+  let bumpOffset = 0;
+  for (const b of BUMPS) {
+    bumpOffset += Math.sin(b.freq * Math.PI * t + b.phase) * b.amp;
+  }
   return {
     lat: base.lat + (ny * bumpOffset) / M_PER_DEG_LAT,
     lon: base.lon + (nx * bumpOffset) / M_PER_DEG_LON,
