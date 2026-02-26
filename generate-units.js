@@ -355,10 +355,10 @@ let squadGlobalIdx = 0;
 function generateSquad() {
   const idx = squadGlobalIdx++;
   // Each squad is randomly offset ±50m from the front line
-  const squadDepthOffset = randRange(-50, 50);
+  const squadDepthOffset = randRange(-50, 150);
   const individuals = makeIndividuals(idx, squadDepthOffset);
   const front = squadFrontPositions[idx];
-  const commander = makeCommander(randRange(100, 200), front.t, randRange(-40, 40));   // squad: 100-200m
+  const commander = makeCommander(randRange(50, 100), front.t, randRange(-40, 40));   // squad: 50-100m
 
   return {
     id: nextId("sq"),
