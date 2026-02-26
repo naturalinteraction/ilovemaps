@@ -294,9 +294,10 @@ function makeStaff(parentId, cmdLat, cmdLon, cmdAlt) {
 function makeIndividuals(squadIdx, squadDepthOffset) {
   const front = squadFrontPositions[squadIdx];
   const individuals = [];
+  const squadSpread = randRange(50, 90); // meters, leaves gaps between squads
   for (let i = 0; i < INDIVIDUALS_PER_SQUAD; i++) {
-    // Spread along the squad's frontage
-    const alongOffset = (i / (INDIVIDUALS_PER_SQUAD - 1) - 0.5) * SQUAD_FRONTAGE * 0.9;
+    // Spread along a random portion of the squad's frontage
+    const alongOffset = (i / (INDIVIDUALS_PER_SQUAD - 1) - 0.5) * squadSpread;
     // Individual jitter within the squad (±15m) plus squad-level offset
     const depthOffset = squadDepthOffset + randRange(-15, 15);
     const pos = offsetPoint(front.lat, front.lon, front.t, depthOffset, alongOffset);
