@@ -854,17 +854,21 @@ function renderHeatmapCanvas(positions) {
   }
 
   // Radius: large for isolated points, small for dense clusters
-  const MIN_RADIUS = 4;
-  const MAX_RADIUS = 40;
-  const ALPHA_CENTER = 0.15;
-  const ALPHA_MID = 0.06;
+  // Alpha: low for dense clusters (individuals), high for isolated points (commanders)
+  const MIN_RADIUS = 3;
+  const MAX_RADIUS = 50;
+  const ALPHA_CENTER_MIN = 0.08;  // dense areas (many individuals)
+  const ALPHA_CENTER_MAX = 0.35;  // sparse areas (isolated commanders)
 
   for (const pt of pts) {
     const density = localDensity(pt.x, pt.y);
-    const radius = Math.max(MIN_RADIUS, Math.min(MAX_RADIUS, MAX_RADIUS / Math.sqrt(density)));
+    const densityFactor = 1 / Math.sqrt(Math.max(1, density));
+    const radius = Math.max(MIN_RADIUS, Math.min(MAX_RADIUS, MAX_RADIUS * densityFactor));
+    const alphaCenter = ALPHA_CENTER_MIN + (ALPHA_CENTER_MAX - ALPHA_CENTER_MIN) * densityFactor;
+    const alphaMid = alphaCenter * 0.4;
     const grad = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, radius);
-    grad.addColorStop(0, `rgba(30, 80, 255, ${ALPHA_CENTER})`);
-    grad.addColorStop(0.3, `rgba(30, 80, 255, ${ALPHA_MID})`);
+    grad.addColorStop(0, `rgba(30, 80, 255, ${alphaCenter})`);
+    grad.addColorStop(0.3, `rgba(30, 80, 255, ${alphaMid})`);
     grad.addColorStop(1, "rgba(30, 80, 255, 0)");
     ctx.fillStyle = grad;
     ctx.fillRect(pt.x - radius, pt.y - radius, radius * 2, radius * 2);
