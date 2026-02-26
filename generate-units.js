@@ -38,12 +38,43 @@ function bezierTangent(t) {
   };
 }
 
+// --- Bumpy front line ---
+// Add sinusoidal perpendicular offset to the base Bezier to create 9 bumps
+const BUMP_AMPLITUDE = 300; // meters
+const BUMP_COUNT = 9; // number of half-wave bumps
+
+function frontLine(t) {
+  const base = bezier(t);
+  const tang = bezierTangent(t);
+  const tx = tang.dlon * M_PER_DEG_LON;
+  const ty = tang.dlat * M_PER_DEG_LAT;
+  const len = Math.sqrt(tx * tx + ty * ty);
+  // Perpendicular direction (consistent side)
+  const nx = -ty / len;
+  const ny = tx / len;
+  const bumpOffset = Math.sin(BUMP_COUNT * Math.PI * t) * BUMP_AMPLITUDE;
+  return {
+    lat: base.lat + (ny * bumpOffset) / M_PER_DEG_LAT,
+    lon: base.lon + (nx * bumpOffset) / M_PER_DEG_LON,
+  };
+}
+
+function frontLineTangent(t) {
+  const dt = 0.00005;
+  const a = frontLine(Math.max(0, t - dt));
+  const b = frontLine(Math.min(1, t + dt));
+  return {
+    dlat: (b.lat - a.lat) / (2 * dt),
+    dlon: (b.lon - a.lon) / (2 * dt),
+  };
+}
+
 // Measure total arc length
 function arcLength(nSamples) {
   let len = 0;
-  let prev = bezier(0);
+  let prev = frontLine(0);
   for (let i = 1; i <= nSamples; i++) {
-    const cur = bezier(i / nSamples);
+    const cur = frontLine(i / nSamples);
     const dlat = (cur.lat - prev.lat) * M_PER_DEG_LAT;
     const dlon = (cur.lon - prev.lon) * M_PER_DEG_LON;
     len += Math.sqrt(dlat * dlat + dlon * dlon);
@@ -58,11 +89,11 @@ console.error(`Front line arc length: ${(TOTAL_ARC / 1000).toFixed(2)} km`);
 // Map distance along arc to parameter t
 function distanceToT(targetDist) {
   let accum = 0;
-  let prev = bezier(0);
+  let prev = frontLine(0);
   const steps = 10000;
   for (let i = 1; i <= steps; i++) {
     const t = i / steps;
-    const cur = bezier(t);
+    const cur = frontLine(t);
     const dlat = (cur.lat - prev.lat) * M_PER_DEG_LAT;
     const dlon = (cur.lon - prev.lon) * M_PER_DEG_LON;
     accum += Math.sqrt(dlat * dlat + dlon * dlon);
@@ -75,7 +106,7 @@ function distanceToT(targetDist) {
 // Get the "behind" direction (perpendicular to tangent, pointing south/away from enemy)
 // Enemy is north, so "behind" is the direction with negative lat component of the normal
 function getBehindDir(t) {
-  const tang = bezierTangent(t);
+  const tang = frontLineTangent(t);
   // tangent in meters
   const tx = tang.dlon * M_PER_DEG_LON;
   const ty = tang.dlat * M_PER_DEG_LAT;
@@ -92,7 +123,7 @@ function getBehindDir(t) {
 // Offset a point by meters along front line normal ("behind") and along front line
 function offsetPoint(baseLat, baseLon, t, behindM, alongM) {
   const behind = getBehindDir(t);
-  const tang = bezierTangent(t);
+  const tang = frontLineTangent(t);
   const tx = tang.dlon * M_PER_DEG_LON;
   const ty = tang.dlat * M_PER_DEG_LAT;
   const tlen = Math.sqrt(tx * tx + ty * ty);
@@ -179,7 +210,7 @@ const BATTALIONS_PER_REGIMENT = 3;
 const COMPANIES_PER_BATTALION = 3;
 const PLATOONS_PER_COMPANY = 3;
 const SQUADS_PER_PLATOON = 3;
-const INDIVIDUALS_PER_SQUAD = 12;
+const INDIVIDUALS_PER_SQUAD = 11;
 
 const TOTAL_SQUADS = REGIMENTS_PER_BRIGADE * BATTALIONS_PER_REGIMENT *
   COMPANIES_PER_BATTALION * PLATOONS_PER_COMPANY * SQUADS_PER_PLATOON; // 243
@@ -192,7 +223,7 @@ const squadFrontPositions = [];
 for (let i = 0; i < TOTAL_SQUADS; i++) {
   const centerDist = (i + 0.5) * SQUAD_FRONTAGE;
   const t = distanceToT(centerDist);
-  const pos = bezier(t);
+  const pos = frontLine(t);
   squadFrontPositions.push({ ...pos, t, dist: centerDist });
 }
 
@@ -218,14 +249,14 @@ function makeStaff(parentId, cmdLat, cmdLon, cmdAlt) {
 }
 
 // Create individuals for a squad
-function makeIndividuals(squadIdx) {
+function makeIndividuals(squadIdx, squadDepthOffset) {
   const front = squadFrontPositions[squadIdx];
   const individuals = [];
   for (let i = 0; i < INDIVIDUALS_PER_SQUAD; i++) {
     // Spread along the squad's frontage
     const alongOffset = (i / (INDIVIDUALS_PER_SQUAD - 1) - 0.5) * SQUAD_FRONTAGE * 0.9;
-    // Random depth: ±50m from front line (positive = behind/south, negative = forward/north)
-    const depthOffset = randRange(-50, 50);
+    // Individual jitter within the squad (±15m) plus squad-level offset
+    const depthOffset = squadDepthOffset + randRange(-15, 15);
     const pos = offsetPoint(front.lat, front.lon, front.t, depthOffset, alongOffset);
     const alt = getAltitude(pos.lat, pos.lon);
     individuals.push({
@@ -243,29 +274,14 @@ function makeIndividuals(squadIdx) {
   return individuals;
 }
 
-// Compute centroid of children positions
-function centroid(children) {
-  let sLat = 0, sLon = 0, sAlt = 0;
-  for (const c of children) {
-    sLat += c.position.lat;
-    sLon += c.position.lon;
-    sAlt += c.position.alt;
-  }
-  const n = children.length;
-  return { lat: sLat / n, lon: sLon / n, alt: Math.round(sAlt / n) };
-}
-
-// Place commander behind (south of) children centroid
-function makeCommander(children, behindM, prefix, t) {
-  const cent = centroid(children);
-  // Use the t parameter of the first child's squad region for direction
-  const pos = offsetPoint(cent.lat, cent.lon, t, behindM, 0);
+// Place commander behind (south of) the front line midpoint for this unit
+function makeCommander(behindM, t) {
+  const ref = frontLine(t);
+  const pos = offsetPoint(ref.lat, ref.lon, t, behindM, 0);
   const alt = getAltitude(pos.lat, pos.lon);
   return {
-    commander: {
-      id: nextId("cmd"),
-      name: `Cmd. ${nextCallsign()}`,
-    },
+    id: nextId("cmd"),
+    name: `Cmd. ${nextCallsign()}`,
     position: {
       lat: parseFloat(pos.lat.toFixed(6)),
       lon: parseFloat(pos.lon.toFixed(6)),
@@ -280,15 +296,16 @@ let squadGlobalIdx = 0;
 
 function generateSquad() {
   const idx = squadGlobalIdx++;
-  const individuals = makeIndividuals(idx);
+  // Each squad is randomly offset ±50m from the front line
+  const squadDepthOffset = randRange(-50, 50);
+  const individuals = makeIndividuals(idx, squadDepthOffset);
   const front = squadFrontPositions[idx];
-  const { commander, position } = makeCommander(individuals, randRange(50, 100), "cmd", front.t);
+  const commander = makeCommander(randRange(50, 100), front.t);
 
   return {
     id: nextId("sq"),
     name: `${squadGlobalIdx} Sqd`,
     type: "squad",
-    position,
     children: individuals,
     commander,
   };
@@ -303,16 +320,15 @@ function generatePlatoon(platoonNum) {
   }
   const midIdx = Math.floor((firstIdx + squadGlobalIdx - 1) / 2);
   const t = squadFrontPositions[Math.min(midIdx, TOTAL_SQUADS - 1)].t;
-  const { commander, position } = makeCommander(squads, randRange(80, 150), "cmd", t);
+  const commander = makeCommander(randRange(80, 150), t);
 
   return {
     id: nextId("pl"),
     name: `${platoonNum} Plt`,
     type: "platoon",
-    position,
     children: squads,
     commander,
-    staff: makeStaff(null, position.lat, position.lon, position.alt),
+    staff: makeStaff(null, commander.position.lat, commander.position.lon, commander.position.alt),
   };
 }
 
@@ -324,17 +340,16 @@ function generateCompany(companyNum) {
   }
   const midIdx = Math.floor((firstIdx + squadGlobalIdx - 1) / 2);
   const t = squadFrontPositions[Math.min(midIdx, TOTAL_SQUADS - 1)].t;
-  const { commander, position } = makeCommander(platoons, randRange(150, 250), "cmd", t);
+  const commander = makeCommander(randRange(150, 250), t);
 
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   return {
     id: nextId("co"),
     name: `${letters[companyNum % 26]} Co`,
     type: "company",
-    position,
     children: platoons,
     commander,
-    staff: makeStaff(null, position.lat, position.lon, position.alt),
+    staff: makeStaff(null, commander.position.lat, commander.position.lon, commander.position.alt),
   };
 }
 
@@ -346,16 +361,15 @@ function generateBattalion(bnNum) {
   }
   const midIdx = Math.floor((firstIdx + squadGlobalIdx - 1) / 2);
   const t = squadFrontPositions[Math.min(midIdx, TOTAL_SQUADS - 1)].t;
-  const { commander, position } = makeCommander(companies, randRange(300, 500), "cmd", t);
+  const commander = makeCommander(randRange(300, 500), t);
 
   return {
     id: nextId("bn"),
     name: `${bnNum + 1} Bn`,
     type: "battalion",
-    position,
     children: companies,
     commander,
-    staff: makeStaff(null, position.lat, position.lon, position.alt),
+    staff: makeStaff(null, commander.position.lat, commander.position.lon, commander.position.alt),
   };
 }
 
@@ -367,16 +381,15 @@ function generateRegiment(rgtNum) {
   }
   const midIdx = Math.floor((firstIdx + squadGlobalIdx - 1) / 2);
   const t = squadFrontPositions[Math.min(midIdx, TOTAL_SQUADS - 1)].t;
-  const { commander, position } = makeCommander(battalions, randRange(500, 800), "cmd", t);
+  const commander = makeCommander(randRange(500, 800), t);
 
   return {
     id: nextId("rgt"),
     name: `${rgtNum + 1} Rgt`,
     type: "regiment",
-    position,
     children: battalions,
     commander,
-    staff: makeStaff(null, position.lat, position.lon, position.alt),
+    staff: makeStaff(null, commander.position.lat, commander.position.lon, commander.position.alt),
   };
 }
 
@@ -388,16 +401,15 @@ function generateBrigade() {
   }
   const midIdx = Math.floor((firstIdx + squadGlobalIdx - 1) / 2);
   const t = squadFrontPositions[Math.min(midIdx, TOTAL_SQUADS - 1)].t;
-  const { commander, position } = makeCommander(regiments, randRange(800, 1200), "cmd", t);
+  const commander = makeCommander(randRange(800, 1200), t);
 
   return {
     id: nextId("bde"),
     name: "1 Bde",
     type: "brigade",
-    position,
     children: regiments,
     commander,
-    staff: makeStaff(null, position.lat, position.lon, position.alt),
+    staff: makeStaff(null, commander.position.lat, commander.position.lon, commander.position.alt),
   };
 }
 

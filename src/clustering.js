@@ -117,7 +117,7 @@ const HEIGHT_ABOVE_TERRAIN = 1; // meters above terrain surface
 let currentLevel = 6; // start at brigade level
 let militaryVisible = true;
 let labelsEnabled = true; // when true, text labels are shown on military entities
-let blobsVisible = true; // when true, convex hull blobs are shown
+let blobsVisible = false; // when true, convex hull blobs are shown
 let heatmapVisible = true; // when true, show heatmap; when false, show circles
 
 // Dot overlay state (replaces heatmap)
@@ -308,11 +308,23 @@ function flattenTree(node, parent) {
   node.parent = parent;
   nodesById[node.id] = node;
   allNodes.push(node);
+  // Units (squad+) have no position — always track commander position
+  if (!node.position && node.commander) {
+    node.position = node.commander.position;
+  }
+  const pos = node.position;
   node.homePosition = Cesium.Cartesian3.fromDegrees(
-    node.position.lon, node.position.lat, node.position.alt + HEIGHT_ABOVE_TERRAIN
+    pos.lon, pos.lat, pos.alt + HEIGHT_ABOVE_TERRAIN
   );
-  // Commander uses same position as unit
-  node.cmdHomePosition = node.homePosition;
+  // Commander position (own position if available, otherwise same as unit)
+  if (node.commander && node.commander.position) {
+    node.cmdHomePosition = Cesium.Cartesian3.fromDegrees(
+      node.commander.position.lon, node.commander.position.lat,
+      node.commander.position.alt + HEIGHT_ABOVE_TERRAIN
+    );
+  } else {
+    node.cmdHomePosition = node.homePosition;
+  }
   // Staff positions from JSON data
   if (node.staff && node.staff.length >= 2) {
     node.staffHomePositions = node.staff.map(s =>
@@ -462,7 +474,7 @@ export async function loadMilitaryUnits(viewer) {
   ro.observe(viewer.canvas);
 
   updateHeatmapLayer();
-  startIndividualMovement();
+  // startIndividualMovement(); // temporarily disabled
   return { entitiesById, nodesById, allNodes };
 }
 
@@ -810,8 +822,8 @@ function renderHeatmapCanvas(positions) {
   ctx.clearRect(0, 0, W, W);
   ctx.globalCompositeOperation = "color";// screen, hue, color
 
-  // Radius scaled to point count so blobs overlap nicely, 100 was 80
-  const baseRadius = Math.max(20, Math.min(100, 300 / Math.sqrt(positions.length)));
+  // Radius scaled to point count so blobs overlap nicely
+  const baseRadius = Math.max(10, Math.min(10, 30 / Math.sqrt(positions.length)));
 
   for (const p of positions) {
     const x = ((p.lon - minLon) / (maxLon - minLon)) * W;
@@ -1434,10 +1446,11 @@ export function startIndividualMovement() {
         }
       }
       const cmdE = cmdEntitiesById[node.id];
-      if (cmdE && cmdE.show) {
-        perturbPosition(node.position);
+      if (cmdE && cmdE.show && node.commander) {
+        const cmdPos = node.commander.position;
+        perturbPosition(cmdPos);
         cmdE.position = Cesium.Cartesian3.fromDegrees(
-          node.position.lon, node.position.lat, node.position.alt + HEIGHT_ABOVE_TERRAIN
+          cmdPos.lon, cmdPos.lat, cmdPos.alt + HEIGHT_ABOVE_TERRAIN
         );
       }
       const staffEs = staffEntitiesById[node.id];
@@ -1453,26 +1466,16 @@ export function startIndividualMovement() {
         }
       }
     }
+    // Unit positions follow their commander (node.position === node.commander.position)
     for (const node of allNodes) {
-      if (node.children.length > 0) {
-        let sumLat = 0, sumLon = 0, sumAlt = 0, count = 0;
-        for (const child of node.children) {
-          sumLat += child.position.lat;
-          sumLon += child.position.lon;
-          sumAlt += child.position.alt;
-          count++;
-        }
-        if (count > 0) {
-          node.position.lat = sumLat / count;
-          node.position.lon = sumLon / count;
-          node.position.alt = sumAlt / count;
-          node.homePosition = Cesium.Cartesian3.fromDegrees(
-            node.position.lon, node.position.lat, node.position.alt + HEIGHT_ABOVE_TERRAIN
-          );
-          const entity = entitiesById[node.id];
-          if (entity) {
-            entity.position = node.homePosition;
-          }
+      if (node.commander) {
+        node.homePosition = Cesium.Cartesian3.fromDegrees(
+          node.position.lon, node.position.lat, node.position.alt + HEIGHT_ABOVE_TERRAIN
+        );
+        node.cmdHomePosition = node.homePosition;
+        const entity = entitiesById[node.id];
+        if (entity) {
+          entity.position = node.homePosition;
         }
       }
     }
@@ -1495,7 +1498,7 @@ export function setupPreRender(viewer) {
     // Visual clustering update
     if (clusterDirty && !animating) {
       clusterDirty = false;
-      updateVisualClusters(viewer);
+      // updateVisualClusters(viewer); // temporarily disabled
     }
     // Draw drone arrows on full-opacity canvas
     if (arrowCanvas && arrowCtx) {
