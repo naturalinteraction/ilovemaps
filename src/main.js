@@ -16,13 +16,13 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
   terrain: Cesium.Terrain.fromWorldTerrain({
     requestWaterMask: true,
   }),
-  // baseLayer: new Cesium.ImageryLayer(
-  //   new Cesium.UrlTemplateImageryProvider({
-  //     url: "https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
-  //     maximumLevel: 20,
-  //     credit: "Google Maps",
-  //   })
-  // ),
+   baseLayer: new Cesium.ImageryLayer(
+     new Cesium.UrlTemplateImageryProvider({
+       url: "https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
+       maximumLevel: 20,
+       credit: "Google Maps",
+     })
+   ),
   selectionIndicator: false,
   infoBox: false,
   animation: false,
