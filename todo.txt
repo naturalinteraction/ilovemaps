@@ -1,3 +1,10 @@
+1. heatmap non deve includere le unita' che sono visibili come billboard
+
+2. decluttering gerarchico, cioe' si compatta insieme solo roba della stessa unita'... cioe', prima posso compattare lo staff, che e' vicino al comandante di plotone, e poi le squadre di quel plotone, non roba di altri plotoni. e' basato sulla viewer camera
+
+3. logica di decluttering scritte, legata a 2 ma piu' stringente
+
+
 - Possiamo assumere che tutti i comandanti, ad ogni livello, abbiano il gps? Come gestire un comandante che non avesse gps?
 - Immaginiamo che una squadra abbia 4 individui con gps e 4 senza. Come gestiamo questa cosa?
 - Forzare la continuita' della heatmap in modo che tutti siano parte di un unico blob crea dei casi ambigui. Nel caso le sottoparti siano molto distanti tra loro possiamo accettare la separazione in piu' chiazze?

@@ -612,6 +612,11 @@ function setCmdStaffShow(node, show) {
     cmdE.position = node.cmdHomePosition;
     if (show) setEntityAlpha(cmdE, 1, 1);
   }
+  // Hide the unit's own label when commander label is visible to avoid overlap
+  const unitE = entitiesById[node.id];
+  if (unitE && unitE.label) {
+    unitE.label.show = show ? false : labelsEnabled;
+  }
   const staffEs = staffEntitiesById[node.id];
   if (staffEs) {
     for (const se of staffEs) {
