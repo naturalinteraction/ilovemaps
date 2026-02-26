@@ -261,7 +261,7 @@ function makeIndividuals(squadIdx, squadDepthOffset) {
     const alt = getAltitude(pos.lat, pos.lon);
     individuals.push({
       id: nextId("ind"),
-      name: `Ind. ${nextCallsign()}`,
+      name: `${nextCallsign()}`,
       type: "individual",
       position: {
         lat: parseFloat(pos.lat.toFixed(6)),
