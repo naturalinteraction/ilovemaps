@@ -1057,19 +1057,20 @@ function updateDotEntities() {
 }
 
 function showLevel(levelIdx) {
-  const type = LEVEL_ORDER[levelIdx];
+  // Show all levels from brigade (top) down to the selected level
   for (const node of allNodes) {
     const entity = entitiesById[node.id];
-    entity.show = militaryVisible && node.type === type;
+    const nodeLevelIdx = LEVEL_ORDER.indexOf(node.type);
+    entity.show = militaryVisible && nodeLevelIdx >= levelIdx;
     entity.position = node.homePosition;
   }
-  // Commander/staff: visible for units one level ABOVE the visible level
-  // (those units are "unmerged" — their symbol is hidden, children are visible)
+  // Commander/staff: visible for units whose children are also visible
+  // (i.e. all levels above the lowest visible level)
   hideAllCmdStaff();
-  if (militaryVisible && levelIdx + 1 < LEVEL_ORDER.length) {
-    const parentType = LEVEL_ORDER[levelIdx + 1];
+  if (militaryVisible) {
     for (const node of allNodes) {
-      if (node.type === parentType) {
+      const nodeLevelIdx = LEVEL_ORDER.indexOf(node.type);
+      if (nodeLevelIdx > levelIdx) {
         setCmdStaffShow(node, true);
       }
     }
