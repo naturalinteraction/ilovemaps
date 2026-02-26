@@ -1,8 +1,8 @@
-1. heatmap non deve includere le unita' che sono visibili come billboard
+
 
 2. decluttering gerarchico, cioe' si compatta insieme solo roba della stessa unita'... cioe', prima posso compattare lo staff, che e' vicino al comandante di plotone, e poi le squadre di quel plotone, non roba di altri plotoni. e' basato sulla viewer camera
 
-3. logica di decluttering scritte, legata a 2 ma piu' stringente
+3. logica di decluttering scritte, legata a 2 ma piu' stringente, non dipende (SOLO o DEL TUTTO) dalla vicinanza tra unita', ma forse SOLO dalla distanza di camera. le scritte appaiono dopo (in meno casi) delle billboard
 
 
 - Possiamo assumere che tutti i comandanti, ad ogni livello, abbiano il gps? Come gestire un comandante che non avesse gps?
