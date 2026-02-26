@@ -769,24 +769,22 @@ function updateVisualClusters(viewer) {
 // --- Heatmap ---
 
 function getHeatmapPositions() {
+  // Always include all humans: individuals, commanders, and staff
   const results = [];
   for (const node of allNodes) {
-    const parentPos = node.parent ? node.parent.position : node.position;
-    // Individuals: include if their entity is hidden (but not by clustering)
+    // Individuals
     if (node.type === "individual") {
-      const entity = entitiesById[node.id];
-      if (entity && !entity.show && !clusteredEntities.has(entity)) results.push({ position: node.position, parentPosition: parentPos });
+      results.push({ position: node.position });
       continue;
     }
-    // Commander: include if its entity is hidden (but not by clustering) and the unit billboard isn't shown
-    const unitE = entitiesById[node.id];
-    const cmdE = cmdEntitiesById[node.id];
-    if (cmdE && !cmdE.show && !clusteredEntities.has(cmdE) && !(unitE && unitE.show)) results.push({ position: node.position, parentPosition: parentPos });
-    // Staff: include each hidden staff member (but not by clustering)
-    const staffEs = staffEntitiesById[node.id];
-    if (staffEs && node.staff) {
-      for (let i = 0; i < staffEs.length; i++) {
-        if (!staffEs[i].show && !clusteredEntities.has(staffEs[i])) results.push({ position: node.staff[i].position, parentPosition: node.position });
+    // Commander
+    if (node.commander && node.commander.position) {
+      results.push({ position: node.commander.position });
+    }
+    // Staff
+    if (node.staff) {
+      for (const s of node.staff) {
+        results.push({ position: s.position });
       }
     }
   }
@@ -820,20 +818,56 @@ function renderHeatmapCanvas(positions) {
   maxLon += lonSpan * pad;
 
   ctx.clearRect(0, 0, W, W);
-  ctx.globalCompositeOperation = "color";// screen, hue, color
+  ctx.globalCompositeOperation = "color";
 
-  // Radius scaled to point count so blobs overlap nicely
-  const baseRadius = Math.max(10, Math.min(10, 30 / Math.sqrt(positions.length)));
+  // Pre-compute canvas coordinates
+  const lonRange = maxLon - minLon;
+  const latRange = maxLat - minLat;
+  const pts = positions.map(p => ({
+    x: ((p.lon - minLon) / lonRange) * W,
+    y: ((maxLat - p.lat) / latRange) * W,
+  }));
 
-  for (const p of positions) {
-    const x = ((p.lon - minLon) / (maxLon - minLon)) * W;
-    const y = ((maxLat - p.lat) / (maxLat - minLat)) * W; // flip Y
-    const grad = ctx.createRadialGradient(x, y, 0, x, y, baseRadius);
-    grad.addColorStop(0, "rgba(30, 80, 255, 0.25)");
-    grad.addColorStop(0.25, "rgba(30, 80, 255, 0.10)");
+  // Grid-based local density: count neighbors in each cell
+  const GRID_SIZE = 32;
+  const cellW = W / GRID_SIZE;
+  const grid = new Uint16Array(GRID_SIZE * GRID_SIZE);
+  for (const pt of pts) {
+    const gx = Math.min(GRID_SIZE - 1, Math.floor(pt.x / cellW));
+    const gy = Math.min(GRID_SIZE - 1, Math.floor(pt.y / cellW));
+    grid[gy * GRID_SIZE + gx]++;
+  }
+  // For each point, sum its cell + 8 neighbors for smooth density
+  function localDensity(px, py) {
+    const gx = Math.min(GRID_SIZE - 1, Math.floor(px / cellW));
+    const gy = Math.min(GRID_SIZE - 1, Math.floor(py / cellW));
+    let count = 0;
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        const nx = gx + dx, ny = gy + dy;
+        if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
+          count += grid[ny * GRID_SIZE + nx];
+        }
+      }
+    }
+    return count;
+  }
+
+  // Radius: large for isolated points, small for dense clusters
+  const MIN_RADIUS = 4;
+  const MAX_RADIUS = 40;
+  const ALPHA_CENTER = 0.15;
+  const ALPHA_MID = 0.06;
+
+  for (const pt of pts) {
+    const density = localDensity(pt.x, pt.y);
+    const radius = Math.max(MIN_RADIUS, Math.min(MAX_RADIUS, MAX_RADIUS / Math.sqrt(density)));
+    const grad = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, radius);
+    grad.addColorStop(0, `rgba(30, 80, 255, ${ALPHA_CENTER})`);
+    grad.addColorStop(0.3, `rgba(30, 80, 255, ${ALPHA_MID})`);
     grad.addColorStop(1, "rgba(30, 80, 255, 0)");
     ctx.fillStyle = grad;
-    ctx.fillRect(x - baseRadius, y - baseRadius, baseRadius * 2, baseRadius * 2);
+    ctx.fillRect(pt.x - radius, pt.y - radius, radius * 2, radius * 2);
   }
 
   ctx.globalCompositeOperation = "source-over";
