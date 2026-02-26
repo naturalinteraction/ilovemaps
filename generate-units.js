@@ -155,14 +155,48 @@ function randSign() {
   return Math.random() < 0.5 ? -1 : 1;
 }
 
-// Altitude: use a base altitude that varies gently along the front
-function getAltitude(lat, lon) {
-  // Simple terrain model: higher in the south, lower in the north
-  // Range roughly 1500-3000m
-  const latNorm = (lat - 46.50) / 0.20; // 0 at south, 1 at north
-  const lonNorm = (lon - 7.85) / 0.30;
-  const base = 2800 - latNorm * 800 + Math.sin(lonNorm * Math.PI * 2) * 300;
-  return Math.round(base + randRange(-50, 50));
+// --- Elevation lookup via Open-Meteo API ---
+// Batch-query real terrain elevation for all positions
+const ELEVATION_BATCH_SIZE = 100;
+
+async function fetchElevations(coords) {
+  // coords: array of { lat, lon }
+  // Uses Open Topo Data with SRTM 90m dataset
+  const results = new Array(coords.length);
+  for (let i = 0; i < coords.length; i += ELEVATION_BATCH_SIZE) {
+    const batch = coords.slice(i, i + ELEVATION_BATCH_SIZE);
+    const locations = batch.map(c => `${c.lat.toFixed(6)},${c.lon.toFixed(6)}`).join("|");
+    const url = `https://api.opentopodata.org/v1/srtm90m?locations=${locations}`;
+    // Retry with backoff
+    let resp, data;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      resp = await fetch(url);
+      if (resp.ok) {
+        data = await resp.json();
+        break;
+      }
+      if (resp.status === 429) {
+        const wait = (attempt + 1) * 2000;
+        console.error(`  Rate limited, waiting ${wait}ms...`);
+        await new Promise(r => setTimeout(r, wait));
+      } else {
+        throw new Error(`Elevation API error: ${resp.status}`);
+      }
+    }
+    if (!data) throw new Error("Elevation API: too many retries");
+    for (let j = 0; j < batch.length; j++) {
+      results[i + j] = Math.round(data.results[j].elevation || 0);
+    }
+    console.error(`  ${Math.min(i + ELEVATION_BATCH_SIZE, coords.length)}/${coords.length} elevations fetched`);
+    // 1 request per second limit for opentopodata
+    await new Promise(r => setTimeout(r, 1100));
+  }
+  return results;
+}
+
+// Placeholder during generation — real altitude filled in later
+function getAltitude() {
+  return 0; // will be replaced by real elevation
 }
 
 // --- ID counters ---
@@ -437,17 +471,56 @@ function generateBrigade() {
   };
 }
 
-// --- Main ---
-const brigade = generateBrigade();
-fs.writeFileSync("data/military-units.json", JSON.stringify(brigade, null, 2) + "\n");
+// --- Collect all positioned entities and patch real elevations ---
 
-// Stats
+function collectPositions(node) {
+  const positions = [];
+  // Individuals have their own position
+  if (node.type === "individual") {
+    positions.push(node.position);
+  }
+  // Commander
+  if (node.commander && node.commander.position) {
+    positions.push(node.commander.position);
+  }
+  // Staff
+  if (node.staff) {
+    for (const s of node.staff) {
+      positions.push(s.position);
+    }
+  }
+  // Recurse
+  for (const child of node.children) {
+    positions.push(...collectPositions(child));
+  }
+  return positions;
+}
+
 function countNodes(node) {
   let count = 1;
   for (const c of node.children) count += countNodes(c);
   return count;
 }
-console.error(`Total nodes: ${countNodes(brigade)}`);
-console.error(`Total squads: ${TOTAL_SQUADS}`);
-console.error(`Total individuals: ${TOTAL_SQUADS * INDIVIDUALS_PER_SQUAD}`);
-console.error(`Written to data/military-units.json`);
+
+// --- Main ---
+async function main() {
+  const brigade = generateBrigade();
+
+  // Collect all positions that need real elevation
+  const allPositions = collectPositions(brigade);
+  console.error(`Fetching elevation for ${allPositions.length} positions...`);
+
+  const elevations = await fetchElevations(allPositions.map(p => ({ lat: p.lat, lon: p.lon })));
+  for (let i = 0; i < allPositions.length; i++) {
+    allPositions[i].alt = elevations[i];
+  }
+
+  fs.writeFileSync("data/military-units.json", JSON.stringify(brigade, null, 2) + "\n");
+
+  console.error(`Total nodes: ${countNodes(brigade)}`);
+  console.error(`Total squads: ${TOTAL_SQUADS}`);
+  console.error(`Total individuals: ${TOTAL_SQUADS * INDIVIDUALS_PER_SQUAD}`);
+  console.error(`Written to data/military-units.json`);
+}
+
+main().catch(err => { console.error(err); process.exit(1); });
