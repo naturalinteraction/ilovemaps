@@ -324,7 +324,7 @@ function generateSquad() {
   const squadDepthOffset = randRange(-50, 50);
   const individuals = makeIndividuals(idx, squadDepthOffset);
   const front = squadFrontPositions[idx];
-  const commander = makeCommander(randRange(100, 200), front.t, randRange(-40, 40));
+  const commander = makeCommander(randRange(100, 200), front.t, randRange(-40, 40));   // squad: 100-200m
 
   return {
     id: nextId("sq"),
@@ -344,7 +344,7 @@ function generatePlatoon(platoonNum) {
   }
   const midIdx = Math.floor((firstIdx + squadGlobalIdx - 1) / 2);
   const t = squadFrontPositions[Math.min(midIdx, TOTAL_SQUADS - 1)].t;
-  const commander = makeCommander(randRange(160, 300), t, randRange(-100, 100));
+  const commander = makeCommander(randRange(250, 400), t, randRange(-100, 100));    // platoon: 250-400m
 
   return {
     id: nextId("pl"),
@@ -364,7 +364,7 @@ function generateCompany(companyNum) {
   }
   const midIdx = Math.floor((firstIdx + squadGlobalIdx - 1) / 2);
   const t = squadFrontPositions[Math.min(midIdx, TOTAL_SQUADS - 1)].t;
-  const commander = makeCommander(randRange(300, 500), t, randRange(-250, 250));
+  const commander = makeCommander(randRange(500, 700), t, randRange(-250, 250));    // company: 500-700m
 
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   return {
@@ -385,7 +385,7 @@ function generateBattalion(bnNum) {
   }
   const midIdx = Math.floor((firstIdx + squadGlobalIdx - 1) / 2);
   const t = squadFrontPositions[Math.min(midIdx, TOTAL_SQUADS - 1)].t;
-  const commander = makeCommander(randRange(600, 1000), t, randRange(-500, 500));
+  const commander = makeCommander(randRange(800, 1100), t, randRange(-500, 500));   // battalion: 800-1100m
 
   return {
     id: nextId("bn"),
@@ -405,7 +405,7 @@ function generateRegiment(rgtNum) {
   }
   const midIdx = Math.floor((firstIdx + squadGlobalIdx - 1) / 2);
   const t = squadFrontPositions[Math.min(midIdx, TOTAL_SQUADS - 1)].t;
-  const commander = makeCommander(randRange(1000, 1600), t, randRange(-800, 800));
+  const commander = makeCommander(randRange(1200, 1600), t, randRange(-800, 800));  // regiment: 1200-1600m
 
   return {
     id: nextId("rgt"),
@@ -425,7 +425,7 @@ function generateBrigade() {
   }
   const midIdx = Math.floor((firstIdx + squadGlobalIdx - 1) / 2);
   const t = squadFrontPositions[Math.min(midIdx, TOTAL_SQUADS - 1)].t;
-  const commander = makeCommander(randRange(1600, 2400), t, randRange(-1500, 1500));
+  const commander = makeCommander(randRange(1800, 2400), t, randRange(-1500, 1500)); // brigade: 1800-2400m
 
   return {
     id: nextId("bde"),
