@@ -161,6 +161,7 @@ const clusteredEntities = new Set(); // entities hidden by clustering (not by me
 // Label declutter constants
 const LABEL_CELL_W = 32;
 const LABEL_CELL_H = 8;
+const LABEL_HYSTERESIS = 0.3; // 30% — visible labels shrink bbox, hidden labels grow it
 
 // Blob overlay state — terrain-clamped polygon entities
 let blobGroups = []; // array of { boundary: [Cartesian3...] } for each visible unit with children
@@ -928,7 +929,8 @@ function updateLabelDeclutter(viewer) {
   // } else {
   {
     for (const c of candidates) {
-      const cellsX = Math.ceil(c.estW / LABEL_CELL_W);
+      const hyst = c.entity._labelTargetAlpha === 1 ? (1 - LABEL_HYSTERESIS) : (1 + LABEL_HYSTERESIS);
+      const cellsX = Math.ceil((c.estW * hyst) / LABEL_CELL_W);
       const cx = Math.floor(c.sx / LABEL_CELL_W);
       const cy = Math.floor(c.sy / LABEL_CELL_H);
 
