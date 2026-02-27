@@ -118,7 +118,6 @@ const GEOID_UNDULATION = 52.65; // MSL→ellipsoid correction for ~46.55°N 8°E
 let currentLevel = 6; // start at brigade level
 let militaryVisible = true;
 let labelsEnabled = true; // when true, text labels are shown on military entities
-let blobsVisible = false; // when true, convex hull blobs are shown
 let moduleViewer = null;          // viewer reference for dot updates
 
 // Heatmap state (imported from clu)
@@ -147,112 +146,6 @@ export const canvasDots = [];
 const LABEL_CELL_W = 32;
 const LABEL_CELL_H = 8;
 const LABEL_HYSTERESIS = 0.3; // 30% — visible labels shrink bbox, hidden labels grow it
-
-// Blob overlay state — terrain-clamped polygon entities
-let blobGroups = []; // array of { boundary: [Cartesian3...] } for each visible unit with children
-const blobEntities = []; // pool of Cesium polygon entities for blobs
-
-// --- Blob geometry: padded convex hull ---
-
-const BLOB_RADIUS = 120; // meters of clearance around each point
-const BLOB_CIRCLE_SAMPLES = 12;
-
-function collectDescendantLeafPositions(node) {
-  const positions = [];
-  function recurse(n) {
-    if (n.children.length === 0) {
-      positions.push(n.position);
-    } else {
-      for (const child of n.children) recurse(child);
-    }
-  }
-  for (const child of node.children) recurse(child);
-  return positions;
-}
-
-function toLocal2D(positions) {
-  if (positions.length === 0) return { pts: [], refLat: 0, refLon: 0 };
-  let sumLat = 0, sumLon = 0;
-  for (const p of positions) { sumLat += p.lat; sumLon += p.lon; }
-  const refLat = sumLat / positions.length;
-  const refLon = sumLon / positions.length;
-  const cosLat = Math.cos(refLat * Math.PI / 180);
-  const M_PER_DEG_LAT = 111320;
-  const M_PER_DEG_LON = 111320 * cosLat;
-  const pts = positions.map(p => ({
-    x: (p.lon - refLon) * M_PER_DEG_LON,
-    y: (p.lat - refLat) * M_PER_DEG_LAT,
-  }));
-  return { pts, refLat, refLon, cosLat, M_PER_DEG_LAT, M_PER_DEG_LON };
-}
-
-function fromLocal2D(pts, refLat, refLon, cosLat) {
-  const M_PER_DEG_LAT = 111320;
-  const M_PER_DEG_LON = 111320 * (cosLat || 1);
-  return pts.map(p => {
-    if (!isFinite(p.x) || !isFinite(p.y)) return null;
-    const lon = refLon + p.x / M_PER_DEG_LON;
-    const lat = refLat + p.y / M_PER_DEG_LAT;
-    if (!isFinite(lon) || !isFinite(lat)) return null;
-    return Cesium.Cartesian3.fromDegrees(lon, lat, HEIGHT_ABOVE_TERRAIN);
-  }).filter(p => p !== null);
-}
-
-function chaikinSmooth(loop, iterations) {
-  let pts = loop;
-  for (let iter = 0; iter < iterations; iter++) {
-    const next = [];
-    for (let i = 0; i < pts.length - 1; i++) {
-      const j = i + 1;
-      next.push({ x: 0.75 * pts[i].x + 0.25 * pts[j].x, y: 0.75 * pts[i].y + 0.25 * pts[j].y });
-      next.push({ x: 0.25 * pts[i].x + 0.75 * pts[j].x, y: 0.25 * pts[i].y + 0.75 * pts[j].y });
-    }
-    pts = next;
-  }
-  return pts;
-}
-
-function computeBlobBoundaries(positions) {
-  const local = toLocal2D(positions);
-  const { pts, refLat, refLon, cosLat } = local;
-
-  // For any number of points: place circle samples around each, then convex hull.
-  const padded = [];
-  for (const p of pts) {
-    for (let i = 0; i < BLOB_CIRCLE_SAMPLES; i++) {
-      const a = (2 * Math.PI * i) / BLOB_CIRCLE_SAMPLES;
-      padded.push({ x: p.x + BLOB_RADIUS * Math.cos(a), y: p.y + BLOB_RADIUS * Math.sin(a) });
-    }
-  }
-  const hull = convexHull(padded);
-  if (hull.length >= 3) {
-    hull.push(hull[0]); // close the loop
-    const smoothed = chaikinSmooth(hull, 2);
-    const converted = fromLocal2D(smoothed, refLat, refLon, cosLat);
-    if (converted.length >= 3) return [converted];
-  }
-
-  return [];
-}
-
-function convexHull(points) {
-  if (points.length < 3) return points;
-  const pts = [...points].sort((a, b) => a.x - b.x || a.y - b.y);
-  const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
-  const lower = [];
-  for (const p of pts) {
-    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop();
-    lower.push(p);
-  }
-  const upper = [];
-  for (let i = pts.length - 1; i >= 0; i--) {
-    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], pts[i]) <= 0) upper.pop();
-    upper.push(pts[i]);
-  }
-  lower.pop();
-  upper.pop();
-  return lower.concat(upper);
-}
 
 // --- Sound effects ---
 
@@ -895,56 +788,7 @@ function updateHeatmapLayer() {
   const viewer = moduleViewer;
   if (!viewer) return;
 
-  updateDotEntities();
   updateCesiumHeatmapLayer();
-}
-
-function updateDotEntities() {
-  const viewer = moduleViewer;
-  if (!viewer) return;
-  if (!militaryVisible) return;
-
-  blobGroups = [];
-
-  if (!blobsVisible) {
-    for (let i = 0; i < blobEntities.length; i++) blobEntities[i].show = false;
-  } else {
-    for (const node of allNodes) {
-      if (node.children.length === 0) continue;
-      const entity = entitiesById[node.id];
-      if (!entity || !entity.show) continue;
-      const positions = collectDescendantLeafPositions(node);
-      positions.push(node.position);
-      if (positions.length < 1) continue;
-      const boundaries = computeBlobBoundaries(positions);
-      for (const boundary of boundaries) {
-        blobGroups.push({ boundary });
-      }
-    }
-
-    for (let i = 0; i < blobGroups.length; i++) {
-      let blobE = blobEntities[i];
-      if (!blobE) {
-        blobE = viewer.entities.add({
-          polygon: {
-            hierarchy: new Cesium.PolygonHierarchy(blobGroups[i].boundary),
-            material: Cesium.Color.fromCssColorString("#2040FF").withAlpha(0.25),
-            classificationType: Cesium.ClassificationType.BOTH,
-          },
-          show: true,
-        });
-        blobE._isBlob = true;
-        blobEntities.push(blobE);
-      } else {
-        blobE.polygon.hierarchy = new Cesium.PolygonHierarchy(blobGroups[i].boundary);
-        blobE.show = true;
-      }
-    }
-  }
-  for (let i = blobGroups.length; i < blobEntities.length; i++) {
-    blobEntities[i].show = false;
-  }
-
 }
 
 function showLevel(levelIdx) {
@@ -978,7 +822,6 @@ function resolvePickedEntity(viewer, click) {
   for (const picked of picks) {
     if (!(picked.id instanceof Cesium.Entity)) continue;
     let entity = picked.id;
-    if (entity._isDot || entity._isDotLine || entity._isBlob) continue; // skip overlay entities
     return entity;
   }
   return null;
@@ -1192,7 +1035,6 @@ export function handleDoubleClick(viewer, click) {
   for (const picked of picks) {
     if (!(picked.id instanceof Cesium.Entity)) continue;
     const e = picked.id;
-    if (e._isDot || e._isDotLine || e._isBlob) continue;
     entity = e;
     break;
   }
@@ -1333,12 +1175,6 @@ export function handleKeydown(event, viewer) {
       const staffEs = staffEntitiesById[node.id];
       if (staffEs) for (const se of staffEs) se._labelTargetAlpha = undefined;
     }
-    return true;
-  }
-
-  if (event.key === "b" || event.key === "B") {
-    blobsVisible = !blobsVisible;
-    updateHeatmapLayer();
     return true;
   }
 
