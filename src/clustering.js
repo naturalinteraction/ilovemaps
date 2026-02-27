@@ -120,7 +120,8 @@ let militaryVisible = true;
 let labelsEnabled = true; // when true, text labels are shown on military entities
 let moduleViewer = null;          // viewer reference for dot updates
 
-// Heatmap state (imported from clu)
+// Heatmap state
+let oldHeatmap = null;
 let heatmapLayer = null;          // Cesium.ImageryLayer
 let heatmapCanvas = null;         // offscreen canvas (reused)
 const HEATMAP_CANVAS_SIZE = 512;
@@ -625,7 +626,7 @@ function getHeatmapPositions() {
   return results;
 }
 
-// Heatmap canvas rendering (imported from clu)
+// Heatmap canvas rendering
 function renderHeatmapCanvas(positions) {
   if (!heatmapCanvas) {
     heatmapCanvas = document.createElement("canvas");
@@ -761,10 +762,12 @@ function updateCesiumHeatmapLayer() {
   if (heatmapLayer) {
     try {
       heatmapLayer.imageryProvider.url = heatmapCanvas.toDataURL() + "?v=" + (++heatmapUrlCounter);
+      console.log("fatto update in place");
       return;
     } catch (e) {
       // If update fails, remove and recreate
-      viewer.imageryLayers.remove(heatmapLayer, false);
+      // viewer.imageryLayers.remove(heatmapLayer, false);
+      console.log("non possibile fare update in place");
     }
   }
 
@@ -780,8 +783,14 @@ function updateCesiumHeatmapLayer() {
     tileWidth: HEATMAP_CANVAS_SIZE,
     tileHeight: HEATMAP_CANVAS_SIZE,
   });
+
+  // save previous heatmap so we can remove it later
+  oldHeatmap = heatmapLayer;
+
   heatmapLayer = viewer.imageryLayers.addImageryProvider(provider);
-  heatmapLayer.alpha = 1.0;
+  heatmapLayer.alpha = 0.0;
+
+  // todo: start timer here (1 second), then swapHeatmaps()
 }
 
 function updateHeatmapLayer() {
@@ -1145,6 +1154,13 @@ export function setupZoomListener(viewer) {
   viewer.camera.percentageChanged = 0.1;
 }
 
+export function swapHeatmaps()
+{
+    heatmapLayer.alpha = 1.0;
+    viewer.imageryLayers.remove(oldHeatmap, false);
+    oldHeatmap = null;
+}
+
 // --- Keyboard ---
 
 export function handleKeydown(event, viewer) {
@@ -1187,7 +1203,7 @@ export function handleKeydown(event, viewer) {
   }
 
   if (event.key === " ") {
-    updateHeatmapLayer();
+    swapHeatmaps();
     return true;
   }
 
