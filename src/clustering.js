@@ -692,8 +692,8 @@ function renderHeatmapCanvas(positions) {
   // Alpha: low for dense clusters (individuals), high for isolated points (commanders)
   const MIN_RADIUS = 3;
   const MAX_RADIUS = 50;
-  const ALPHA_CENTER_MIN = 0.08;  // dense areas (many individuals)
-  const ALPHA_CENTER_MAX = 0.35;  // sparse areas (isolated commanders)
+  const ALPHA_CENTER_MIN = 0.09;  // dense areas (many individuals)
+  const ALPHA_CENTER_MAX = 0.5;  // sparse areas (isolated commanders)
 
   for (const pt of pts) {
     const density = localDensity(pt.x, pt.y);
@@ -790,7 +790,7 @@ function updateCesiumHeatmapLayer() {
   heatmapLayer = viewer.imageryLayers.addImageryProvider(provider);
   heatmapLayer.alpha = 0.0;
 
-  // todo: start timer here (1 second), then swapHeatmaps()
+  setTimeout(swapHeatmaps, 500);
 }
 
 function updateHeatmapLayer() {
@@ -906,6 +906,7 @@ export function handleRightClick(viewer, click) {
     }
 
     if (anims.length > 0) { playBeep(MERGE_BEEP_FREQ); startAnimations(anims); }
+    updateHeatmapLayer();
     return true;
   }
 
@@ -958,6 +959,7 @@ export function handleRightClick(viewer, click) {
   }
 
   if (anims.length > 0) { playBeep(MERGE_BEEP_FREQ); startAnimations(anims); }
+  updateHeatmapLayer();
   return true;
 }
 
@@ -1034,6 +1036,7 @@ export function handleLeftClick(viewer, click) {
   }
 
   if (anims.length > 0) { playBeep(UNMERGE_BEEP_FREQ); startAnimations(anims); }
+  updateHeatmapLayer();
   return true;
 }
 
@@ -1157,7 +1160,7 @@ export function setupZoomListener(viewer) {
 export function swapHeatmaps()
 {
     heatmapLayer.alpha = 1.0;
-    viewer.imageryLayers.remove(oldHeatmap, false);
+    moduleViewer.imageryLayers.remove(oldHeatmap, false);
     oldHeatmap = null;
 }
 
