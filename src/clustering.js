@@ -84,14 +84,31 @@ function drawMilitarySymbol(type, hq) {
   return canvas;
 }
 
-// Cache billboard images
-const symbolImages = {};
-function getSymbolImage(type, hq) {
-  const key = hq ? type + "_hq" : type;
-  if (!symbolImages[key]) {
-    symbolImages[key] = drawMilitarySymbol(type, hq);
+// Symbol texture atlas — all variants pre-rendered into a single canvas
+let symbolAtlas = null;
+const symbolRegions = {}; // key → { sx, sy }
+
+function ensureSymbolAtlas() {
+  if (symbolAtlas) return;
+  const types = ["individual", "squad", "platoon", "company", "battalion", "regiment", "brigade"];
+  const cols = types.length;
+  symbolAtlas = document.createElement("canvas");
+  symbolAtlas.width = cols * SYMBOL_SIZE;
+  symbolAtlas.height = 2 * SYMBOL_SIZE; // row 0: normal, row 1: HQ
+  const ctx = symbolAtlas.getContext("2d");
+  for (let i = 0; i < types.length; i++) {
+    const x = i * SYMBOL_SIZE;
+    ctx.drawImage(drawMilitarySymbol(types[i], false), x, 0);
+    symbolRegions[types[i]] = { sx: x, sy: 0 };
+    ctx.drawImage(drawMilitarySymbol(types[i], true), x, SYMBOL_SIZE);
+    symbolRegions[types[i] + "_hq"] = { sx: x, sy: SYMBOL_SIZE };
   }
-  return symbolImages[key];
+}
+
+function getSymbolImage(type, hq) {
+  ensureSymbolAtlas();
+  const key = hq ? type + "_hq" : type;
+  return symbolRegions[key];
 }
 
 // --- Data structures ---
@@ -852,6 +869,8 @@ function updateLabelDeclutter(viewer) {
   if (!labelsEnabled || animating) return;
 
   const scene = viewer.scene;
+  const vw = viewer.canvas.clientWidth;
+  const vh = viewer.canvas.clientHeight;
   const candidates = [];
 
   // Collect visible entities with labels
@@ -859,7 +878,7 @@ function updateLabelDeclutter(viewer) {
     const entity = entitiesById[node.id];
     if (entity && entity.show && !entity._labelHidden) {
       const screen = clampedScreen(scene, entity.position);
-      if (screen) {
+      if (screen && screen.x > -200 && screen.x < vw + 200 && screen.y > -100 && screen.y < vh + 100) {
         if (!entity._labelEstW) estimateLabelSize(entity);
         candidates.push({ entity, sx: screen.x, sy: screen.y, rank: entityRank(entity), estW: entity._labelEstW || 60, estH: entity._labelEstH || 24 });
       }
@@ -867,7 +886,7 @@ function updateLabelDeclutter(viewer) {
     const cmdE = cmdEntitiesById[node.id];
     if (cmdE && cmdE.show) {
       const screen = clampedScreen(scene, cmdE.position);
-      if (screen) {
+      if (screen && screen.x > -200 && screen.x < vw + 200 && screen.y > -100 && screen.y < vh + 100) {
         if (!cmdE._labelEstW) estimateLabelSize(cmdE);
         candidates.push({ entity: cmdE, sx: screen.x, sy: screen.y, rank: entityRank(cmdE), estW: cmdE._labelEstW || 60, estH: cmdE._labelEstH || 24 });
       }
@@ -877,7 +896,7 @@ function updateLabelDeclutter(viewer) {
       for (const se of staffEs) {
         if (se && se.show) {
           const screen = clampedScreen(scene, se.position);
-          if (screen) {
+          if (screen && screen.x > -200 && screen.x < vw + 200 && screen.y > -100 && screen.y < vh + 100) {
             if (!se._labelEstW) estimateLabelSize(se);
             candidates.push({ entity: se, sx: screen.x, sy: screen.y, rank: entityRank(se), estW: se._labelEstW || 60, estH: se._labelEstH || 24 });
           }
@@ -889,7 +908,7 @@ function updateLabelDeclutter(viewer) {
   for (const proxy of clusterProxies) {
     if (proxy.show) {
       const screen = clampedScreen(scene, proxy.position);
-      if (screen) {
+      if (screen && screen.x > -200 && screen.x < vw + 200 && screen.y > -100 && screen.y < vh + 100) {
         if (!proxy._labelEstW) estimateLabelSize(proxy);
         candidates.push({ entity: proxy, sx: screen.x, sy: screen.y, rank: entityRank(proxy), estW: proxy._labelEstW || 60, estH: proxy._labelEstH || 24 });
       }
@@ -1814,13 +1833,17 @@ export function setupPreRender(viewer) {
     {
       bbDrawList.length = 0;
       const scene = viewer.scene;
+      const vw = viewer.canvas.clientWidth;
+      const vh = viewer.canvas.clientHeight;
       function pushBb(entity) {
         if (!entity || !entity.show) return;
         const screen = clampedScreen(scene, entity.position);
         if (!screen) return;
+        const sz = (entity._bbSize || SYMBOL_SIZE) * (entity._bbScale || 1);
+        if (screen.x < -sz || screen.x > vw + sz || screen.y < -sz || screen.y > vh + sz) return;
         bbDrawList.push({
           entity,
-          image: entity._bbImage,
+          region: entity._bbImage,
           size: entity._bbSize || SYMBOL_SIZE,
           alpha: entity._bbAlpha != null ? entity._bbAlpha : 1,
           scale: entity._bbScale != null ? entity._bbScale : 1,
@@ -1835,6 +1858,16 @@ export function setupPreRender(viewer) {
         if (staffEs) for (const se of staffEs) pushBb(se);
       }
       for (const proxy of clusterProxies) pushBb(proxy);
+      // // LOD: skip individuals and staff when too many billboards
+      // if (bbDrawList.length > 200) {
+      //   let j = 0;
+      //   for (let i = 0; i < bbDrawList.length; i++) {
+      //     const e = bbDrawList[i].entity;
+      //     if (e._milStaffOf || (e._milNode && e._milNode.type === "individual")) continue;
+      //     bbDrawList[j++] = bbDrawList[i];
+      //   }
+      //   bbDrawList.length = j;
+      // }
     }
     // Draw billboards on canvas (after arrows, before labels)
     if (bbCanvas && bbCtx) {
@@ -1842,9 +1875,11 @@ export function setupPreRender(viewer) {
       for (const bb of bbDrawList) {
         const sz = bb.size * bb.scale;
         bbCtx.globalAlpha = bb.alpha;
-        bbCtx.drawImage(bb.image, bb.sx - sz / 2, bb.sy - sz, sz, sz);
+        bbCtx.drawImage(symbolAtlas, bb.region.sx, bb.region.sy, SYMBOL_SIZE, SYMBOL_SIZE,
+                        bb.sx - sz / 2, bb.sy - sz, sz, sz);
       }
       bbCtx.globalAlpha = 1;
+      console.log("bb:", bbDrawList.length, "labels:", labelDrawList.length);
     }
     // Draw drone arrows on full-opacity canvas
     if (arrowCanvas && arrowCtx) {
