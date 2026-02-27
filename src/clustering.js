@@ -772,19 +772,6 @@ function updateCesiumHeatmapLayer() {
   // Render canvas
   renderHeatmapCanvas(positions);
 
-  // If layer exists, try to update it in place
-  if (heatmapLayer) {
-    try {
-      heatmapLayer.imageryProvider.url = heatmapCanvas.toDataURL() + "?v=" + (++heatmapUrlCounter);
-      console.log("fatto update in place");
-      return;
-    } catch (e) {
-      // If update fails, remove and recreate
-      // viewer.imageryLayers.remove(heatmapLayer, false);
-      console.log("non possibile fare update in place");
-    }
-  }
-
   // Create new layer
   const provider = new Cesium.SingleTileImageryProvider({
     url: heatmapCanvas.toDataURL() + "?v=" + (++heatmapUrlCounter),
