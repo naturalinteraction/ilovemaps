@@ -119,11 +119,13 @@ let militaryVisible = true;
 let labelsEnabled = true; // when true, text labels are shown on military entities
 let blobsVisible = false; // when true, convex hull blobs are shown
 let heatmapVisible = true; // when true, show heatmap; when false, show circles
+let declutterByRank = false; // when true, declutter labels as entire rank groups
 
 // Dot overlay state (replaces heatmap)
 const DOT_RADIUS_M = 100;  // meters semi-axis for terrain-clamped ellipse
 const DOT_ALPHA = 0.15;   // alpha per dot; overlapping dots sum alphas
 let moduleViewer = null;          // viewer reference for dot updates
+let hudDiv = null;                // on-screen status indicator
 const dotEntities = [];           // pool of Cesium ellipse entities for dots
 
 // Heatmap state (imported from clu)
@@ -138,6 +140,11 @@ const HEATMAP_LAYER_UPDATE_MS = 5000; // only rebuild layer every 5 seconds
 // Canvas overlay for drone arrows (full opacity, drawn on top of post-process stages)
 let arrowCanvas = null;
 let arrowCtx = null;
+
+// Canvas overlay for labels (drawn on top of arrows so labels are never occluded by billboards)
+let labelCanvas = null;
+let labelCtx = null;
+const labelDrawList = []; // rebuilt each frame by updateLabelDeclutter
 // Each entry: { base: Cartesian3, tip: Cartesian3, color: string }
 export const canvasArrows = [];
 // Each entry: { lines: [[Cartesian3,Cartesian3],...], color: string, width: number }
@@ -152,8 +159,8 @@ let clusterDirty = true;          // flag to recalculate
 const clusteredEntities = new Set(); // entities hidden by clustering (not by merge/unmerge)
 
 // Label declutter constants
-const LABEL_CELL_W = 60;
-const LABEL_CELL_H = 14;
+const LABEL_CELL_W = 32;
+const LABEL_CELL_H = 8;
 
 // Blob overlay state — terrain-clamped polygon entities
 let blobGroups = []; // array of { boundary: [Cartesian3...] } for each visible unit with children
@@ -292,12 +299,9 @@ const animations = []; // { entity, from, to, startTime, duration, fade, onCompl
 let animating = false;
 const WHITE = Cesium.Color.WHITE;
 
-function setEntityAlpha(entity, alpha, labelAlpha) {
+function setEntityAlpha(entity, alpha) {
   // Use small epsilon for billboard to prevent Cesium from skipping fully-transparent billboards
   entity.billboard.color = new Cesium.Color(1, 1, 1, Math.max(alpha, 0.005));
-  const la = labelAlpha !== undefined ? labelAlpha : alpha;
-  entity.label.fillColor = new Cesium.Color(1, 1, 1, la);
-  entity.label.outlineColor = new Cesium.Color(0, 0, 0, la);
 }
 
 function setEntityScale(entity, scale) {
@@ -366,19 +370,20 @@ export async function loadMilitaryUnits(viewer) {
       },
       label: {
         text: node.name,
-        font: isIndividual ? "18px sans-serif" : "20px sans-serif",
+        font: isIndividual ? "18px sans-serif" : "18px sans-serif",
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         outlineWidth: 2,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
         pixelOffset: new Cesium.Cartesian2(0, -(size / 2 + 4)),
         eyeOffset: new Cesium.Cartesian3(0, 0, -50),
-        show: labelsEnabled,
+        show: false,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
       show: levelIdx === currentLevel,
     });
 
     entity._milNode = node;
+    entity._labelPixelOffsetY = -(size / 2 + 4);
     estimateLabelSize(entity);
     entitiesById[node.id] = entity;
   }
@@ -408,12 +413,13 @@ export async function loadMilitaryUnits(viewer) {
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
         pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE / 2 + 4)),
         eyeOffset: new Cesium.Cartesian3(0, 0, -50),
-        show: labelsEnabled,
+        show: false,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
       show: false,
     });
     cmdEntity._milCmdOf = node;
+    cmdEntity._labelPixelOffsetY = -(SYMBOL_SIZE / 2 + 4);
     estimateLabelSize(cmdEntity);
     cmdEntitiesById[node.id] = cmdEntity;
 
@@ -441,12 +447,13 @@ export async function loadMilitaryUnits(viewer) {
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
             pixelOffset: new Cesium.Cartesian2(0, -28),
             eyeOffset: new Cesium.Cartesian3(0, 0, -50),
-            show: labelsEnabled,
+            show: false,
             disableDepthTestDistance: Number.POSITIVE_INFINITY,
               },
           show: false,
         });
         staffEntity._milStaffOf = node;
+        staffEntity._labelPixelOffsetY = -28;
         estimateLabelSize(staffEntity);
         staffEnts.push(staffEntity);
       }
@@ -464,6 +471,15 @@ export async function loadMilitaryUnits(viewer) {
   container.appendChild(arrowCanvas);
   arrowCtx = arrowCanvas.getContext("2d");
 
+  // Label canvas (renders on top of arrowCanvas)
+  labelCanvas = document.createElement("canvas");
+  labelCanvas.style.position = "absolute";
+  labelCanvas.style.top = "0";
+  labelCanvas.style.left = "0";
+  labelCanvas.style.pointerEvents = "none";
+  container.appendChild(labelCanvas);
+  labelCtx = labelCanvas.getContext("2d");
+
   const syncCanvasSize = () => {
     const cw = viewer.canvas.clientWidth;
     const ch = viewer.canvas.clientHeight;
@@ -473,12 +489,23 @@ export async function loadMilitaryUnits(viewer) {
     arrowCanvas.width = cw * dpr;
     arrowCanvas.height = ch * dpr;
     arrowCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    labelCanvas.style.width = cw + "px";
+    labelCanvas.style.height = ch + "px";
+    labelCanvas.width = cw * dpr;
+    labelCanvas.height = ch * dpr;
+    labelCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
   };
   syncCanvasSize();
 
   // Keep canvas size in sync with Cesium canvas
   const ro = new ResizeObserver(() => { syncCanvasSize(); });
   ro.observe(viewer.canvas);
+
+  // HUD status indicator
+  // hudDiv = document.createElement("div");
+  // hudDiv.style.cssText = "position:absolute;top:8px;left:8px;color:#fff;font:12px monospace;background:rgba(0,0,0,0.5);padding:4px 8px;pointer-events:none;border-radius:3px;z-index:1;";
+  // updateHud();
+  // container.appendChild(hudDiv);
 
   updateHeatmapLayer();
   // startIndividualMovement(); // temporarily disabled
@@ -525,10 +552,10 @@ function startAnimations(anims) {
     a.startTime = now;
     a.entity.show = true;
     if (a.fade === "in") {
-      setEntityAlpha(a.entity, 0, 0);
+      setEntityAlpha(a.entity, 0);
       if (a.popScale) setEntityScale(a.entity, PARENT_POP_SCALE);
     } else if (a.fade === "out") {
-      setEntityAlpha(a.entity, 1, 1);
+      setEntityAlpha(a.entity, 1);
       if (a.popScale) setEntityScale(a.entity, 1);
     }
     const stationary = Cesium.Cartesian3.equals(a.from, a.to);
@@ -574,19 +601,7 @@ function onPreRender() {
         const ft = Math.max(0, Math.min(1, elapsed / fadeDur));
         const eased = easeInOutCubic(ft);
         const alpha = a.fade === "in" ? eased : 1 - eased;
-        // Labels: fade out during delay period, fade in only after delay
-        const labelDelay = a.duration * (1 - PARENT_FADE_RELATIVE_DURATION);
-        const labelDur = a.duration * PARENT_FADE_RELATIVE_DURATION;
-        let labelAlpha;
-        if (a.fade === "out") {
-          const lt = labelDelay > 0 ? easeInOutCubic(Math.min(1, (now - a.startTime) / labelDelay)) : 1;
-          labelAlpha = 1 - lt;
-        } else {
-          const labelElapsed = now - a.startTime - labelDelay;
-          const lt = Math.max(0, Math.min(1, labelElapsed / labelDur));
-          labelAlpha = easeInOutCubic(lt);
-        }
-        setEntityAlpha(a.entity, alpha, labelAlpha);
+        setEntityAlpha(a.entity, alpha);
         if (a.popScale) {
           const scale = a.fade === "in"
             ? PARENT_POP_SCALE + (1 - PARENT_POP_SCALE) * eased
@@ -617,18 +632,18 @@ function setCmdStaffShow(node, show) {
   if (cmdE) {
     cmdE.show = show;
     cmdE.position = node.cmdHomePosition;
-    if (show) setEntityAlpha(cmdE, 1, 1);
+    if (show) setEntityAlpha(cmdE, 1);
   }
   // Hide the unit's own label when commander label is visible to avoid overlap
   const unitE = entitiesById[node.id];
-  if (unitE && unitE.label) {
-    unitE.label.show = show ? false : labelsEnabled;
+  if (unitE) {
+    unitE._labelHidden = show;
   }
   const staffEs = staffEntitiesById[node.id];
   if (staffEs) {
     for (const se of staffEs) {
       se.show = show;
-      if (show) setEntityAlpha(se, 1, 1);
+      if (show) setEntityAlpha(se, 1);
     }
     // Reset staff positions
     if (node.staffHomePositions) {
@@ -687,12 +702,13 @@ function getOrCreateProxy(viewer, index) {
       verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
       pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE / 2 + 4)),
       eyeOffset: new Cesium.Cartesian3(0, 0, -50),
-      show: labelsEnabled,
+      show: false,
       disableDepthTestDistance: Number.POSITIVE_INFINITY,
     },
     show: false,
   });
   proxy._isClusterProxy = true;
+  proxy._labelPixelOffsetY = -(SYMBOL_SIZE / 2 + 4);
   clusterProxies.push(proxy);
   return proxy;
 }
@@ -798,7 +814,13 @@ function estimateLabelSize(entity) {
   entity._labelEstH = fontSize * 1.3 + 4;
 }
 
+// function updateHud() {
+//   if (!hudDiv) return;
+//   hudDiv.textContent = "declutter: " + (declutterByRank ? "by-rank" : "per-label");
+// }
+
 function updateLabelDeclutter(viewer) {
+  labelDrawList.length = 0;
   if (!labelsEnabled || animating) return;
 
   const scene = viewer.scene;
@@ -807,7 +829,7 @@ function updateLabelDeclutter(viewer) {
   // Collect visible entities with labels
   for (const node of allNodes) {
     const entity = entitiesById[node.id];
-    if (entity && entity.show && entity.label && entity.label.show) {
+    if (entity && entity.show && !entity._labelHidden) {
       const screen = scene.cartesianToCanvasCoordinates(entity.position.getValue ? entity.position.getValue(Cesium.JulianDate.now()) : entity.position);
       if (screen) {
         if (!entity._labelEstW) estimateLabelSize(entity);
@@ -815,7 +837,7 @@ function updateLabelDeclutter(viewer) {
       }
     }
     const cmdE = cmdEntitiesById[node.id];
-    if (cmdE && cmdE.show && cmdE.label && cmdE.label.show) {
+    if (cmdE && cmdE.show) {
       const screen = scene.cartesianToCanvasCoordinates(cmdE.position.getValue ? cmdE.position.getValue(Cesium.JulianDate.now()) : cmdE.position);
       if (screen) {
         if (!cmdE._labelEstW) estimateLabelSize(cmdE);
@@ -825,7 +847,7 @@ function updateLabelDeclutter(viewer) {
     const staffEs = staffEntitiesById[node.id];
     if (staffEs) {
       for (const se of staffEs) {
-        if (se && se.show && se.label && se.label.show) {
+        if (se && se.show) {
           const screen = scene.cartesianToCanvasCoordinates(se.position.getValue ? se.position.getValue(Cesium.JulianDate.now()) : se.position);
           if (screen) {
             if (!se._labelEstW) estimateLabelSize(se);
@@ -837,7 +859,7 @@ function updateLabelDeclutter(viewer) {
   }
   // Cluster proxies
   for (const proxy of clusterProxies) {
-    if (proxy.show && proxy.label && proxy.label.show) {
+    if (proxy.show) {
       const pos = proxy.position.getValue ? proxy.position.getValue(Cesium.JulianDate.now()) : proxy.position;
       const screen = scene.cartesianToCanvasCoordinates(pos);
       if (screen) {
@@ -855,36 +877,87 @@ function updateLabelDeclutter(viewer) {
   // Grid occupancy pass
   const grid = new Map();
 
-  for (const c of candidates) {
-    const cellsX = Math.ceil(c.estW / LABEL_CELL_W);
-    const cx = Math.floor(c.sx / LABEL_CELL_W);
-    const cy = Math.floor(c.sy / LABEL_CELL_H);
+  // if (declutterByRank) {
+  //   // Group candidates by floored rank
+  //   const groups = new Map();
+  //   for (const c of candidates) {
+  //     const rk = Math.floor(c.rank);
+  //     if (!groups.has(rk)) groups.set(rk, []);
+  //     groups.get(rk).push(c);
+  //   }
+  //   // Process groups from highest rank to lowest
+  //   const sortedRanks = [...groups.keys()].sort((a, b) => b - a);
+  //   for (const rk of sortedRanks) {
+  //     const members = groups.get(rk);
+  //     // Precompute cell info and check for blocks
+  //     let anyBlocked = false;
+  //     const cellInfos = [];
+  //     for (const c of members) {
+  //       const cellsX = Math.ceil(c.estW / LABEL_CELL_W);
+  //       const cx = Math.floor(c.sx / LABEL_CELL_W);
+  //       const cy = Math.floor(c.sy / LABEL_CELL_H);
+  //       cellInfos.push({ cellsX, cx, cy });
+  //       if (!anyBlocked) {
+  //         for (let dx = 0; dx < cellsX && !anyBlocked; dx++) {
+  //           for (let dy = -1; dy <= 1 && !anyBlocked; dy++) {
+  //             if (grid.has((cx + dx) + "," + (cy + dy))) anyBlocked = true;
+  //           }
+  //         }
+  //       }
+  //     }
+  //     const targetAlpha = anyBlocked ? 0 : 1;
+  //     if (!anyBlocked) {
+  //       // Claim cells for all members
+  //       for (const ci of cellInfos) {
+  //         for (let dx = 0; dx < ci.cellsX; dx++) {
+  //           for (let dy = -1; dy <= 1; dy++) {
+  //             grid.set((ci.cx + dx) + "," + (ci.cy + dy), true);
+  //           }
+  //         }
+  //       }
+  //     }
+  //     for (const c of members) {
+  //       c.entity._labelTargetAlpha = targetAlpha;
+  //       if (!anyBlocked) {
+  //         const text = c.entity.label.text;
+  //         const str = (text && text.getValue) ? text.getValue(Cesium.JulianDate.now()) : text;
+  //         if (str) labelDrawList.push({ text: str, sx: c.sx, sy: c.sy, offsetY: c.entity._labelPixelOffsetY || 0 });
+  //       }
+  //     }
+  //   }
+  // } else {
+  {
+    for (const c of candidates) {
+      const cellsX = Math.ceil(c.estW / LABEL_CELL_W);
+      const cx = Math.floor(c.sx / LABEL_CELL_W);
+      const cy = Math.floor(c.sy / LABEL_CELL_H);
 
-    // Check if any cell is occupied
-    let blocked = false;
-    for (let dx = 0; dx < cellsX && !blocked; dx++) {
-      for (let dy = -1; dy <= 1 && !blocked; dy++) {
-        const key = (cx + dx) + "," + (cy + dy);
-        if (grid.has(key)) blocked = true;
-      }
-    }
-
-    const targetAlpha = blocked ? 0 : 1;
-
-    if (!blocked) {
-      // Claim cells
-      for (let dx = 0; dx < cellsX; dx++) {
-        for (let dy = -1; dy <= 1; dy++) {
-          grid.set((cx + dx) + "," + (cy + dy), true);
+      // Check if any cell is occupied
+      let blocked = false;
+      for (let dx = 0; dx < cellsX && !blocked; dx++) {
+        for (let dy = -1; dy <= 1 && !blocked; dy++) {
+          const key = (cx + dx) + "," + (cy + dy);
+          if (grid.has(key)) blocked = true;
         }
       }
-    }
 
-    // Only update Cesium color objects when value changes
-    if (c.entity._labelTargetAlpha !== targetAlpha) {
+      const targetAlpha = blocked ? 0 : 1;
+
+      if (!blocked) {
+        // Claim cells
+        for (let dx = 0; dx < cellsX; dx++) {
+          for (let dy = -1; dy <= 1; dy++) {
+            grid.set((cx + dx) + "," + (cy + dy), true);
+          }
+        }
+      }
+
       c.entity._labelTargetAlpha = targetAlpha;
-      c.entity.label.fillColor = new Cesium.Color(1, 1, 1, targetAlpha);
-      c.entity.label.outlineColor = new Cesium.Color(0, 0, 0, targetAlpha);
+      if (!blocked) {
+        const text = c.entity.label.text;
+        const str = (text && text.getValue) ? text.getValue(Cesium.JulianDate.now()) : text;
+        if (str) labelDrawList.push({ text: str, sx: c.sx, sy: c.sy, offsetY: c.entity._labelPixelOffsetY || 0 });
+      }
     }
   }
 }
@@ -1548,16 +1621,32 @@ export function handleKeydown(event, viewer) {
 
   if (event.key === "l" || event.key === "L") {
     labelsEnabled = !labelsEnabled;
+    // Reset target alphas so declutter recalculates fresh when re-enabled
     for (const node of allNodes) {
       const e = entitiesById[node.id];
-      e.label.show = labelsEnabled;
-      if (labelsEnabled) { e._labelTargetAlpha = undefined; }
+      if (e) e._labelTargetAlpha = undefined;
       const cmdE = cmdEntitiesById[node.id];
-      if (cmdE) { cmdE.label.show = labelsEnabled; if (labelsEnabled) cmdE._labelTargetAlpha = undefined; }
+      if (cmdE) cmdE._labelTargetAlpha = undefined;
       const staffEs = staffEntitiesById[node.id];
-      if (staffEs) for (const se of staffEs) { se.label.show = labelsEnabled; if (labelsEnabled) se._labelTargetAlpha = undefined; }
+      if (staffEs) for (const se of staffEs) se._labelTargetAlpha = undefined;
     }
-    for (const proxy of clusterProxies) { proxy.label.show = labelsEnabled; if (labelsEnabled) proxy._labelTargetAlpha = undefined; }
+    for (const proxy of clusterProxies) proxy._labelTargetAlpha = undefined;
+    return true;
+  }
+
+  if (event.key === "d" || event.key === "D") {
+    declutterByRank = !declutterByRank;
+    // Reset target alphas so the new mode recalculates fresh
+    for (const node of allNodes) {
+      const e = entitiesById[node.id];
+      if (e) e._labelTargetAlpha = undefined;
+      const cmdE = cmdEntitiesById[node.id];
+      if (cmdE) cmdE._labelTargetAlpha = undefined;
+      const staffEs = staffEntitiesById[node.id];
+      if (staffEs) for (const se of staffEs) se._labelTargetAlpha = undefined;
+    }
+    for (const proxy of clusterProxies) proxy._labelTargetAlpha = undefined;
+    // updateHud();
     return true;
   }
 
@@ -1768,6 +1857,22 @@ export function setupPreRender(viewer) {
         arrowCtx.beginPath();
         arrowCtx.arc(sp.x, sp.y, r, 0, Math.PI * 2);
         arrowCtx.fill();
+      }
+    }
+    // Draw labels on canvas overlay (always on top of billboards)
+    if (labelCanvas && labelCtx) {
+      labelCtx.clearRect(0, 0, labelCanvas.width, labelCanvas.height);
+      if (labelsEnabled && !animating) {
+        labelCtx.font = "18px sans-serif";
+        labelCtx.textAlign = "center";
+        labelCtx.textBaseline = "bottom";
+        labelCtx.lineWidth = 3;
+        for (const lb of labelDrawList) {
+          labelCtx.strokeStyle = "rgba(0,0,0,1)";
+          labelCtx.strokeText(lb.text, lb.sx, lb.sy + lb.offsetY);
+          labelCtx.fillStyle = "rgba(255,255,255,1)";
+          labelCtx.fillText(lb.text, lb.sx, lb.sy + lb.offsetY);
+        }
       }
     }
   });
