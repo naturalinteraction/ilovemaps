@@ -367,7 +367,7 @@ export async function loadMilitaryUnits(viewer) {
         width: size,
         height: size,
         verticalOrigin: Cesium.VerticalOrigin.CENTER,
-        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
       },
       label: {
         text: node.name,
@@ -378,7 +378,7 @@ export async function loadMilitaryUnits(viewer) {
         pixelOffset: new Cesium.Cartesian2(0, -(size / 2 + 4)),
         eyeOffset: new Cesium.Cartesian3(0, 0, -50),
         show: false,
-        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+
       },
       show: levelIdx === currentLevel,
     });
@@ -404,7 +404,7 @@ export async function loadMilitaryUnits(viewer) {
         width: SYMBOL_SIZE,
         height: SYMBOL_SIZE,
         verticalOrigin: Cesium.VerticalOrigin.CENTER,
-        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
       },
       label: {
         text: cmdLabel,
@@ -415,7 +415,7 @@ export async function loadMilitaryUnits(viewer) {
         pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE / 2 + 4)),
         eyeOffset: new Cesium.Cartesian3(0, 0, -50),
         show: false,
-        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+
       },
       show: false,
     });
@@ -438,8 +438,8 @@ export async function loadMilitaryUnits(viewer) {
             width: 48,
             height: 48,
             verticalOrigin: Cesium.VerticalOrigin.CENTER,
-            disableDepthTestDistance: Number.POSITIVE_INFINITY,
-              },
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+          },
           label: {
             text: s.name,
             font: "18px sans-serif",
@@ -449,7 +449,7 @@ export async function loadMilitaryUnits(viewer) {
             pixelOffset: new Cesium.Cartesian2(0, -28),
             eyeOffset: new Cesium.Cartesian3(0, 0, -50),
             show: false,
-            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+    
               },
           show: false,
         });
@@ -693,7 +693,7 @@ function getOrCreateProxy(viewer, index) {
       width: SYMBOL_SIZE,
       height: SYMBOL_SIZE,
       verticalOrigin: Cesium.VerticalOrigin.CENTER,
-      disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
     },
     label: {
       text: "",
@@ -704,7 +704,7 @@ function getOrCreateProxy(viewer, index) {
       pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE / 2 + 4)),
       eyeOffset: new Cesium.Cartesian3(0, 0, -50),
       show: false,
-      disableDepthTestDistance: Number.POSITIVE_INFINITY,
+
     },
     show: false,
   });
@@ -820,6 +820,18 @@ function estimateLabelSize(entity) {
 //   hudDiv.textContent = "declutter: " + (declutterByRank ? "by-rank" : "per-label");
 // }
 
+// Get billboard screen position by projecting from the terrain surface
+const _scratchCarto = new Cesium.Cartographic();
+const _scratchCart3 = new Cesium.Cartesian3();
+function billboardScreenXY(entity, scene) {
+  const pos = entity.position.getValue ? entity.position.getValue(Cesium.JulianDate.now()) : entity.position;
+  Cesium.Cartographic.fromCartesian(pos, Cesium.Ellipsoid.WGS84, _scratchCarto);
+  const terrainH = scene.globe.getHeight(_scratchCarto);
+  if (terrainH !== undefined) _scratchCarto.height = terrainH;
+  Cesium.Cartesian3.fromRadians(_scratchCarto.longitude, _scratchCarto.latitude, _scratchCarto.height, Cesium.Ellipsoid.WGS84, _scratchCart3);
+  return scene.cartesianToCanvasCoordinates(_scratchCart3);
+}
+
 function updateLabelDeclutter(viewer) {
   labelDrawList.length = 0;
   if (!labelsEnabled || animating) return;
@@ -831,7 +843,7 @@ function updateLabelDeclutter(viewer) {
   for (const node of allNodes) {
     const entity = entitiesById[node.id];
     if (entity && entity.show && !entity._labelHidden) {
-      const screen = scene.cartesianToCanvasCoordinates(entity.position.getValue ? entity.position.getValue(Cesium.JulianDate.now()) : entity.position);
+      const screen = billboardScreenXY(entity, scene);
       if (screen) {
         if (!entity._labelEstW) estimateLabelSize(entity);
         candidates.push({ entity, sx: screen.x, sy: screen.y, rank: entityRank(entity), estW: entity._labelEstW || 60, estH: entity._labelEstH || 24 });
@@ -839,7 +851,7 @@ function updateLabelDeclutter(viewer) {
     }
     const cmdE = cmdEntitiesById[node.id];
     if (cmdE && cmdE.show) {
-      const screen = scene.cartesianToCanvasCoordinates(cmdE.position.getValue ? cmdE.position.getValue(Cesium.JulianDate.now()) : cmdE.position);
+      const screen = billboardScreenXY(cmdE, scene);
       if (screen) {
         if (!cmdE._labelEstW) estimateLabelSize(cmdE);
         candidates.push({ entity: cmdE, sx: screen.x, sy: screen.y, rank: entityRank(cmdE), estW: cmdE._labelEstW || 60, estH: cmdE._labelEstH || 24 });
@@ -849,7 +861,7 @@ function updateLabelDeclutter(viewer) {
     if (staffEs) {
       for (const se of staffEs) {
         if (se && se.show) {
-          const screen = scene.cartesianToCanvasCoordinates(se.position.getValue ? se.position.getValue(Cesium.JulianDate.now()) : se.position);
+          const screen = billboardScreenXY(se, scene);
           if (screen) {
             if (!se._labelEstW) estimateLabelSize(se);
             candidates.push({ entity: se, sx: screen.x, sy: screen.y, rank: entityRank(se), estW: se._labelEstW || 60, estH: se._labelEstH || 24 });
@@ -861,8 +873,7 @@ function updateLabelDeclutter(viewer) {
   // Cluster proxies
   for (const proxy of clusterProxies) {
     if (proxy.show) {
-      const pos = proxy.position.getValue ? proxy.position.getValue(Cesium.JulianDate.now()) : proxy.position;
-      const screen = scene.cartesianToCanvasCoordinates(pos);
+      const screen = billboardScreenXY(proxy, scene);
       if (screen) {
         if (!proxy._labelEstW) estimateLabelSize(proxy);
         candidates.push({ entity: proxy, sx: screen.x, sy: screen.y, rank: entityRank(proxy), estW: proxy._labelEstW || 60, estH: proxy._labelEstH || 24 });
@@ -1787,6 +1798,7 @@ export function setupPreRender(viewer) {
         && Cesium.Cartesian3.distanceSquared(c, camPos) > 1;
       for (let i = 0; i < canvasArrows.length; i++) {
         const a = canvasArrows[i];
+        if (a.visible === false) continue;
         if (!isValid(a.base) || !isValid(a.tip)) continue;
         const sBase = scene.cartesianToCanvasCoordinates(a.base);
         const sTip = scene.cartesianToCanvasCoordinates(a.tip);
@@ -1821,6 +1833,7 @@ export function setupPreRender(viewer) {
       const FRUSTUM_SEGMENTS = 20;
       for (let i = 0; i < canvasFrustumLines.length; i++) {
         const f = canvasFrustumLines[i];
+        if (f.visible === false) continue;
         arrowCtx.strokeStyle = f.color;
         arrowCtx.lineWidth = f.width;
         for (let j = 0; j < f.lines.length; j++) {
@@ -1851,6 +1864,7 @@ export function setupPreRender(viewer) {
       // Draw indicator dots on top of arrows and frustum lines
       for (let i = 0; i < canvasDots.length; i++) {
         const d = canvasDots[i];
+        if (d.visible === false) continue;
         if (!isValid(d.position)) continue;
         const sp = scene.cartesianToCanvasCoordinates(d.position);
         if (!sp) continue;

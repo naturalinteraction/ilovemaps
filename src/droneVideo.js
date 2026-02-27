@@ -172,6 +172,7 @@ export async function setupDroneVideoLayer(viewer) {
   );
   let drone = computeDroneCameraMatrix(DRONE_POSE);
   let droneAlpha = 1.0;
+  let droneVisible = false; // toggled by 'v' key
 
   // One post-process stage per drone frame, all visible simultaneously
   const droneStates = DRONE_FRAMES.map((frame, i) => {
@@ -183,7 +184,7 @@ export async function setupDroneVideoLayer(viewer) {
         videoTexture:      () => textures[i],
         droneEcefPosition: () => state.cam.ecef,
         droneCameraMatrix: () => state.cam.matrix,
-        videoAlpha:        () => state.alpha,
+        videoAlpha:        () => droneVisible ? state.alpha : 0.0,
       },
     });
     viewer.scene.postProcessStages.add(stage);
@@ -232,16 +233,17 @@ export async function setupDroneVideoLayer(viewer) {
       outlineColor: Cesium.Color.ORANGE.toCssColorString(),
       pixelSize: 14,
       outlineWidth: 2,
+      get visible() { return droneVisible; },
     };
     canvasDots.push(canvasDotEntry);
 
     // Register arrow on shared canvas overlay (renders above post-process stages)
-    const canvasArrowEntry = { base: arrowPos[0], tip: arrowPos[1], color: "red" };
+    const canvasArrowEntry = { base: arrowPos[0], tip: arrowPos[1], color: "red", get visible() { return droneVisible; } };
     canvasArrows.push(canvasArrowEntry);
 
     // Register frustum lines on shared canvas overlay (between arrows and dots)
     const cssColor = indicatorColor.withAlpha(0.7).toCssColorString();
-    const canvasFrustumEntry = { lines: frustumPos, color: cssColor, width: 2 };
+    const canvasFrustumEntry = { lines: frustumPos, color: cssColor, width: 2, get visible() { return droneVisible; } };
     canvasFrustumLines.push(canvasFrustumEntry);
 
     return {
@@ -282,14 +284,17 @@ export async function setupDroneVideoLayer(viewer) {
   window.addEventListener("keydown", (e) => {
     const headRad = Cesium.Math.toRadians(DRONE_POSE.heading);
     if (e.key === "v" || e.key === "V") {
-      viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(DRONE_POSE.lon, DRONE_POSE.lat, DRONE_POSE.alt + 500),
-        orientation: {
-          heading: Cesium.Math.toRadians(DRONE_POSE.heading),
-          pitch: Cesium.Math.toRadians(-DRONE_POSE.pitch),
-          roll: 0,
-        },
-      });
+      droneVisible = !droneVisible;
+      if (droneVisible) {
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(DRONE_POSE.lon, DRONE_POSE.lat, DRONE_POSE.alt + 500),
+          orientation: {
+            heading: Cesium.Math.toRadians(DRONE_POSE.heading),
+            pitch: Cesium.Math.toRadians(-DRONE_POSE.pitch),
+            roll: 0,
+          },
+        });
+      }
     } else if (e.key === "r" || e.key === "R") {
       viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(8.82, 46.23, 5000) });
     } else if (e.key === "u" || e.key === "U") {
