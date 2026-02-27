@@ -943,9 +943,12 @@ function updateLabelDeclutter(viewer) {
         }
       }
 
-      const targetAlpha = blocked ? 0 : 1;
+      const wouldShow = !blocked;
 
-      if (!blocked) {
+      // While camera is moving, only remove labels — don't add new ones
+      const show = wouldShow && !(cameraMoving && c.entity._labelTargetAlpha !== 1);
+
+      if (show) {
         // Claim cells
         for (let dx = 0; dx < cellsX; dx++) {
           for (let dy = -1; dy <= 1; dy++) {
@@ -954,8 +957,8 @@ function updateLabelDeclutter(viewer) {
         }
       }
 
-      c.entity._labelTargetAlpha = targetAlpha;
-      if (!blocked) {
+      c.entity._labelTargetAlpha = show ? 1 : 0;
+      if (show) {
         const text = c.entity.label.text;
         const str = (text && text.getValue) ? text.getValue(Cesium.JulianDate.now()) : text;
         if (str) labelDrawList.push({ text: str, sx: c.sx, sy: c.sy, offsetY: c.entity._labelPixelOffsetY || 0 });
@@ -1589,9 +1592,14 @@ function animateMergeAllDescendants(node, targetPos, anims) {
 // --- Zoom listener ---
 
 let clusterDebounceTimer = null;
+let cameraMoving = false;
+let cameraSettleTimer = null;
 
 export function setupZoomListener(viewer) {
   viewer.camera.changed.addEventListener(() => {
+    cameraMoving = true;
+    if (cameraSettleTimer) clearTimeout(cameraSettleTimer);
+    cameraSettleTimer = setTimeout(() => { cameraMoving = false; }, 150);
     // Debounced visual clustering update
     if (clusterDebounceTimer) clearTimeout(clusterDebounceTimer);
     clusterDebounceTimer = setTimeout(() => {
