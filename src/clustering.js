@@ -112,6 +112,7 @@ const cmdEntitiesById = {};
 // Staff entities indexed by node id → [staff1, staff2]
 const staffEntitiesById = {};
 const HEIGHT_ABOVE_TERRAIN = 1; // meters above terrain surface
+const GEOID_UNDULATION = 52.65; // MSL→ellipsoid correction for ~46.55°N 8°E (EGM2008)
 
 // Current visible level index (0=squad, 3=battalion)
 let currentLevel = 6; // start at brigade level
@@ -323,13 +324,13 @@ function flattenTree(node, parent) {
   }
   const pos = node.position;
   node.homePosition = Cesium.Cartesian3.fromDegrees(
-    pos.lon, pos.lat, pos.alt + HEIGHT_ABOVE_TERRAIN
+    pos.lon, pos.lat, pos.alt + GEOID_UNDULATION + HEIGHT_ABOVE_TERRAIN
   );
   // Commander position (own position if available, otherwise same as unit)
   if (node.commander && node.commander.position) {
     node.cmdHomePosition = Cesium.Cartesian3.fromDegrees(
       node.commander.position.lon, node.commander.position.lat,
-      node.commander.position.alt + HEIGHT_ABOVE_TERRAIN
+      node.commander.position.alt + GEOID_UNDULATION + HEIGHT_ABOVE_TERRAIN
     );
   } else {
     node.cmdHomePosition = node.homePosition;
@@ -337,7 +338,7 @@ function flattenTree(node, parent) {
   // Staff positions from JSON data
   if (node.staff && node.staff.length >= 2) {
     node.staffHomePositions = node.staff.map(s =>
-      Cesium.Cartesian3.fromDegrees(s.position.lon, s.position.lat, s.position.alt + HEIGHT_ABOVE_TERRAIN)
+      Cesium.Cartesian3.fromDegrees(s.position.lon, s.position.lat, s.position.alt + GEOID_UNDULATION + HEIGHT_ABOVE_TERRAIN)
     );
   }
   for (const child of node.children) {
@@ -366,7 +367,7 @@ export async function loadMilitaryUnits(viewer) {
         image,
         width: size,
         height: size,
-        verticalOrigin: Cesium.VerticalOrigin.CENTER,
+        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
 
       },
       label: {
@@ -403,7 +404,7 @@ export async function loadMilitaryUnits(viewer) {
         image: cmdImage,
         width: SYMBOL_SIZE,
         height: SYMBOL_SIZE,
-        verticalOrigin: Cesium.VerticalOrigin.CENTER,
+        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
 
       },
       label: {
@@ -437,7 +438,7 @@ export async function loadMilitaryUnits(viewer) {
             image: staffImage,
             width: 48,
             height: 48,
-            verticalOrigin: Cesium.VerticalOrigin.CENTER,
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
     
           },
           label: {
@@ -692,7 +693,7 @@ function getOrCreateProxy(viewer, index) {
       image: getSymbolImage("battalion"),
       width: SYMBOL_SIZE,
       height: SYMBOL_SIZE,
-      verticalOrigin: Cesium.VerticalOrigin.CENTER,
+      verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
 
     },
     label: {
@@ -1715,7 +1716,7 @@ export function startIndividualMovement() {
         const entity = entitiesById[node.id];
         if (entity) {
           entity.position = Cesium.Cartesian3.fromDegrees(
-            node.position.lon, node.position.lat, node.position.alt + HEIGHT_ABOVE_TERRAIN
+            node.position.lon, node.position.lat, node.position.alt + GEOID_UNDULATION + HEIGHT_ABOVE_TERRAIN
           );
         }
       }
@@ -1724,7 +1725,7 @@ export function startIndividualMovement() {
         const cmdPos = node.commander.position;
         perturbPosition(cmdPos);
         cmdE.position = Cesium.Cartesian3.fromDegrees(
-          cmdPos.lon, cmdPos.lat, cmdPos.alt + HEIGHT_ABOVE_TERRAIN
+          cmdPos.lon, cmdPos.lat, cmdPos.alt + GEOID_UNDULATION + HEIGHT_ABOVE_TERRAIN
         );
       }
       const staffEs = staffEntitiesById[node.id];
@@ -1734,7 +1735,7 @@ export function startIndividualMovement() {
             const staffPos = node.staff[i].position;
             perturbPosition(staffPos);
             staffEs[i].position = Cesium.Cartesian3.fromDegrees(
-              staffPos.lon, staffPos.lat, staffPos.alt + HEIGHT_ABOVE_TERRAIN
+              staffPos.lon, staffPos.lat, staffPos.alt + GEOID_UNDULATION + HEIGHT_ABOVE_TERRAIN
             );
           }
         }
@@ -1744,7 +1745,7 @@ export function startIndividualMovement() {
     for (const node of allNodes) {
       if (node.commander) {
         node.homePosition = Cesium.Cartesian3.fromDegrees(
-          node.position.lon, node.position.lat, node.position.alt + HEIGHT_ABOVE_TERRAIN
+          node.position.lon, node.position.lat, node.position.alt + GEOID_UNDULATION + HEIGHT_ABOVE_TERRAIN
         );
         node.cmdHomePosition = node.homePosition;
         const entity = entitiesById[node.id];

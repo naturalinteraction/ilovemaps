@@ -11,6 +11,10 @@ const M_PER_DEG_LAT = 111320;
 const REF_LAT = 46.575; // reference latitude for lon scaling
 const COS_LAT = Math.cos(REF_LAT * DEG_TO_RAD);
 const M_PER_DEG_LON = M_PER_DEG_LAT * COS_LAT;
+// Geoid undulation: converts SRTM elevation (MSL) to WGS84 ellipsoid height (used by Cesium).
+// Look up the value for your lat/lon at: https://geographiclib.sourceforge.io/cgi-bin/GeoidEval
+// Enter "lat lon" (e.g. "46.55 8.0"), use the EGM2008 result.
+const GEOID_UNDULATION = 52.65; // MSL→WGS84 ellipsoid correction for ~46.55°N 8°E (EGM2008)
 
 // --- Front line definition ---
 // Concave arc (curving south) from SE to NW, ~25km
@@ -185,7 +189,7 @@ async function fetchElevations(coords) {
     }
     if (!data) throw new Error("Elevation API: too many retries");
     for (let j = 0; j < batch.length; j++) {
-      results[i + j] = Math.round(data.results[j].elevation || 0);
+      results[i + j] = Math.round((data.results[j].elevation || 0) + GEOID_UNDULATION);
     }
     console.error(`  ${Math.min(i + ELEVATION_BATCH_SIZE, coords.length)}/${coords.length} elevations fetched`);
     // 1 request per second limit for opentopodata
