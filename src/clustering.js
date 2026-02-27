@@ -661,6 +661,8 @@ function hideAllCmdStaff() {
     if (cmdEntitiesById[node.id]) cmdEntitiesById[node.id].show = false;
     const staffEs = staffEntitiesById[node.id];
     if (staffEs) for (const se of staffEs) se.show = false;
+    const unitE = entitiesById[node.id];
+    if (unitE) unitE._labelHidden = false;
   }
 }
 
@@ -1359,7 +1361,7 @@ export function handleRightClick(viewer, click) {
         duration: ANIM_DURATION,
         fade: "out",
         fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
-        onComplete: () => { cmdE.show = false; },
+        onComplete: () => { cmdE.show = false; parentEntity._labelHidden = false; },
       });
     }
     const staffEs = staffEntitiesById[parentNode.id];
@@ -1419,7 +1421,7 @@ export function handleRightClick(viewer, click) {
       duration: ANIM_DURATION,
       fade: "out",
       fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
-      onComplete: () => { cmdE.show = false; },
+      onComplete: () => { cmdE.show = false; parentEntity._labelHidden = false; },
     });
   }
   const staffEs = staffEntitiesById[parent.id];
