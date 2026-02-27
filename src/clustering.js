@@ -436,6 +436,7 @@ function onPreRender() {
 
   if (allDone) {
     animating = false;
+    labelStates.clear();
   }
 }
 
