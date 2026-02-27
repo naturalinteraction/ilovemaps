@@ -437,6 +437,7 @@ function onPreRender() {
   if (allDone) {
     animating = false;
     labelStates.clear();
+    updateHeatmapLayer();
   }
 }
 
@@ -897,8 +898,8 @@ export function handleRightClick(viewer, click) {
         if (se.show) {
           anims.push({
             entity: se,
-            from: parentNode.staffHomePosition[si],
-            to: parentNode.staffHomePosition[si],
+            from: parentNode.staffHomePositions[si],
+            to: parentNode.staffHomePositions[si],
             duration: 400,
             fade: "out",
             onComplete: () => { se.show = false; },
@@ -908,50 +909,50 @@ export function handleRightClick(viewer, click) {
     }
 
     if (anims.length > 0) { playBeep(MERGE_BEEP_FREQ); startAnimations(anims); }
-    updateHeatmapLayer();
     return true;
   }
 
-  if (!node || !node.parent) return true; // can't merge, but still eat event
-
-  const parent = node.parent;
-  const parentEntity = entitiesById[parent.id];
+  if (!node || node.children.length === 0) return true; // no descendants to merge, eat event
 
   const anims = [];
-  // Animate ALL visible descendants (handles exploded sub-levels too)
-  animateMergeAllDescendants(parent, parent.homePosition, anims);
+  // Animate ALL visible descendants back into this node
+  animateMergeAllDescendants(node, node.homePosition, anims);
 
-  parentEntity.position = parent.homePosition;
-  anims.push({
-    entity: parentEntity,
-    from: parent.homePosition,
-    to: parent.homePosition,
-    duration: 400,
-    fade: "in",
-    onComplete: () => { parentEntity.position = parent.homePosition; },
-  });
+  // Fade IN the unit entity if it was hidden (from a previous unmerge)
+  const unitEntity = entitiesById[node.id];
+  if (unitEntity && !unitEntity.show) {
+    unitEntity.position = node.homePosition;
+    anims.push({
+      entity: unitEntity,
+      from: node.homePosition,
+      to: node.homePosition,
+      duration: 400,
+      fade: "in",
+      onComplete: () => { unitEntity.position = node.homePosition; },
+    });
+  }
 
-  // Fade OUT parent's own commander/staff (commander disappears, unit symbol returns)
-  const cmdE = cmdEntitiesById[parent.id];
+  // Fade OUT this node's own commander/staff (commander disappears, unit symbol returns)
+  const cmdE = cmdEntitiesById[node.id];
   if (cmdE && cmdE.show) {
     anims.push({
       entity: cmdE,
-      from: parent.cmdHomePosition,
-      to: parent.cmdHomePosition,
+      from: node.cmdHomePosition,
+      to: node.cmdHomePosition,
       duration: 400,
       fade: "out",
-      onComplete: () => { cmdE.show = false; parentEntity._labelHidden = false; },
+      onComplete: () => { cmdE.show = false; unitEntity._labelHidden = false; },
     });
   }
-  const staffEs = staffEntitiesById[parent.id];
-  if (staffEs && parent.staffHomePositions) {
+  const staffEs = staffEntitiesById[node.id];
+  if (staffEs && node.staffHomePositions) {
     for (let si = 0; si < staffEs.length; si++) {
       const se = staffEs[si];
       if (se.show) {
         anims.push({
           entity: se,
-          from: parent.staffHomePositions[si],
-          to: parent.staffHomePositions[si],
+          from: node.staffHomePositions[si],
+          to: node.staffHomePositions[si],
           duration: 400,
           fade: "out",
           onComplete: () => { se.show = false; },
@@ -961,7 +962,6 @@ export function handleRightClick(viewer, click) {
   }
 
   if (anims.length > 0) { playBeep(MERGE_BEEP_FREQ); startAnimations(anims); }
-  updateHeatmapLayer();
   return true;
 }
 
@@ -1038,7 +1038,6 @@ export function handleLeftClick(viewer, click) {
   }
 
   if (anims.length > 0) { playBeep(UNMERGE_BEEP_FREQ); startAnimations(anims); }
-  updateHeatmapLayer();
   return true;
 }
 
@@ -1164,6 +1163,7 @@ export function swapHeatmaps()
     heatmapLayer.alpha = 1.0;
     moduleViewer.imageryLayers.remove(oldHeatmap, false);
     oldHeatmap = null;
+    console.log ("swapHeatmaps()");
 }
 
 // --- Keyboard ---
