@@ -144,8 +144,8 @@ export const canvasFrustumLines = [];
 export const canvasDots = [];
 
 // Label declutter constants
-const LABEL_CELL_W = 32;
-const LABEL_CELL_H = 8;
+const LABEL_CELL_W = 64;
+const LABEL_CELL_H = 16;
 const LABEL_HYSTERESIS = 0.3; // 30% — visible labels shrink bbox, hidden labels grow it
 
 // --- Sound effects ---
