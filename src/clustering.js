@@ -146,7 +146,10 @@ export const canvasDots = [];
 // Label declutter constants
 const LABEL_CELL_W = 64;
 const LABEL_CELL_H = 16;
-const LABEL_HYSTERESIS = 0.3; // 30% — visible labels shrink bbox, hidden labels grow it
+const LABEL_HYSTERESIS = 0.5; // 50% — visible labels shrink bbox, hidden labels grow it
+
+// Label state tracking for hysteresis
+const labelStates = new Map(); // entity id -> { showing: bool }
 
 // --- Sound effects ---
 
@@ -553,7 +556,13 @@ function updateLabelDeclutter(viewer) {
 
   {
     for (const c of candidates) {
-      const hyst = c.entity._labelTargetAlpha === 1 ? (1 - LABEL_HYSTERESIS) : (1 + LABEL_HYSTERESIS);
+      const entityId = c.entity.id;
+      let state = labelStates.get(entityId);
+      if (!state) {
+        state = { showing: false };
+        labelStates.set(entityId, state);
+      }
+      const hyst = state.showing ? (1 - LABEL_HYSTERESIS) : (1 + LABEL_HYSTERESIS);
       const cellsX = Math.ceil((c.estW * hyst) / LABEL_CELL_W);
       const cx = Math.floor(c.sx / LABEL_CELL_W);
       const cy = Math.floor(c.sy / LABEL_CELL_H);
@@ -570,7 +579,7 @@ function updateLabelDeclutter(viewer) {
       const wouldShow = !blocked;
 
       // While camera is moving, only remove labels — don't add new ones
-      const show = wouldShow && !(cameraMoving && c.entity._labelTargetAlpha !== 1);
+      const show = wouldShow && !(cameraMoving && !state.showing);
 
       if (show) {
         // Claim cells
@@ -581,8 +590,12 @@ function updateLabelDeclutter(viewer) {
         }
       }
 
-      c.entity._labelTargetAlpha = show ? 1 : 0;
-      if (show) {
+      // Only update state when it changes
+      if (show !== state.showing) {
+        state.showing = show;
+      }
+
+      if (state.showing) {
         const text = c.entity.label.text;
         const str = (text && text.getValue) ? text.getValue(Cesium.JulianDate.now()) : text;
         if (str) labelDrawList.push({ text: str, sx: c.sx, sy: c.sy, offsetY: c.entity._labelPixelOffsetY || 0 });
@@ -820,6 +833,7 @@ function showLevel(levelIdx) {
     }
   }
   updateHeatmapLayer();
+  labelStates.clear();
 }
 
 // --- Click toggle ---
@@ -1185,15 +1199,8 @@ export function handleKeydown(event, viewer) {
 
   if (event.key === "l" || event.key === "L") {
     labelsEnabled = !labelsEnabled;
-    // Reset target alphas so declutter recalculates fresh when re-enabled
-    for (const node of allNodes) {
-      const e = entitiesById[node.id];
-      if (e) e._labelTargetAlpha = undefined;
-      const cmdE = cmdEntitiesById[node.id];
-      if (cmdE) cmdE._labelTargetAlpha = undefined;
-      const staffEs = staffEntitiesById[node.id];
-      if (staffEs) for (const se of staffEs) se._labelTargetAlpha = undefined;
-    }
+    // Reset label states so declutter recalculates fresh when re-enabled
+    labelStates.clear();
     return true;
   }
 
