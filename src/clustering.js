@@ -152,8 +152,8 @@ let clusterDirty = true;          // flag to recalculate
 const clusteredEntities = new Set(); // entities hidden by clustering (not by merge/unmerge)
 
 // Label declutter constants
-const LABEL_CELL_W = 100;
-const LABEL_CELL_H = 28;
+const LABEL_CELL_W = 60;
+const LABEL_CELL_H = 14;
 
 // Blob overlay state — terrain-clamped polygon entities
 let blobGroups = []; // array of { boundary: [Cartesian3...] } for each visible unit with children
@@ -366,7 +366,7 @@ export async function loadMilitaryUnits(viewer) {
       },
       label: {
         text: node.name,
-        font: isIndividual ? "14px sans-serif" : "20px sans-serif",
+        font: isIndividual ? "18px sans-serif" : "20px sans-serif",
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         outlineWidth: 2,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
@@ -435,7 +435,7 @@ export async function loadMilitaryUnits(viewer) {
               },
           label: {
             text: s.name,
-            font: "14px sans-serif",
+            font: "18px sans-serif",
             style: Cesium.LabelStyle.FILL_AND_OUTLINE,
             outlineWidth: 2,
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
@@ -681,7 +681,7 @@ function getOrCreateProxy(viewer, index) {
     },
     label: {
       text: "",
-      font: "bold 18px sans-serif",
+      font: "18px sans-serif",
       style: Cesium.LabelStyle.FILL_AND_OUTLINE,
       outlineWidth: 2,
       verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
