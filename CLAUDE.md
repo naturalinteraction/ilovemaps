@@ -15,9 +15,8 @@ No tests or linter configured.
 CesiumJS 3D globe app built with Vite. `vite-plugin-cesium` handles Cesium static assets (workers, imagery, widgets).
 
 - `src/main.js` — Entry point. Creates `Cesium.Viewer`, loads waypoints from JSON, adds point entities with labels, and a polyline connecting them. Calls `viewer.zoomTo()` to frame all entities.
-- `data/waypoints.json` — Array of `{name, lat, lon, alt}` objects served as static data via Vite's public-like fetch.
-- `index.html` — Fullscreen `#cesiumContainer` div, loads `src/main.js` as ES module.
+- `src/clustering.js` has clustering, merge/unmerge, decluttering, military units rendering and units' text labels. Commanders, staff, platoons, individuals, etcetera are here.
 
 ## Cesium Ion Token
 
-`Cesium.Ion.defaultAccessToken` in `src/main.js` is commented out. The globe works without a token (no 3D terrain). Set a token from cesium.com/ion to enable terrain and premium imagery.
+The user has a token set and working.
