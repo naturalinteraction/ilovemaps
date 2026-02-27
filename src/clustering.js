@@ -494,37 +494,7 @@ export async function loadMilitaryUnits(viewer) {
 
 // --- Animation ---
 
-function easeInOutCubic(t) {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-}
 
-function computeControlPoint(from, to) {
-  // Midpoint
-  const mid = Cesium.Cartesian3.midpoint(from, to, new Cesium.Cartesian3());
-  // Direction from→to
-  const dir = Cesium.Cartesian3.subtract(to, from, new Cesium.Cartesian3());
-  const dist = Cesium.Cartesian3.magnitude(dir);
-  // Surface normal at midpoint (points "up" from globe)
-  const normal = Cesium.Cartesian3.normalize(mid, new Cesium.Cartesian3());
-  // Perpendicular in the plane: cross(dir, normal)
-  const perp = Cesium.Cartesian3.cross(dir, normal, new Cesium.Cartesian3());
-  Cesium.Cartesian3.normalize(perp, perp);
-  // Offset midpoint sideways by 20% of distance
-  const offset = Cesium.Cartesian3.multiplyByScalar(perp, dist * 0.2, new Cesium.Cartesian3());
-  return Cesium.Cartesian3.add(mid, offset, new Cesium.Cartesian3());
-}
-
-function quadraticBezier(from, control, to, t, result) {
-  // B(t) = (1-t)²·from + 2(1-t)t·control + t²·to
-  const omt = 1 - t;
-  const a = omt * omt;
-  const b = 2 * omt * t;
-  const c = t * t;
-  result.x = a * from.x + b * control.x + c * to.x;
-  result.y = a * from.y + b * control.y + c * to.y;
-  result.z = a * from.z + b * control.z + c * to.z;
-  return result;
-}
 
 function startAnimations(anims) {
   const now = performance.now();
@@ -533,25 +503,11 @@ function startAnimations(anims) {
     a.entity.show = true;
     if (a.fade === "in") {
       setEntityAlpha(a.entity, 0);
-      if (a.popScale) setEntityScale(a.entity, PARENT_POP_SCALE);
     } else if (a.fade === "out") {
       setEntityAlpha(a.entity, 1);
-      if (a.popScale) setEntityScale(a.entity, 1);
     }
-    const stationary = Cesium.Cartesian3.equals(a.from, a.to);
-    if (!stationary) {
-      a.control = computeControlPoint(a.from, a.to);
-      const anim = a;
-      a.entity.position = new Cesium.CallbackProperty(() => {
-        const t = Math.min(1, (performance.now() - anim.startTime) / anim.duration);
-        const eased = easeInOutCubic(t);
-        return quadraticBezier(anim.from, anim.control, anim.to, eased, new Cesium.Cartesian3());
-      }, false);
-    } else {
-      // Force Cesium to treat entity as dynamic for re-render every frame
-      const pos = a.from;
-      a.entity.position = new Cesium.CallbackProperty(() => pos, false);
-    }
+    // Set position immediately since there's no movement animation
+    a.entity.position = a.to;
     animations.push(a);
   }
   animating = true;
@@ -567,27 +523,15 @@ function onPreRender() {
     const a = animations[i];
     const t = (now - a.startTime) / a.duration;
     if (t >= 1) {
-      // Animation complete — reset alpha/scale, run callback, swap position
+      // Animation complete — reset alpha, run callback
       if (a.fade) setEntityAlpha(a.entity, 1);
-      if (a.popScale) setEntityScale(a.entity, 1);
       if (a.onComplete) a.onComplete();
-      a.entity.position = a.to;
       animations.splice(i, 1);
     } else {
       if (a.fade) {
-        const fadeDelay = a.fadeDelay || 0;
-        const fadeDur = a.fadeDuration || a.duration;
-        const elapsed = now - a.startTime - fadeDelay;
-        const ft = Math.max(0, Math.min(1, elapsed / fadeDur));
-        const eased = easeInOutCubic(ft);
-        const alpha = a.fade === "in" ? eased : 1 - eased;
+        // Linear fade
+        const alpha = a.fade === "in" ? t : 1 - t;
         setEntityAlpha(a.entity, alpha);
-        if (a.popScale) {
-          const scale = a.fade === "in"
-            ? PARENT_POP_SCALE + (1 - PARENT_POP_SCALE) * eased
-            : 1 + (PARENT_POP_SCALE - 1) * eased;
-          setEntityScale(a.entity, scale);
-        }
       }
       allDone = false;
     }
@@ -601,9 +545,7 @@ function onPreRender() {
 
 // --- Merge / Unmerge ---
 
-const ANIM_DURATION = 400;
-const PARENT_POP_SCALE = 1.2; // max scale factor for parent appear/disappear effect
-const PARENT_FADE_RELATIVE_DURATION = 0.5; // parent fade duration relative to ANIM_DURATION (also used as delay for fade-in)
+
 
 
 function setCmdStaffShow(node, show) {
@@ -1078,11 +1020,8 @@ export function handleRightClick(viewer, click) {
       entity: parentEntity,
       from: parentNode.homePosition,
       to: parentNode.homePosition,
-      duration: ANIM_DURATION,
+      duration: 400,
       fade: "in",
-      popScale: true,
-      fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
-      fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
       onComplete: () => { parentEntity.position = parentNode.homePosition; },
     });
 
@@ -1093,9 +1032,8 @@ export function handleRightClick(viewer, click) {
         entity: cmdE,
         from: parentNode.cmdHomePosition,
         to: parentNode.cmdHomePosition,
-        duration: ANIM_DURATION,
+        duration: 400,
         fade: "out",
-        fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
         onComplete: () => { cmdE.show = false; parentEntity._labelHidden = false; },
       });
     }
@@ -1106,11 +1044,10 @@ export function handleRightClick(viewer, click) {
         if (se.show) {
           anims.push({
             entity: se,
-            from: parentNode.staffHomePositions[si],
-            to: parentNode.staffHomePositions[si],
-            duration: ANIM_DURATION,
+            from: parentNode.staffHomePosition[si],
+            to: parentNode.staffHomePosition[si],
+            duration: 400,
             fade: "out",
-            fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
             onComplete: () => { se.show = false; },
           });
         }
@@ -1135,11 +1072,8 @@ export function handleRightClick(viewer, click) {
     entity: parentEntity,
     from: parent.homePosition,
     to: parent.homePosition,
-    duration: ANIM_DURATION,
+    duration: 400,
     fade: "in",
-    popScale: true,
-    fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
-    fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
     onComplete: () => { parentEntity.position = parent.homePosition; },
   });
 
@@ -1150,9 +1084,8 @@ export function handleRightClick(viewer, click) {
       entity: cmdE,
       from: parent.cmdHomePosition,
       to: parent.cmdHomePosition,
-      duration: ANIM_DURATION,
+      duration: 400,
       fade: "out",
-      fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
       onComplete: () => { cmdE.show = false; parentEntity._labelHidden = false; },
     });
   }
@@ -1165,9 +1098,8 @@ export function handleRightClick(viewer, click) {
           entity: se,
           from: parent.staffHomePositions[si],
           to: parent.staffHomePositions[si],
-          duration: ANIM_DURATION,
+          duration: 400,
           fade: "out",
-          fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
           onComplete: () => { se.show = false; },
         });
       }
@@ -1200,10 +1132,8 @@ export function handleLeftClick(viewer, click) {
     entity,
     from: node.homePosition,
     to: node.homePosition,
-    duration: ANIM_DURATION,
+    duration: 400,
     fade: "out",
-    popScale: true,
-    fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
     onComplete: () => {
       entity.show = false;
       entity.position = node.homePosition;
@@ -1215,7 +1145,7 @@ export function handleLeftClick(viewer, click) {
       entity: e,
       from: desc.homePosition,
       to: desc.homePosition,
-      duration: ANIM_DURATION,
+      duration: 400,
       fade: "in",
       onComplete: () => {
         e.position = desc.homePosition;
@@ -1231,10 +1161,8 @@ export function handleLeftClick(viewer, click) {
       entity: cmdE,
       from: node.cmdHomePosition,
       to: node.cmdHomePosition,
-      duration: ANIM_DURATION,
+      duration: 400,
       fade: "in",
-      fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
-      fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
       onComplete: () => { cmdE.position = node.cmdHomePosition; },
     });
   }
@@ -1247,10 +1175,8 @@ export function handleLeftClick(viewer, click) {
         entity: se,
         from: node.staffHomePositions[si],
         to: node.staffHomePositions[si],
-        duration: ANIM_DURATION,
+        duration: 400,
         fade: "in",
-        fadeDelay: ANIM_DURATION * (1 - PARENT_FADE_RELATIVE_DURATION),
-        fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
         onComplete: () => { se.position = node.staffHomePositions[si]; },
       });
     }
@@ -1279,7 +1205,6 @@ export function handleDoubleClick(viewer, click) {
   if (animating) {
     for (const a of animations) {
       if (a.fade) setEntityAlpha(a.entity, 1);
-      if (a.popScale) setEntityScale(a.entity, 1);
       if (a.onComplete) a.onComplete();
       a.entity.position = a.to;
     }
@@ -1325,7 +1250,7 @@ function animateMergeAllDescendants(node, targetPos, anims) {
         entity: e,
         from: child.homePosition,
         to: child.homePosition,
-        duration: ANIM_DURATION,
+        duration: 400,
         fade: "out",
         onComplete: () => {
           e.show = false;
@@ -1340,9 +1265,8 @@ function animateMergeAllDescendants(node, targetPos, anims) {
         entity: cmdE,
         from: child.cmdHomePosition,
         to: child.cmdHomePosition,
-        duration: ANIM_DURATION,
+        duration: 400,
         fade: "out",
-        fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
         onComplete: () => { cmdE.show = false; },
       });
     }
@@ -1355,9 +1279,8 @@ function animateMergeAllDescendants(node, targetPos, anims) {
             entity: se,
             from: child.staffHomePositions[si],
             to: child.staffHomePositions[si],
-            duration: ANIM_DURATION,
+            duration: 400,
             fade: "out",
-            fadeDuration: ANIM_DURATION * PARENT_FADE_RELATIVE_DURATION,
             onComplete: () => { se.show = false; },
           });
         }
