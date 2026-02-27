@@ -539,7 +539,6 @@ function onPreRender() {
 
   if (allDone) {
     animating = false;
-    updateHeatmapLayer();
   }
 }
 
@@ -1352,6 +1351,11 @@ export function handleKeydown(event, viewer) {
   }
 
   if (event.key === " ") {
+    updateHeatmapLayer();
+    return true;
+  }
+
+  if (event.key === "h" || event.key === "H") {
     updateHeatmapLayer();
     return true;
   }
