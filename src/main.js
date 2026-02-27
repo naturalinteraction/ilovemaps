@@ -1,6 +1,6 @@
 import * as Cesium from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
-import { loadMilitaryUnits, setupZoomListener, setupPreRender, handleLeftClick, handleRightClick, handleKeydown, playBeep } from "./clustering.js";
+import { loadMilitaryUnits, setupZoomListener, setupPreRender, handleLeftClick, handleRightClick, handleDoubleClick, handleKeydown, playBeep } from "./clustering.js";
 import { setupDroneVideoLayer } from "./droneVideo.js";
 
 // Token Cesium Ion (registrarsi su cesium.com/ion per ottenerne uno)
@@ -269,6 +269,11 @@ handler.setInputAction((click) => {
 handler.setInputAction((click) => {
   handleRightClick(viewer, click);
 }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+
+viewer.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+handler.setInputAction((click) => {
+  handleDoubleClick(viewer, click);
+}, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 
 // Color picker tooltip
 const colorTooltip = document.createElement("div");

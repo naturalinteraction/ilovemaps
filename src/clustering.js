@@ -1531,6 +1531,52 @@ export function handleLeftClick(viewer, click) {
   return true;
 }
 
+export function handleDoubleClick(viewer, click) {
+  // Pick directly — bypass animating guard since single-click may have started an animation
+  const picks = viewer.scene.drillPick(click.position);
+  let entity = null;
+  for (const picked of picks) {
+    if (!(picked.id instanceof Cesium.Entity)) continue;
+    const e = picked.id;
+    if (e._isDot || e._isDotLine || e._isBlob) continue;
+    if (e._isClusterProxy) { entity = e._clusterRepEntity; break; }
+    entity = e;
+    break;
+  }
+  if (!entity) return false;
+  const node = entity._milNode || entity._milCmdOf || entity._milStaffOf;
+  if (!node || node.children.length === 0) return false;
+
+  // Finish any in-progress animations immediately
+  if (animating) {
+    for (const a of animations) {
+      if (a.fade) setEntityAlpha(a.entity, 1);
+      if (a.popScale) setEntityScale(a.entity, 1);
+      if (a.onComplete) a.onComplete();
+      a.entity.position = a.to;
+    }
+    animations.length = 0;
+    animating = false;
+  }
+
+  // Collect positions of all leaf descendants
+  const positions = [];
+  function collectLeaves(n) {
+    if (n.children.length === 0) {
+      positions.push(n.homePosition);
+    } else {
+      for (const c of n.children) collectLeaves(c);
+    }
+    if (n.commander) positions.push(n.cmdHomePosition || Cesium.Cartesian3.fromDegrees(
+      n.commander.position.lon, n.commander.position.lat, n.commander.position.alt + GEOID_UNDULATION + HEIGHT_ABOVE_TERRAIN));
+  }
+  collectLeaves(node);
+
+  if (positions.length === 0) return false;
+  viewer.camera.flyToBoundingSphere(Cesium.BoundingSphere.fromPoints(positions), { duration: 1.0 });
+  return true;
+}
+
 function forEachDescendantAtLevel(node, type, fn) {
   for (const child of node.children) {
     if (child.type === type) {
