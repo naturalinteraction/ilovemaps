@@ -144,9 +144,9 @@ export const canvasFrustumLines = [];
 export const canvasDots = [];
 
 // Label declutter constants
-const LABEL_CELL_W = 64;
-const LABEL_CELL_H = 16;
-const LABEL_HYSTERESIS = 0.5; // 50% — visible labels shrink bbox, hidden labels grow it
+const LABEL_CELL_W = 8;
+const LABEL_CELL_H = 8;
+const LABEL_HYSTERESIS = 0.6;
 
 // Label state tracking for hysteresis
 const labelStates = new Map(); // entity id -> { showing: bool }
@@ -1166,7 +1166,7 @@ export function setupZoomListener(viewer) {
   viewer.camera.changed.addEventListener(() => {
     cameraMoving = true;
     if (cameraSettleTimer) clearTimeout(cameraSettleTimer);
-    cameraSettleTimer = setTimeout(() => { cameraMoving = false; }, 150);
+    cameraSettleTimer = setTimeout(() => { cameraMoving = false; }, 500);
   });
   viewer.camera.percentageChanged = 0.1;
 }
