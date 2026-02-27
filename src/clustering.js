@@ -111,7 +111,7 @@ const entitiesById = {};
 const cmdEntitiesById = {};
 // Staff entities indexed by node id → [staff1, staff2]
 const staffEntitiesById = {};
-const HEIGHT_ABOVE_TERRAIN = 1; // meters above terrain surface
+const HEIGHT_ABOVE_TERRAIN = 11; // meters above terrain surface
 const GEOID_UNDULATION = 52.65; // MSL→ellipsoid correction for ~46.55°N 8°E (EGM2008)
 
 // Current visible level index (0=squad, 3=battalion)
@@ -376,7 +376,7 @@ export async function loadMilitaryUnits(viewer) {
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         outlineWidth: 2,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-        pixelOffset: new Cesium.Cartesian2(0, -(size / 2 + 4)),
+        pixelOffset: new Cesium.Cartesian2(0, -(size + 4)),
         eyeOffset: new Cesium.Cartesian3(0, 0, -50),
         show: false,
 
@@ -385,7 +385,7 @@ export async function loadMilitaryUnits(viewer) {
     });
 
     entity._milNode = node;
-    entity._labelPixelOffsetY = -(size / 2 + 4);
+    entity._labelPixelOffsetY = -(size + 4);
     estimateLabelSize(entity);
     entitiesById[node.id] = entity;
   }
@@ -413,7 +413,7 @@ export async function loadMilitaryUnits(viewer) {
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         outlineWidth: 2,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-        pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE / 2 + 4)),
+        pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE + 4)),
         eyeOffset: new Cesium.Cartesian3(0, 0, -50),
         show: false,
 
@@ -421,7 +421,7 @@ export async function loadMilitaryUnits(viewer) {
       show: false,
     });
     cmdEntity._milCmdOf = node;
-    cmdEntity._labelPixelOffsetY = -(SYMBOL_SIZE / 2 + 4);
+    cmdEntity._labelPixelOffsetY = -(SYMBOL_SIZE + 4);
     estimateLabelSize(cmdEntity);
     cmdEntitiesById[node.id] = cmdEntity;
 
@@ -447,15 +447,15 @@ export async function loadMilitaryUnits(viewer) {
             style: Cesium.LabelStyle.FILL_AND_OUTLINE,
             outlineWidth: 2,
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-            pixelOffset: new Cesium.Cartesian2(0, -28),
+            pixelOffset: new Cesium.Cartesian2(0, -52),
             eyeOffset: new Cesium.Cartesian3(0, 0, -50),
             show: false,
-    
+
               },
           show: false,
         });
         staffEntity._milStaffOf = node;
-        staffEntity._labelPixelOffsetY = -28;
+        staffEntity._labelPixelOffsetY = -52;
         estimateLabelSize(staffEntity);
         staffEnts.push(staffEntity);
       }
@@ -704,7 +704,7 @@ function getOrCreateProxy(viewer, index) {
       style: Cesium.LabelStyle.FILL_AND_OUTLINE,
       outlineWidth: 2,
       verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-      pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE / 2 + 4)),
+      pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE + 4)),
       eyeOffset: new Cesium.Cartesian3(0, 0, -50),
       show: false,
 
@@ -712,7 +712,7 @@ function getOrCreateProxy(viewer, index) {
     show: false,
   });
   proxy._isClusterProxy = true;
-  proxy._labelPixelOffsetY = -(SYMBOL_SIZE / 2 + 4);
+  proxy._labelPixelOffsetY = -(SYMBOL_SIZE + 4);
   clusterProxies.push(proxy);
   return proxy;
 }
