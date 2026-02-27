@@ -133,6 +133,7 @@ setupZoomListener(viewer);
 setupPreRender(viewer);
 
 let currentRouteLetter = "?";
+let redMarkersEnabled = false;
 let inspectedEntity = null; // black pin with temporarily changed label
 let inspectedOriginalLabel = null;
 
@@ -226,6 +227,7 @@ handler.setInputAction((click) => {
   }
 
   // Add new red point to current route
+  if (!redMarkersEnabled) return;
   playBeep(440);
   clickedGroundPositions.push(Cesium.Cartesian3.fromDegrees(lon, lat));
 
@@ -769,7 +771,11 @@ document.addEventListener("keydown", (event) => {
   // Military clustering keys (M, 1-4)
   if (handleKeydown(event, viewer)) return;
 
-  if (event.key === "Delete" && clickedEntities.length > 0) {
+  if (event.key === "r" || event.key === "R") {
+    redMarkersEnabled = !redMarkersEnabled;
+    console.log("Red markers:", redMarkersEnabled ? "enabled" : "disabled");
+    return;
+  } else if (event.key === "Delete" && clickedEntities.length > 0) {
     viewer.entities.remove(clickedEntities.pop());
     clickedGroundPositions.pop();
     clickedWaypointData.pop();
