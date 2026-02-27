@@ -111,8 +111,8 @@ const entitiesById = {};
 const cmdEntitiesById = {};
 // Staff entities indexed by node id → [staff1, staff2]
 const staffEntitiesById = {};
-const HEIGHT_ABOVE_TERRAIN = 11; // meters above terrain surface
-const GEOID_UNDULATION = 52.65; // MSL→ellipsoid correction for ~46.55°N 8°E (EGM2008)
+const HEIGHT_ABOVE_TERRAIN = 2; // meters above terrain surface
+const GEOID_UNDULATION = 0; // terrain heights now from Cesium
 
 // Current visible level index (0=squad, 3=battalion)
 let currentLevel = 6; // start at brigade level
@@ -1222,6 +1222,15 @@ export function handleKeydown(event, viewer) {
     return true;
   }
 
+  if (event.key === "t" || event.key === "T") {
+    sampleTerrainAltitudes(moduleViewer).then(result => {
+      if (result && result.avgDiff) {
+        console.log(`\n>>> UPDATE RECOMMENDATION: Set GEOID_UNDULATION to ${result.avgDiff.toFixed(2)}`);
+      }
+    });
+    return true;
+  }
+
   return false;
 }
 
@@ -1298,6 +1307,100 @@ export function stopIndividualMovement() {
     clearInterval(moveIntervalId);
     moveIntervalId = null;
   }
+}
+
+// --- Terrain altitude comparison ---
+
+export async function sampleTerrainAltitudes(viewer) {
+  const terrainProvider = viewer.terrainProvider;
+  const positions = [];
+  for (const node of allNodes) {
+    if (node.position) {
+      positions.push({
+        id: node.id,
+        name: node.name,
+        type: node.type,
+        lat: node.position.lat,
+        lon: node.position.lon,
+        jsonAlt: node.position.alt,
+        cartographic: Cesium.Cartographic.fromDegrees(node.position.lon, node.position.lat),
+      });
+    }
+    if (node.commander && node.commander.position) {
+      positions.push({
+        id: node.commander.id,
+        name: node.commander.name,
+        type: "commander",
+        lat: node.commander.position.lat,
+        lon: node.commander.position.lon,
+        jsonAlt: node.commander.position.alt,
+        cartographic: Cesium.Cartographic.fromDegrees(node.commander.position.lon, node.commander.position.lat),
+      });
+    }
+    if (node.staff) {
+      for (const s of node.staff) {
+        positions.push({
+          id: s.id,
+          name: s.name,
+          type: "staff",
+          lat: s.position.lat,
+          lon: s.position.lon,
+          jsonAlt: s.position.alt,
+          cartographic: Cesium.Cartographic.fromDegrees(s.position.lon, s.position.lat),
+        });
+      }
+    }
+  }
+
+  console.log(`Sampling terrain for ${positions.length} positions...`);
+  const cartographics = positions.map(p => p.cartographic);
+  const sampled = await Cesium.sampleTerrainMostDetailed(terrainProvider, cartographics);
+
+  const results = [];
+  const updates = [];
+  let totalDiff = 0;
+  let count = 0;
+  for (let i = 0; i < positions.length; i++) {
+    const p = positions[i];
+    const terrainAlt = sampled[i]?.height;
+    if (terrainAlt !== undefined) {
+      const diff = p.jsonAlt - terrainAlt;
+      totalDiff += diff;
+      count++;
+      results.push({
+        id: p.id,
+        name: p.name,
+        type: p.type,
+        lat: p.lat.toFixed(6),
+        lon: p.lon.toFixed(6),
+        jsonAlt: p.jsonAlt,
+        terrainAlt: terrainAlt.toFixed(2),
+        diff: diff.toFixed(2),
+      });
+      updates.push({ id: p.id, newAlt: Math.round(terrainAlt) });
+    }
+  }
+
+  results.sort((a, b) => parseFloat(b.diff) - parseFloat(a.diff));
+  console.log("Altitude comparison (JSON vs Cesium terrain):");
+  console.table(results);
+  const avgDiff = totalDiff / count;
+  console.log(`Average diff (JSON - terrain): ${avgDiff.toFixed(2)}m`);
+
+  // Output JSON patch format for easy file update
+  const patch = {};
+  for (let i = 0; i < positions.length; i++) {
+    const p = positions[i];
+    const terrainAlt = sampled[i]?.height;
+    if (terrainAlt !== undefined) {
+      patch[p.id] = Math.round(terrainAlt);
+    }
+  }
+  console.log("\n--- JSON PATCH (replace alt values in military-units.json) ---");
+  console.log(JSON.stringify(patch, null, 2));
+  console.log("--- END PATCH ---\n");
+
+  return { results, updates, avgDiff };
 }
 
 // --- Pre-render hook ---
