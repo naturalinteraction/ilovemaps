@@ -151,6 +151,10 @@ const clusterProxies = [];        // pool of proxy entities
 let clusterDirty = true;          // flag to recalculate
 const clusteredEntities = new Set(); // entities hidden by clustering (not by merge/unmerge)
 
+// Label declutter constants
+const LABEL_CELL_W = 100;
+const LABEL_CELL_H = 28;
+
 // Blob overlay state — terrain-clamped polygon entities
 let blobGroups = []; // array of { boundary: [Cartesian3...] } for each visible unit with children
 const blobEntities = []; // pool of Cesium polygon entities for blobs
@@ -375,6 +379,7 @@ export async function loadMilitaryUnits(viewer) {
     });
 
     entity._milNode = node;
+    estimateLabelSize(entity);
     entitiesById[node.id] = entity;
   }
 
@@ -409,6 +414,7 @@ export async function loadMilitaryUnits(viewer) {
       show: false,
     });
     cmdEntity._milCmdOf = node;
+    estimateLabelSize(cmdEntity);
     cmdEntitiesById[node.id] = cmdEntity;
 
     // Staff entities: individual HQ symbol, at staff positions
@@ -441,6 +447,7 @@ export async function loadMilitaryUnits(viewer) {
           show: false,
         });
         staffEntity._milStaffOf = node;
+        estimateLabelSize(staffEntity);
         staffEnts.push(staffEntity);
       }
       staffEntitiesById[node.id] = staffEnts;
@@ -761,6 +768,7 @@ function updateVisualClusters(viewer) {
     proxy.billboard.width = repBb.width ? repBb.width.getValue(now) : SYMBOL_SIZE;
     proxy.billboard.height = repBb.height ? repBb.height.getValue(now) : SYMBOL_SIZE;
     proxy.label.text = rep.name + " +" + (members.length - 1);
+    estimateLabelSize(proxy);
     proxy._clusterRepEntity = rep.entity;
     proxy.show = true;
   }
@@ -768,6 +776,116 @@ function updateVisualClusters(viewer) {
   // Hide unused proxies
   for (let i = proxyIdx; i < clusterProxies.length; i++) {
     clusterProxies[i].show = false;
+  }
+}
+
+// --- Label decluttering ---
+
+function estimateLabelSize(entity) {
+  if (!entity || !entity.label) return;
+  const text = entity.label.text;
+  const str = (text && text.getValue) ? text.getValue(Cesium.JulianDate.now()) : text;
+  if (!str) { entity._labelEstW = 60; entity._labelEstH = 24; return; }
+  // Parse font size from label font string (e.g. "bold 18px sans-serif" or "14px sans-serif")
+  const font = entity.label.font;
+  const fontStr = (font && font.getValue) ? font.getValue(Cesium.JulianDate.now()) : font;
+  let fontSize = 16;
+  if (fontStr) {
+    const m = fontStr.match(/(\d+)px/);
+    if (m) fontSize = parseInt(m[1]);
+  }
+  entity._labelEstW = str.length * fontSize * 0.55 + 12;
+  entity._labelEstH = fontSize * 1.3 + 4;
+}
+
+function updateLabelDeclutter(viewer) {
+  if (!labelsEnabled || animating) return;
+
+  const scene = viewer.scene;
+  const candidates = [];
+
+  // Collect visible entities with labels
+  for (const node of allNodes) {
+    const entity = entitiesById[node.id];
+    if (entity && entity.show && entity.label && entity.label.show) {
+      const screen = scene.cartesianToCanvasCoordinates(entity.position.getValue ? entity.position.getValue(Cesium.JulianDate.now()) : entity.position);
+      if (screen) {
+        if (!entity._labelEstW) estimateLabelSize(entity);
+        candidates.push({ entity, sx: screen.x, sy: screen.y, rank: entityRank(entity), estW: entity._labelEstW || 60, estH: entity._labelEstH || 24 });
+      }
+    }
+    const cmdE = cmdEntitiesById[node.id];
+    if (cmdE && cmdE.show && cmdE.label && cmdE.label.show) {
+      const screen = scene.cartesianToCanvasCoordinates(cmdE.position.getValue ? cmdE.position.getValue(Cesium.JulianDate.now()) : cmdE.position);
+      if (screen) {
+        if (!cmdE._labelEstW) estimateLabelSize(cmdE);
+        candidates.push({ entity: cmdE, sx: screen.x, sy: screen.y, rank: entityRank(cmdE), estW: cmdE._labelEstW || 60, estH: cmdE._labelEstH || 24 });
+      }
+    }
+    const staffEs = staffEntitiesById[node.id];
+    if (staffEs) {
+      for (const se of staffEs) {
+        if (se && se.show && se.label && se.label.show) {
+          const screen = scene.cartesianToCanvasCoordinates(se.position.getValue ? se.position.getValue(Cesium.JulianDate.now()) : se.position);
+          if (screen) {
+            if (!se._labelEstW) estimateLabelSize(se);
+            candidates.push({ entity: se, sx: screen.x, sy: screen.y, rank: entityRank(se), estW: se._labelEstW || 60, estH: se._labelEstH || 24 });
+          }
+        }
+      }
+    }
+  }
+  // Cluster proxies
+  for (const proxy of clusterProxies) {
+    if (proxy.show && proxy.label && proxy.label.show) {
+      const pos = proxy.position.getValue ? proxy.position.getValue(Cesium.JulianDate.now()) : proxy.position;
+      const screen = scene.cartesianToCanvasCoordinates(pos);
+      if (screen) {
+        if (!proxy._labelEstW) estimateLabelSize(proxy);
+        candidates.push({ entity: proxy, sx: screen.x, sy: screen.y, rank: entityRank(proxy), estW: proxy._labelEstW || 60, estH: proxy._labelEstH || 24 });
+      }
+    }
+  }
+
+  if (candidates.length === 0) return;
+
+  // Sort by rank descending (highest priority first)
+  candidates.sort((a, b) => b.rank - a.rank);
+
+  // Grid occupancy pass
+  const grid = new Map();
+
+  for (const c of candidates) {
+    const cellsX = Math.ceil(c.estW / LABEL_CELL_W);
+    const cx = Math.floor(c.sx / LABEL_CELL_W);
+    const cy = Math.floor(c.sy / LABEL_CELL_H);
+
+    // Check if any cell is occupied
+    let blocked = false;
+    for (let dx = 0; dx < cellsX && !blocked; dx++) {
+      for (let dy = -1; dy <= 1 && !blocked; dy++) {
+        const key = (cx + dx) + "," + (cy + dy);
+        if (grid.has(key)) blocked = true;
+      }
+    }
+
+    const targetAlpha = blocked ? 0 : 1;
+
+    if (!blocked) {
+      // Claim cells
+      for (let dx = 0; dx < cellsX; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          grid.set((cx + dx) + "," + (cy + dy), true);
+        }
+      }
+    }
+
+    // Only update Cesium color objects when value changes
+    if (c.entity._labelTargetAlpha !== targetAlpha) {
+      c.entity._labelTargetAlpha = targetAlpha;
+      c.entity.label.fillColor = new Cesium.Color(1, 1, 1, targetAlpha);
+      c.entity.label.outlineColor = new Cesium.Color(0, 0, 0, targetAlpha);
+    }
   }
 }
 
@@ -1431,13 +1549,15 @@ export function handleKeydown(event, viewer) {
   if (event.key === "l" || event.key === "L") {
     labelsEnabled = !labelsEnabled;
     for (const node of allNodes) {
-      entitiesById[node.id].label.show = labelsEnabled;
+      const e = entitiesById[node.id];
+      e.label.show = labelsEnabled;
+      if (labelsEnabled) { e._labelTargetAlpha = undefined; }
       const cmdE = cmdEntitiesById[node.id];
-      if (cmdE) cmdE.label.show = labelsEnabled;
+      if (cmdE) { cmdE.label.show = labelsEnabled; if (labelsEnabled) cmdE._labelTargetAlpha = undefined; }
       const staffEs = staffEntitiesById[node.id];
-      if (staffEs) for (const se of staffEs) se.label.show = labelsEnabled;
+      if (staffEs) for (const se of staffEs) { se.label.show = labelsEnabled; if (labelsEnabled) se._labelTargetAlpha = undefined; }
     }
-    for (const proxy of clusterProxies) proxy.label.show = labelsEnabled;
+    for (const proxy of clusterProxies) { proxy.label.show = labelsEnabled; if (labelsEnabled) proxy._labelTargetAlpha = undefined; }
     return true;
   }
 
@@ -1553,6 +1673,10 @@ export function setupPreRender(viewer) {
     if (clusterDirty && !animating) {
       clusterDirty = false;
       // updateVisualClusters(viewer); // temporarily disabled
+    }
+    // Label decluttering
+    if (!animating && labelsEnabled && militaryVisible) {
+      updateLabelDeclutter(viewer);
     }
     // Draw drone arrows on full-opacity canvas
     if (arrowCanvas && arrowCtx) {
