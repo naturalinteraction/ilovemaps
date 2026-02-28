@@ -1441,7 +1441,6 @@ export function startIndividualMovement() {
         }
       }
     }
-    updateDotEntities();
   }, MOVE_INTERVAL_MS);
 }
 
