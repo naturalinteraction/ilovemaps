@@ -127,6 +127,14 @@ let heatmapCanvas = null;         // offscreen canvas (reused)
 const HEATMAP_CANVAS_SIZE = 1024;
 let heatmapUrlCounter = 0;        // cache-busting counter
 
+// Heatmap adjustable parameters
+let heatmapMinRadius = 8;
+let heatmapMaxRadius = 20;
+let heatmapMinAlpha = 0.11;
+let heatmapMaxAlpha = 0.6;
+let heatmapGradientMid = 0.3;
+let heatmapGridSize = 32;
+
 
 // Canvas overlay for drone arrows (full opacity, drawn on top of post-process stages)
 let arrowCanvas = null;
@@ -384,6 +392,7 @@ export async function loadMilitaryUnits(viewer) {
   const ro = new ResizeObserver(() => { syncCanvasSize(); });
   ro.observe(viewer.canvas);
 
+  createHeatmapControls();
   updateHeatmapLayer();
   // startIndividualMovement(); // temporarily disabled
   return { entitiesById, nodesById, allNodes };
@@ -608,6 +617,47 @@ function updateLabelDeclutter(viewer) {
 
 // --- Heatmap ---
 
+function createHeatmapControls() {
+  const container = document.getElementById("cesiumContainer");
+  if (!container) return;
+
+  const panel = document.createElement("div");
+  panel.id = "heatmap-controls";
+  panel.style.cssText = "position:absolute;top:10px;right:10px;background:rgba(30,30,30,0.85);color:#fff;padding:12px;border-radius:6px;font-family:sans-serif;font-size:12px;z-index:100;";
+
+  function makeSlider(label, min, max, step, initial, onChange) {
+    const row = document.createElement("div");
+    row.style.cssText = "margin-bottom:8px;";
+    row.innerHTML = `<div style="margin-bottom:2px;">${label}: <span id="val-${label}">${initial}</span></div>`;
+    const input = document.createElement("input");
+    input.type = "range";
+    input.min = min;
+    input.max = max;
+    input.step = step;
+    input.value = initial;
+    input.style.width = "120px";
+    input.oninput = () => {
+      const val = parseFloat(input.value);
+      document.getElementById(`val-${label}`).textContent = val;
+      onChange(val);
+    };
+    input.onchange = () => {
+      updateHeatmapLayer();
+    };
+    row.appendChild(input);
+    panel.appendChild(row);
+  }
+
+  makeSlider("Min Radius", 1, 30, 1, heatmapMinRadius, v => heatmapMinRadius = v);
+  makeSlider("Max Radius", 10, 200, 1, heatmapMaxRadius, v => heatmapMaxRadius = v);
+  makeSlider("Min Alpha", 0.01, 1, 0.01, heatmapMinAlpha, v => heatmapMinAlpha = v);
+  makeSlider("Max Alpha", 0.01, 1, 0.01, heatmapMaxAlpha, v => heatmapMaxAlpha = v);
+  makeSlider("Gradient Mid", 0.1, 0.9, 0.05, heatmapGradientMid, v => heatmapGradientMid = v);
+  makeSlider("Grid Size", 16, 128, 1, heatmapGridSize, v => heatmapGridSize = v);
+
+  container.appendChild(panel);
+}
+
 function getHeatmapPositions() {
   // Include humans whose billboard is NOT currently visible
   const results = [];
@@ -679,7 +729,7 @@ function renderHeatmapCanvas(positions) {
   }));
 
   // Grid-based local density: count neighbors in each cell
-  const GRID_SIZE = 32;
+  const GRID_SIZE = heatmapGridSize;
   const cellW = W / GRID_SIZE;
   const grid = new Uint16Array(GRID_SIZE * GRID_SIZE);
   for (const pt of pts) {
@@ -705,20 +755,20 @@ function renderHeatmapCanvas(positions) {
 
   // Radius: large for isolated points, small for dense clusters
   // Alpha: low for dense clusters (individuals), high for isolated points (commanders)
-  const MIN_RADIUS = 8;
-  const MAX_RADIUS = 100;
-  const ALPHA_CENTER_MIN = 0.11;  // dense areas (many individuals)
-  const ALPHA_CENTER_MAX = 0.6;  // sparse areas (isolated commanders)
+  const MIN_RADIUS = heatmapMinRadius;
+  const MAX_RADIUS = heatmapMaxRadius;
+  const ALPHA_CENTER_MIN = heatmapMinAlpha;
+  const ALPHA_CENTER_MAX = heatmapMaxAlpha;
 
   for (const pt of pts) {
     const density = localDensity(pt.x, pt.y);
     const densityFactor = 1 / Math.sqrt(Math.max(1, density));
     const radius = Math.max(MIN_RADIUS, Math.min(MAX_RADIUS, MAX_RADIUS * densityFactor));
     const alphaCenter = ALPHA_CENTER_MIN + (ALPHA_CENTER_MAX - ALPHA_CENTER_MIN) * densityFactor;
-    const alphaMid = alphaCenter * 0.4;
+    const alphaMid = alphaCenter * heatmapGradientMid;
     const grad = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, radius);
     grad.addColorStop(0, `rgba(30, 80, 255, ${alphaCenter})`);
-    grad.addColorStop(0.3, `rgba(30, 80, 255, ${alphaMid})`);
+    grad.addColorStop(heatmapGradientMid, `rgba(30, 80, 255, ${alphaMid})`);
     grad.addColorStop(1, "rgba(30, 80, 255, 0)");
     ctx.fillStyle = grad;
     ctx.fillRect(pt.x - radius, pt.y - radius, radius * 2, radius * 2);
