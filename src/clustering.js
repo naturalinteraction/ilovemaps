@@ -1210,6 +1210,7 @@ export function handleDoubleClick(viewer, click) {
     }
     animations.length = 0;
     animating = false;
+    updateHeatmapLayer();
   }
 
   // Collect positions of all leaf descendants
