@@ -134,6 +134,7 @@ let heatmapMinAlpha = 0.11;
 let heatmapMaxAlpha = 0.6;
 let heatmapGradientMid = 0.3;
 let heatmapGridSize = 32;
+let heatmapBlendMode = "color";
 
 
 // Canvas overlay for drone arrows (full opacity, drawn on top of post-process stages)
@@ -655,6 +656,49 @@ function createHeatmapControls() {
   makeSlider("Gradient Mid", 0.1, 0.9, 0.05, heatmapGradientMid, v => heatmapGradientMid = v);
   makeSlider("Grid Size", 16, 128, 1, heatmapGridSize, v => heatmapGridSize = v);
 
+  const blendModes = [
+    "source-over", 
+    "destination-over", 
+    "lighter", "xor",
+    "multiply", "screen", "overlay", "darken", 
+    "color-dodge", "color-burn", "hard-light", "soft-light",
+    "difference", "exclusion", "hue", "saturation", "color", "luminosity"
+  ];
+  const blendRow = document.createElement("div");
+  blendRow.style.cssText = "margin-top:8px;";
+  blendRow.innerHTML = `<div style="margin-bottom:4px;">Blend Mode</div>`;
+  let btnGroup = document.createElement("div");
+  btnGroup.style.cssText = "display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;";
+  for (const mode of blendModes) {
+    if (btnGroup.children.length >= 2) {
+      blendRow.appendChild(btnGroup);
+      btnGroup = document.createElement("div");
+      btnGroup.style.cssText = "display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;";
+    }
+    const btn = document.createElement("button");
+    btn.textContent = mode;
+    btn.style.cssText = "padding:4px 8px;background:#444;border:1px solid #666;color:#fff;cursor:pointer;";
+    if (mode === heatmapBlendMode) {
+      btn.style.background = "#1e50ff";
+      btn.style.borderColor = "#1e50ff";
+    }
+    btn.onclick = () => {
+      heatmapBlendMode = mode;
+      Array.from(blendRow.querySelectorAll("button")).forEach(b => {
+        b.style.background = "#444";
+        b.style.borderColor = "#666";
+      });
+      btn.style.background = "#1e50ff";
+      btn.style.borderColor = "#1e50ff";
+      updateHeatmapLayer();
+    };
+    btnGroup.appendChild(btn);
+  }
+  if (btnGroup.children.length > 0) {
+    blendRow.appendChild(btnGroup);
+  }
+  panel.appendChild(blendRow);
+
   container.appendChild(panel);
 }
 
@@ -718,7 +762,7 @@ function renderHeatmapCanvas(positions) {
   maxLon += lonSpan * pad;
 
   ctx.clearRect(0, 0, W, W);
-  ctx.globalCompositeOperation = "color";
+  ctx.globalCompositeOperation = heatmapBlendMode;
 
   // Pre-compute canvas coordinates
   const lonRange = maxLon - minLon;
