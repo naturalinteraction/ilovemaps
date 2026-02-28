@@ -135,6 +135,9 @@ let heatmapMaxAlpha = 0.6;
 let heatmapGradientMid = 0.3;
 let heatmapGridSize = 32;
 let heatmapBlendMode = "color";
+let heatmapHue = 220;
+let heatmapSaturation = 100;
+let heatmapLightness = 50;
 
 
 // Canvas overlay for drone arrows (full opacity, drawn on top of post-process stages)
@@ -655,6 +658,9 @@ function createHeatmapControls() {
   makeSlider("Max Alpha", 0.01, 1, 0.01, heatmapMaxAlpha, v => heatmapMaxAlpha = v);
   makeSlider("Gradient Mid", 0.1, 0.9, 0.05, heatmapGradientMid, v => heatmapGradientMid = v);
   makeSlider("Grid Size", 16, 128, 1, heatmapGridSize, v => heatmapGridSize = v);
+  makeSlider("Hue", 200, 260, 1, heatmapHue, v => heatmapHue = v);
+  makeSlider("Saturation", 35, 100, 1, heatmapSaturation, v => heatmapSaturation = v);
+  makeSlider("Lightness", 20, 70, 1, heatmapLightness, v => heatmapLightness = v);
 
   const blendModes = [
     "source-over", 
@@ -811,9 +817,10 @@ function renderHeatmapCanvas(positions) {
     const alphaCenter = ALPHA_CENTER_MIN + (ALPHA_CENTER_MAX - ALPHA_CENTER_MIN) * densityFactor;
     const alphaMid = alphaCenter * heatmapGradientMid;
     const grad = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, radius);
-    grad.addColorStop(0, `rgba(30, 80, 255, ${alphaCenter})`);
-    grad.addColorStop(heatmapGradientMid, `rgba(30, 80, 255, ${alphaMid})`);
-    grad.addColorStop(1, "rgba(30, 80, 255, 0)");
+    const hsla = (a) => `hsla(${heatmapHue}, ${heatmapSaturation}%, ${heatmapLightness}%, ${a})`;
+    grad.addColorStop(0, hsla(alphaCenter));
+    grad.addColorStop(heatmapGradientMid, hsla(alphaMid));
+    grad.addColorStop(1, hsla(0));
     ctx.fillStyle = grad;
     ctx.fillRect(pt.x - radius, pt.y - radius, radius * 2, radius * 2);
   }
