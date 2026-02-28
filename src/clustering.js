@@ -159,6 +159,7 @@ export const canvasDots = [];
 let LABEL_CELL_W = 8;
 let LABEL_CELL_H = 8;
 let LABEL_HYSTERESIS = 0.4; // also 0.34 seems to work fine
+let LABEL_SETTLE_MS = 100; // camera settle time before labels appear
 let DEBUG_LABEL_DECLUTTER = false;
 
 // Label state tracking for hysteresis
@@ -706,6 +707,7 @@ function createHeatmapControls() {
   makeSlider("Cell Width", 4, 40, 1, LABEL_CELL_W, v => LABEL_CELL_W = v);
   makeSlider("Cell Height", 4, 40, 1, LABEL_CELL_H, v => LABEL_CELL_H = v);
   makeSlider("Hysteresis", 0, 0.49, 0.01, LABEL_HYSTERESIS, v => LABEL_HYSTERESIS = v);
+  makeSlider("Settle (ms)", 100, 500, 10, LABEL_SETTLE_MS, v => LABEL_SETTLE_MS = v);
 
   const blendModes = [
     "source-over", 
@@ -1300,7 +1302,7 @@ export function setupZoomListener(viewer) {
   viewer.camera.changed.addEventListener(() => {
     cameraMoving = true;
     if (cameraSettleTimer) clearTimeout(cameraSettleTimer);
-    cameraSettleTimer = setTimeout(() => { cameraMoving = false; }, 500);
+    cameraSettleTimer = setTimeout(() => { cameraMoving = false; }, LABEL_SETTLE_MS);
   });
   viewer.camera.percentageChanged = 0.1;
 }
