@@ -124,7 +124,7 @@ let moduleViewer = null;          // viewer reference for dot updates
 let oldHeatmap = null;
 let heatmapLayer = null;          // Cesium.ImageryLayer
 let heatmapCanvas = null;         // offscreen canvas (reused)
-const HEATMAP_CANVAS_SIZE = 512;
+const HEATMAP_CANVAS_SIZE = 1024;
 let heatmapUrlCounter = 0;        // cache-busting counter
 
 
@@ -705,10 +705,10 @@ function renderHeatmapCanvas(positions) {
 
   // Radius: large for isolated points, small for dense clusters
   // Alpha: low for dense clusters (individuals), high for isolated points (commanders)
-  const MIN_RADIUS = 3;
-  const MAX_RADIUS = 50;
-  const ALPHA_CENTER_MIN = 0.09;  // dense areas (many individuals)
-  const ALPHA_CENTER_MAX = 0.5;  // sparse areas (isolated commanders)
+  const MIN_RADIUS = 8;
+  const MAX_RADIUS = 100;
+  const ALPHA_CENTER_MIN = 0.11;  // dense areas (many individuals)
+  const ALPHA_CENTER_MAX = 0.6;  // sparse areas (isolated commanders)
 
   for (const pt of pts) {
     const density = localDensity(pt.x, pt.y);
