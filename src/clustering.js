@@ -126,6 +126,7 @@ let heatmapLayer = null;          // Cesium.ImageryLayer
 let heatmapCanvas = null;         // offscreen canvas (reused)
 const HEATMAP_CANVAS_SIZE = 1024;
 let heatmapUrlCounter = 0;        // cache-busting counter
+let heatmapSwapTimer = null;      // pending swapHeatmaps timeout
 
 // Heatmap adjustable parameters
 let heatmapMinRadius = 8;
@@ -886,6 +887,12 @@ function updateCesiumHeatmapLayer() {
   const viewer = moduleViewer;
   if (!viewer) return;
 
+  // Cancel any pending crossfade swap
+  if (heatmapSwapTimer) { clearTimeout(heatmapSwapTimer); heatmapSwapTimer = null; }
+  // Immediately show current layer if swap was pending
+  if (heatmapLayer) heatmapLayer.alpha = 1.0;
+  if (oldHeatmap) { viewer.imageryLayers.remove(oldHeatmap, false); oldHeatmap = null; }
+
   if (!militaryVisible) {
     if (heatmapLayer) {
       viewer.imageryLayers.remove(heatmapLayer, false);
@@ -941,7 +948,7 @@ function updateCesiumHeatmapLayer() {
   heatmapLayer = viewer.imageryLayers.addImageryProvider(provider);
   heatmapLayer.alpha = 0.0;
 
-  setTimeout(swapHeatmaps, 500);
+  heatmapSwapTimer = setTimeout(swapHeatmaps, 500);
 }
 
 function updateHeatmapLayer() {
@@ -1310,10 +1317,10 @@ export function setupZoomListener(viewer) {
 
 export function swapHeatmaps()
 {
-    heatmapLayer.alpha = 1.0;
-    moduleViewer.imageryLayers.remove(oldHeatmap, false);
+    heatmapSwapTimer = null;
+    if (heatmapLayer) heatmapLayer.alpha = 1.0;
+    if (oldHeatmap) moduleViewer.imageryLayers.remove(oldHeatmap, false);
     oldHeatmap = null;
-    console.log ("swapHeatmaps()");
 }
 
 // --- Keyboard ---
