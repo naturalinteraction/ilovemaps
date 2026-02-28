@@ -156,12 +156,14 @@ export const canvasFrustumLines = [];
 export const canvasDots = [];
 
 // Label declutter constants
-const LABEL_CELL_W = 8;
-const LABEL_CELL_H = 8;
-const LABEL_HYSTERESIS = 0.6;
+let LABEL_CELL_W = 8;
+let LABEL_CELL_H = 8;
+let LABEL_HYSTERESIS = 0.4;
+let DEBUG_LABEL_DECLUTTER = false;
 
 // Label state tracking for hysteresis
 const labelStates = new Map(); // entity id -> { showing: bool }
+const labelDebugRects = []; // { x, y, w, h } for debug visualization
 
 // --- Sound effects ---
 
@@ -524,6 +526,7 @@ function estimateLabelSize(entity) {
 
 function updateLabelDeclutter(viewer) {
   labelDrawList.length = 0;
+  labelDebugRects.length = 0;
   if (!labelsEnabled || animating) return;
 
   const scene = viewer.scene;
@@ -578,14 +581,22 @@ function updateLabelDeclutter(viewer) {
         labelStates.set(entityId, state);
       }
       const hyst = state.showing ? (1 - LABEL_HYSTERESIS) : (1 + LABEL_HYSTERESIS);
-      const cellsX = Math.ceil((c.estW * hyst) / LABEL_CELL_W);
-      const cx = Math.floor(c.sx / LABEL_CELL_W);
-      const cy = Math.floor(c.sy / LABEL_CELL_H);
+      const cellW = Math.max(1, LABEL_CELL_W);
+      const cellH = Math.max(1, LABEL_CELL_H);
+      const sizeW = c.estW * hyst;
+      const sizeH = c.estH * hyst;
+      const cellsX = Math.max(1, Math.ceil(sizeW / cellW));
+      const cellsY = Math.max(1, Math.ceil(sizeH / cellH));
+      const labelSy = c.sy + (c.entity._labelPixelOffsetY || 0);
+      const centerX = c.sx;
+      const centerY = labelSy - c.estH / 2;
+      const cx = Math.floor(centerX / cellW) - Math.floor(cellsX / 2);
+      const cy = Math.floor(centerY / cellH) - Math.floor(cellsY / 2);
 
-      // Check if any cell is occupied
+      // Check if any cell is occupied (same cells that will be claimed)
       let blocked = false;
       for (let dx = 0; dx < cellsX && !blocked; dx++) {
-        for (let dy = -1; dy <= 1 && !blocked; dy++) {
+        for (let dy = 0; dy < cellsY && !blocked; dy++) {
           const key = (cx + dx) + "," + (cy + dy);
           if (grid.has(key)) blocked = true;
         }
@@ -599,10 +610,35 @@ function updateLabelDeclutter(viewer) {
       if (show) {
         // Claim cells
         for (let dx = 0; dx < cellsX; dx++) {
-          for (let dy = -1; dy <= 1; dy++) {
+          for (let dy = 0; dy < cellsY; dy++) {
             grid.set((cx + dx) + "," + (cy + dy), true);
           }
         }
+        // Store debug rect (grid cells being claimed)
+        if (DEBUG_LABEL_DECLUTTER) {
+          const gridW = cellsX * cellW;
+          const gridH = cellsY * cellH;
+          labelDebugRects.push({
+            x: cx * cellW,
+            y: cy * cellH,
+            w: gridW,
+            h: gridH,
+            showing: true,
+            labelText: c.entity.label.text
+          });
+        }
+      } else if (DEBUG_LABEL_DECLUTTER) {
+        // Still show blocked labels in red for debug (grid cells they would need)
+        const gridW = cellsX * cellW;
+        const gridH = cellsY * cellH;
+        labelDebugRects.push({
+          x: cx * cellW,
+          y: cy * cellH,
+          w: gridW,
+          h: gridH,
+          showing: false,
+          labelText: c.entity.label.text
+        });
       }
 
       // Only update state when it changes
@@ -613,7 +649,7 @@ function updateLabelDeclutter(viewer) {
       if (state.showing) {
         const text = c.entity.label.text;
         const str = (text && text.getValue) ? text.getValue(Cesium.JulianDate.now()) : text;
-        if (str) labelDrawList.push({ text: str, sx: c.sx, sy: c.sy, offsetY: c.entity._labelPixelOffsetY || 0 });
+        if (str) labelDrawList.push({ text: str, sx: c.sx, sy: labelSy, offsetY: 0 });
       }
     }
   }
@@ -661,6 +697,15 @@ function createHeatmapControls() {
   makeSlider("Hue", 200, 260, 1, heatmapHue, v => heatmapHue = v);
   makeSlider("Saturation", 35, 100, 1, heatmapSaturation, v => heatmapSaturation = v);
   makeSlider("Lightness", 20, 70, 1, heatmapLightness, v => heatmapLightness = v);
+
+  const labelHeader = document.createElement("div");
+  labelHeader.style.cssText = "margin-top:12px;padding-top:8px;border-top:1px solid #555;font-weight:bold;";
+  labelHeader.textContent = "Label Declutter";
+  panel.appendChild(labelHeader);
+
+  makeSlider("Cell Width", 1, 40, 1, LABEL_CELL_W, v => LABEL_CELL_W = v);
+  makeSlider("Cell Height", 1, 40, 1, LABEL_CELL_H, v => LABEL_CELL_H = v);
+  makeSlider("Hysteresis", 0, 0.49, 0.01, LABEL_HYSTERESIS, v => LABEL_HYSTERESIS = v);
 
   const blendModes = [
     "source-over", 
@@ -1320,6 +1365,12 @@ export function handleKeydown(event, viewer) {
     return true;
   }
 
+  if (event.key === "d" || event.key === "D") {
+    DEBUG_LABEL_DECLUTTER = !DEBUG_LABEL_DECLUTTER;
+    console.log("DEBUG_LABEL_DECLUTTER:", DEBUG_LABEL_DECLUTTER);
+    return true;
+  }
+
   return false;
 }
 
@@ -1601,6 +1652,14 @@ export function setupPreRender(viewer) {
     if (labelCanvas && labelCtx) {
       labelCtx.clearRect(0, 0, labelCanvas.width, labelCanvas.height);
       if (labelsEnabled && !animating) {
+        // Debug: draw declutter rects
+        if (DEBUG_LABEL_DECLUTTER) {
+          labelCtx.lineWidth = 1;
+          for (const rect of labelDebugRects) {
+            labelCtx.strokeStyle = rect.showing ? "rgba(0,255,0,0.8)" : "rgba(255,0,0,0.8)";
+            labelCtx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+          }
+        }
         labelCtx.font = "18px sans-serif";
         labelCtx.textAlign = "center";
         labelCtx.textBaseline = "bottom";
