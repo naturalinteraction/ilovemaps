@@ -158,7 +158,7 @@ export const canvasDots = [];
 // Label declutter constants
 let LABEL_CELL_W = 8;
 let LABEL_CELL_H = 8;
-let LABEL_HYSTERESIS = 0.4;
+let LABEL_HYSTERESIS = 0.4; // also 0.34 seems to work fine
 let DEBUG_LABEL_DECLUTTER = false;
 
 // Label state tracking for hysteresis
@@ -703,8 +703,8 @@ function createHeatmapControls() {
   labelHeader.textContent = "Label Declutter";
   panel.appendChild(labelHeader);
 
-  makeSlider("Cell Width", 1, 40, 1, LABEL_CELL_W, v => LABEL_CELL_W = v);
-  makeSlider("Cell Height", 1, 40, 1, LABEL_CELL_H, v => LABEL_CELL_H = v);
+  makeSlider("Cell Width", 4, 40, 1, LABEL_CELL_W, v => LABEL_CELL_W = v);
+  makeSlider("Cell Height", 4, 40, 1, LABEL_CELL_H, v => LABEL_CELL_H = v);
   makeSlider("Hysteresis", 0, 0.49, 0.01, LABEL_HYSTERESIS, v => LABEL_HYSTERESIS = v);
 
   const blendModes = [

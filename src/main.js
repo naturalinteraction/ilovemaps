@@ -34,6 +34,16 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
   navigationHelpButton: false,
   fullscreenButton: false,
 });
+
+// Enable tilt with two-finger drag and improve multitouch
+const sscc = viewer.scene.screenSpaceCameraController;
+sscc.enableRotate = true;
+sscc.enableTranslate = true;
+sscc.enableZoom = true;
+sscc.enableTilt = true;
+sscc.enableLook = true;
+viewer.scene.canvas.setAttribute("touch-action", "none");
+
 viewer.scene.globe.depthTestAgainstTerrain = true;
 
 const waypointEntities = [];
