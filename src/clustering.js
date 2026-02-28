@@ -401,7 +401,6 @@ export async function loadMilitaryUnits(viewer) {
 
   createHeatmapControls();
   updateHeatmapLayer();
-  // startIndividualMovement(); // temporarily disabled
   return { entitiesById, nodesById, allNodes };
 }
 
@@ -410,6 +409,7 @@ export async function loadMilitaryUnits(viewer) {
 
 
 function startAnimations(anims) {
+  stopMoveUnits();
   const now = performance.now();
   for (const a of anims) {
     a.startTime = now;
@@ -454,6 +454,7 @@ function onPreRender() {
     animating = false;
     labelStates.clear();
     updateHeatmapLayer();
+    if (movementEnabled) startMoveUnits();
   }
 }
 
@@ -1319,18 +1320,12 @@ export function swapHeatmaps()
 
 export function handleKeydown(event, viewer) {
   if (event.key === "m" || event.key === "M") {
-    militaryVisible = !militaryVisible;
-    if (!animating) {
-      if (militaryVisible) {
-        showLevel(currentLevel);
-      } else {
-        for (const node of allNodes) {
-          entitiesById[node.id].show = false;
-        }
-        hideAllCmdStaff();
-      }
-      updateHeatmapLayer();
+    if (movementEnabled) {
+      stopMoveUnits();
+    } else {
+      startMoveUnits();
     }
+    movementEnabled = !movementEnabled;
     return true;
   }
 
@@ -1379,7 +1374,140 @@ export function handleKeydown(event, viewer) {
 
 // --- Individual movement ---
 
-const MOVE_INTERVAL_MS = 1000;
+const MOVE_INTERVAL_MS = 100;
+let moveUnitsIntervalId = null;
+let moveUnitsCallCount = 0;
+let moveUnitsTime = 0;
+let movementEnabled = false;
+
+const MOTION_AMPLITUDE_M = 10;
+const MOTION_VELOCITY = 1;
+
+const metersPerDegLat = 111320;
+
+function getUnitDirection(unit) {
+  const str = unit.name || unit.id || "";
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash) % 181;
+}
+
+function getUnitAmplitude(unit) {
+  const str = unit.name || unit.id || "";
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 3) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return 2.5 + (Math.abs(hash) % 8);
+}
+
+function getUnitVelocity(unit) {
+  const str = unit.name || unit.id || "";
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 7) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return 0.25 + (Math.abs(hash) % 101) / 400;
+}
+
+function getMotionOffset(directionDeg, amplitude, velocity, time) {
+  const directionRad = directionDeg * Math.PI / 180;
+  const offset = amplitude * Math.sin(velocity * time);
+  const dlat = offset * Math.cos(directionRad) / metersPerDegLat;
+  const dlon = offset * Math.sin(directionRad) / metersPerDegLat;
+  return { dlat, dlon };
+}
+
+function moveUnits() {
+  moveUnitsCallCount++;
+  moveUnitsTime += MOVE_INTERVAL_MS / 1000;
+  if (moveUnitsCallCount >= 30) {
+    moveUnitsCallCount = 0;
+    updateHeatmapLayer();
+  }
+
+  for (const node of allNodes) {
+    if (node.type === "individual" && node.position) {
+      const direction = getUnitDirection(node);
+      const amplitude = getUnitAmplitude(node);
+      const velocity = getUnitVelocity(node);
+      const { dlat, dlon } = getMotionOffset(direction, amplitude, velocity, moveUnitsTime);
+      node.position.lat += dlat;
+      node.position.lon += dlon;
+      const entity = entitiesById[node.id];
+      if (entity) {
+        entity.position = Cesium.Cartesian3.fromDegrees(
+          node.position.lon, node.position.lat, node.position.alt + GEOID_UNDULATION + HEIGHT_ABOVE_TERRAIN
+        );
+      }
+    }
+    if (node.commander && node.commander.position) {
+      const direction = getUnitDirection(node.commander);
+      const amplitude = getUnitAmplitude(node.commander);
+      const velocity = getUnitVelocity(node.commander);
+      const { dlat, dlon } = getMotionOffset(direction, amplitude, velocity, moveUnitsTime);
+      node.commander.position.lat += dlat;
+      node.commander.position.lon += dlon;
+      const cmdE = cmdEntitiesById[node.id];
+      if (cmdE && cmdE.show) {
+        cmdE.position = Cesium.Cartesian3.fromDegrees(
+          node.commander.position.lon, node.commander.position.lat,
+          node.commander.position.alt + GEOID_UNDULATION + HEIGHT_ABOVE_TERRAIN
+        );
+      }
+    }
+    if (node.staff) {
+      for (let i = 0; i < node.staff.length; i++) {
+        const staffPos = node.staff[i];
+        if (staffPos.position) {
+          const direction = getUnitDirection(staffPos);
+          const amplitude = getUnitAmplitude(staffPos);
+          const velocity = getUnitVelocity(staffPos);
+          const { dlat, dlon } = getMotionOffset(direction, amplitude, velocity, moveUnitsTime);
+          staffPos.position.lat += dlat;
+          staffPos.position.lon += dlon;
+          const staffEs = staffEntitiesById[node.id];
+          if (staffEs && staffEs[i] && staffEs[i].show) {
+            staffEs[i].position = Cesium.Cartesian3.fromDegrees(
+              staffPos.position.lon, staffPos.position.lat,
+              staffPos.position.alt + GEOID_UNDULATION + HEIGHT_ABOVE_TERRAIN
+            );
+          }
+        }
+      }
+    }
+  }
+
+  for (const node of allNodes) {
+    if (node.commander) {
+      node.homePosition = Cesium.Cartesian3.fromDegrees(
+        node.position.lon, node.position.lat, node.position.alt + GEOID_UNDULATION + HEIGHT_ABOVE_TERRAIN
+      );
+      const entity = entitiesById[node.id];
+      if (entity && entity.show) {
+        entity.position = node.homePosition;
+      }
+    }
+  }
+}
+
+function startMoveUnits() {
+  if (moveUnitsIntervalId) return;
+  moveUnitsIntervalId = setInterval(moveUnits, MOVE_INTERVAL_MS);
+}
+
+function stopMoveUnits() {
+  if (moveUnitsIntervalId) {
+    clearInterval(moveUnitsIntervalId);
+    moveUnitsIntervalId = null;
+  }
+}
+
 const MOVE_DISTANCE_M = 45;
 
 function perturbPosition(pos) {
