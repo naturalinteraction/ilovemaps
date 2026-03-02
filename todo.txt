@@ -1,3 +1,24 @@
+
+                  
+  In the Unity Hub window:                                                     
+  1. Sign in (or create a Unity account if you don't have one)
+  2. When prompted, activate a Personal license (free)
+
+  Step 3: Install an Editor
+
+  1. Go to Installs → Install Editor
+  2. Pick the latest LTS version (recommended: 6000.0.x LTS — or 2022.3.x LTS
+  if you prefer proven stability)
+  3. For modules, just keep Linux Build Support checked (uncheck anything else
+  to save disk space)
+  4. Click Install — this will be a few GB download, so it'll take a while
+
+
+
+
+
+
+
 - decluttering gerarchico, cioe' si compatta insieme solo roba della stessa unita'... cioe', prima posso compattare lo staff, che e' vicino al comandante di plotone, e poi le squadre di quel plotone, non roba di altri plotoni. e' basato sulla viewer camera   +187 o +1 o +2 non fa grande differenza
 
 - Forzare la continuita' della heatmap in modo che tutti siano parte di un unico blob crea dei casi ambigui. Nel caso le sottoparti siano molto distanti tra loro possiamo accettare la separazione in piu' chiazze?
