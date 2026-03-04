@@ -28,10 +28,23 @@ const DRONE_POSE_2 = {
   aspectRatio: 1.0,
 };
 
+const DRONE_POSE_1 = {
+  lat: 46.3300,       // degrees
+  lon: 10.3282,        // degrees
+  alt: 1155.6,        // metres above ellipsoid
+  heading: 194.5,       // degrees, 0 = North, clockwise
+  pitch: 64,       // degrees, 0 = horizontal, positive = looking down, 90 = straight down
+  roll: 0,          // degrees
+  hFovDeg: 85.7,      // horizontal field of view
+  aspectRatio: 1.77,
+};
+
 const DRONE_FRAMES = [
-  { pose: DRONE_POSE_2, url: "/data/drone_frame_2b.png" },
+  { pose: DRONE_POSE_1, url: "/data/drone_frame_1b.png" },
+  //{ pose: DRONE_POSE_2, url: "/data/drone_frame_2b.png" },
   { pose: DRONE_POSE_3, url: "/data/drone_frame_3b.png" },
 ];
+
 let currentFrameIndex = 0;
 let DRONE_POSE = { ...DRONE_FRAMES[0].pose };
 
@@ -218,7 +231,7 @@ export async function setupDroneVideoLayer(viewer) {
   viewer.container.appendChild(poseOverlay);
 
   // --- Per-frame 3D indicators (dot + arrow + frustum lines) ----------------
-  const INDICATOR_COLORS = [Cesium.Color.YELLOW, Cesium.Color.LIME];
+  const INDICATOR_COLORS = [Cesium.Color.YELLOW, Cesium.Color.LIME, Cesium.Color.CYAN];
   const indicators = DRONE_FRAMES.map((frame, i) => {
     const cam = droneStates[i].cam;
     let arrowPos = [cam.ecef, arrowTip(cam.ecef, cam.forward)];
@@ -276,8 +289,7 @@ export async function setupDroneVideoLayer(viewer) {
         roll: Cesium.Math.toRadians(DRONE_POSE.roll),
       },
     });
-    const hFovRad = Cesium.Math.toRadians(DRONE_POSE.hFovDeg);
-    viewer.camera.frustum.fov = 2.0 * Math.atan(Math.tan(hFovRad / 2.0) / DRONE_POSE.aspectRatio);
+    viewer.camera.frustum.fov = Cesium.Math.toRadians(DRONE_POSE.hFovDeg);
     viewer.camera.frustum.aspectRatio = DRONE_POSE.aspectRatio;
   }
 
