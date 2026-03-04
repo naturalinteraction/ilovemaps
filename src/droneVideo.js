@@ -6,9 +6,20 @@ import { canvasArrows, canvasFrustumLines, canvasDots } from "./clustering.js";
 // Hardcoded 6-DOF pose 
 // ---------------------------------------------------------------------------
 
+const DRONE_POSE_5 = {
+  lat: 46.3295,       // degrees
+  lon: 10.3282,        // degrees
+  alt: 1500.1,        // metres above ellipsoid
+  heading: 0.0,       // degrees, 0 = North, clockwise
+  pitch: 90,       // degrees, 0 = horizontal, positive = looking down, 90 = straight down
+  roll: 0,          // degrees
+  hFovDeg: 59.2,      // horizontal field of view
+  aspectRatio: 1.77,
+};
+
 const DRONE_POSE_4 = {
-  lat: 46.3272,       // degrees
-  lon: 10.3257,        // degrees
+  lat: 46.327142,       // degrees
+  lon: 10.325665,        // degrees
   alt: 1254.6,        // metres above ellipsoid
   heading: 211.0,       // degrees, 0 = North, clockwise
   pitch: 47.5,       // degrees, 0 = horizontal, positive = looking down, 90 = straight down
@@ -51,10 +62,11 @@ const DRONE_POSE_1 = {
 };
 
 const DRONE_FRAMES = [
-  { pose: DRONE_POSE_1, url: "/data/drone_frame_1b.png" },
+  //{ pose: DRONE_POSE_1, url: "/data/drone_frame_1b.png" },
   //{ pose: DRONE_POSE_2, url: "/data/drone_frame_2b.png" },
   //{ pose: DRONE_POSE_3, url: "/data/drone_frame_3b.png" },
   { pose: DRONE_POSE_4, url: "/data/drone_frame_4b.png" },
+  { pose: DRONE_POSE_5, url: "/data/drone_frame_5b.png" },
 ];
 
 let currentFrameIndex = 0;
@@ -234,7 +246,7 @@ export async function setupDroneVideoLayer(viewer) {
   }
 
   function poseLabel() {
-    return `${DRONE_POSE.lat.toFixed(4)}, ${DRONE_POSE.lon.toFixed(4)}, ${DRONE_POSE.alt.toFixed(1)}m\nH:${DRONE_POSE.heading.toFixed(1)}° P:${DRONE_POSE.pitch.toFixed(1)}° R:${DRONE_POSE.roll.toFixed(1)}° FOV:${DRONE_POSE.hFovDeg.toFixed(1)}° AR:${DRONE_POSE.aspectRatio.toFixed(2)}`;
+    return `${DRONE_POSE.lat.toFixed(6)}, ${DRONE_POSE.lon.toFixed(6)}, ${DRONE_POSE.alt.toFixed(1)}m\nH:${DRONE_POSE.heading.toFixed(1)}° P:${DRONE_POSE.pitch.toFixed(1)}° R:${DRONE_POSE.roll.toFixed(1)}° FOV:${DRONE_POSE.hFovDeg.toFixed(1)}° AR:${DRONE_POSE.aspectRatio.toFixed(2)}`;
   }
 
   // HTML overlay for pose info (always visible regardless of camera)
