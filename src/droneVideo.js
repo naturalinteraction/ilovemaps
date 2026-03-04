@@ -266,7 +266,7 @@ export async function setupDroneVideoLayer(viewer) {
   }
 
   function poseLabel() {
-    return `${DRONE_POSE.lat.toFixed(6)}, ${DRONE_POSE.lon.toFixed(6)}, ${DRONE_POSE.alt.toFixed(1)}m\nH:${DRONE_POSE.heading.toFixed(1)}° P:${DRONE_POSE.pitch.toFixed(1)}° R:${DRONE_POSE.roll.toFixed(1)}° FOV:${DRONE_POSE.hFovDeg.toFixed(1)}° AR:${DRONE_POSE.aspectRatio.toFixed(2)}`;
+    return `${DRONE_POSE.lat.toFixed(6)}, ${DRONE_POSE.lon.toFixed(6)}, ${DRONE_POSE.alt.toFixed(1)}m\nH:${DRONE_POSE.heading.toFixed(2)}° P:${DRONE_POSE.pitch.toFixed(2)}° R:${DRONE_POSE.roll.toFixed(2)}° FOV:${DRONE_POSE.hFovDeg.toFixed(2)}° AR:${DRONE_POSE.aspectRatio.toFixed(4)}`;
   }
 
   // HTML overlay for pose info (always visible regardless of camera)
