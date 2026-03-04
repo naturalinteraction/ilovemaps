@@ -6,6 +6,17 @@ import { canvasArrows, canvasFrustumLines, canvasDots } from "./clustering.js";
 // Hardcoded 6-DOF pose 
 // ---------------------------------------------------------------------------
 
+const DRONE_POSE_4 = {
+  lat: 46.3272,       // degrees
+  lon: 10.3257,        // degrees
+  alt: 1254.6,        // metres above ellipsoid
+  heading: 211.0,       // degrees, 0 = North, clockwise
+  pitch: 47.5,       // degrees, 0 = horizontal, positive = looking down, 90 = straight down
+  roll: 0,          // degrees
+  hFovDeg: 105.2,      // horizontal field of view
+  aspectRatio: 1.33,
+};
+
 const DRONE_POSE_3 = {
   lat: 46.3285,       // degrees
   lon: 10.3228,        // degrees
@@ -42,7 +53,8 @@ const DRONE_POSE_1 = {
 const DRONE_FRAMES = [
   { pose: DRONE_POSE_1, url: "/data/drone_frame_1b.png" },
   //{ pose: DRONE_POSE_2, url: "/data/drone_frame_2b.png" },
-  { pose: DRONE_POSE_3, url: "/data/drone_frame_3b.png" },
+  //{ pose: DRONE_POSE_3, url: "/data/drone_frame_3b.png" },
+  { pose: DRONE_POSE_4, url: "/data/drone_frame_4b.png" },
 ];
 
 let currentFrameIndex = 0;
@@ -297,6 +309,13 @@ export async function setupDroneVideoLayer(viewer) {
     const headRad = Cesium.Math.toRadians(DRONE_POSE.heading);
     if (e.key === "v" || e.key === "V") {
       droneVisible = !droneVisible;
+      // Toggle HUD and hide UI panels in drone mode
+      poseOverlay.style.display = droneVisible ? "" : "none";
+      if (droneVisible) poseOverlay.textContent = poseLabel();
+      const heatmapCtrl = document.getElementById("heatmap-controls");
+      const claudePanel = document.getElementById("claude-panel");
+      if (heatmapCtrl) heatmapCtrl.style.display = droneVisible ? "none" : "";
+      if (claudePanel) claudePanel.style.display = droneVisible ? "none" : "";
       if (droneVisible) {
         viewer.camera.flyTo({
           destination: Cesium.Cartesian3.fromDegrees(DRONE_POSE.lon, DRONE_POSE.lat, DRONE_POSE.alt + 500),
