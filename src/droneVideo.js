@@ -89,10 +89,24 @@ function computeDroneCameraMatrix(pose) {
   // Build body rotation manually in ENU frame (East-North-Up).
   // ENU axes: X = East (right), Y = North (forward), Z = Up.
   //
-  // Cesium's fromHeadingPitchRoll uses order Z·Y·X which couples roll into
-  // the forward direction.  We need Z·X·Y (heading · pitch · roll) so that
-  // roll — the innermost rotation about the forward/Y axis — never changes
-  // where the camera points.
+  // Rotation order matters — there are two reasonable choices:
+  //
+  //   Z·Y·X  (Cesium's built-in fromHeadingPitchRoll):
+  //     heading * roll * pitch   (applied right-to-left: pitch first, then
+  //     roll, then heading).  Because roll is applied *before* pitch, it
+  //     couples into the forward direction — changing roll also shifts where
+  //     the camera is looking, not just how the image is rotated.
+  //
+  //   Z·X·Y  (what we use here):
+  //     heading * pitch * roll   (applied right-to-left: roll first, then
+  //     pitch, then heading).  Roll is the *innermost* rotation, applied
+  //     about the forward/Y axis.  This means roll only spins the image
+  //     around the look direction — it never changes where the camera
+  //     points.  This is the correct model for a drone/aircraft where roll
+  //     (bank) tilts the horizon but the camera still looks the same way.
+  //
+  // We use Z·X·Y so that adjusting roll feels natural and independent of
+  // the other two angles.
   //
   // Sign conventions:
   //   heading: 0 = North, positive = clockwise  →  −heading about Z
@@ -106,9 +120,15 @@ function computeDroneCameraMatrix(pose) {
   const pitchQ = Cesium.Quaternion.fromAxisAngle(Cesium.Cartesian3.UNIT_X, -pitchRad);
   const headQ  = Cesium.Quaternion.fromAxisAngle(Cesium.Cartesian3.UNIT_Z, -headRad);
 
-  // Combined in ENU: heading * pitch * roll  (applied right-to-left)
+  // Z·X·Y (current): heading * pitch * roll  (applied right-to-left)
+  // Roll is innermost — only rotates the image, doesn't change look direction.
   let bodyQ = Cesium.Quaternion.multiply(pitchQ, rollQ, new Cesium.Quaternion());
   bodyQ = Cesium.Quaternion.multiply(headQ, bodyQ, bodyQ);
+
+  // Z·Y·X (Cesium default): heading * roll * pitch  (applied right-to-left)
+  // Roll couples into look direction — changing roll also shifts where camera points.
+  // let bodyQ = Cesium.Quaternion.multiply(rollQ, pitchQ, new Cesium.Quaternion());
+  // bodyQ = Cesium.Quaternion.multiply(headQ, bodyQ, bodyQ);
 
   const bodyRot = Cesium.Matrix3.fromQuaternion(bodyQ);
 
