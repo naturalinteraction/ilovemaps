@@ -120,15 +120,15 @@ function computeDroneCameraMatrix(pose) {
   const pitchQ = Cesium.Quaternion.fromAxisAngle(Cesium.Cartesian3.UNIT_X, -pitchRad);
   const headQ  = Cesium.Quaternion.fromAxisAngle(Cesium.Cartesian3.UNIT_Z, -headRad);
 
-  // Z·X·Y (current): heading * pitch * roll  (applied right-to-left)
+  // Z·X·Y: heading * pitch * roll  (applied right-to-left)
   // Roll is innermost — only rotates the image, doesn't change look direction.
-  let bodyQ = Cesium.Quaternion.multiply(pitchQ, rollQ, new Cesium.Quaternion());
-  bodyQ = Cesium.Quaternion.multiply(headQ, bodyQ, bodyQ);
+  // let bodyQ = Cesium.Quaternion.multiply(pitchQ, rollQ, new Cesium.Quaternion());
+  // bodyQ = Cesium.Quaternion.multiply(headQ, bodyQ, bodyQ);
 
   // Z·Y·X (Cesium default): heading * roll * pitch  (applied right-to-left)
   // Roll couples into look direction — changing roll also shifts where camera points.
-  // let bodyQ = Cesium.Quaternion.multiply(rollQ, pitchQ, new Cesium.Quaternion());
-  // bodyQ = Cesium.Quaternion.multiply(headQ, bodyQ, bodyQ);
+  let bodyQ = Cesium.Quaternion.multiply(rollQ, pitchQ, new Cesium.Quaternion());
+  bodyQ = Cesium.Quaternion.multiply(headQ, bodyQ, bodyQ);
 
   const bodyRot = Cesium.Matrix3.fromQuaternion(bodyQ);
 
