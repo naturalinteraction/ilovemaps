@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## IMPORTANT: Git Policy
+
+**NEVER commit or push unless the user explicitly asks you to.** Do not auto-commit, do not suggest committing. Wait for the user to say "commit" or "push".
+
 ## Commands
 
 - `npm run dev` — Start Vite dev server (http://localhost:5173)
