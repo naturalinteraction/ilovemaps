@@ -1,4 +1,4 @@
 node_modules/
 dist/
 .claude
-data/*.MOV
+data/DJI*.*
