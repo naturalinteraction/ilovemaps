@@ -1,6 +1,6 @@
 import * as Cesium from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
-import { loadMilitaryUnits, setupZoomListener, setupPreRender, handleLeftClick, handleRightClick, handleDoubleClick, handleKeydown, playBeep } from "./clustering.js";
+import { loadMilitaryUnits, loadOtherUnits, setupZoomListener, setupPreRender, handleLeftClick, handleRightClick, handleDoubleClick, handleKeydown, playBeep } from "./clustering.js";
 import { setupDroneVideoLayer } from "./droneVideo.js";
 
 // Token Cesium Ion (registrarsi su cesium.com/ion per ottenerne uno)
@@ -139,6 +139,7 @@ loadCameraView();
 
 // Military unit clustering
 loadMilitaryUnits(viewer).catch(console.error);
+loadOtherUnits(viewer).catch(console.error);
 setupZoomListener(viewer);
 setupPreRender(viewer);
 

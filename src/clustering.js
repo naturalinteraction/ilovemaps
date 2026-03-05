@@ -94,6 +94,230 @@ function getSymbolImage(type, hq) {
   return symbolImages[key];
 }
 
+// --- Identity-based symbol rendering (APP-6 shapes) ---
+
+const IDENTITY_COLORS = {
+  friendly: "#2040FF",
+  hostile:  "#FF2020",
+  neutral:  "#20AA20",
+  unknown:  "#FFD700",
+};
+
+function drawIdentityShape(ctx, identity, rx, ry, rw, rh) {
+  const color = IDENTITY_COLORS[identity] || IDENTITY_COLORS.unknown;
+  const cx = rx + rw / 2;
+  const cy = ry + rh / 2;
+  const hw = rw / 2, hh = rh / 2;
+
+  // White fill + outline, then colored fill + outline
+  ctx.fillStyle = "white";
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = 5;
+
+  if (identity === "friendly") {
+    // Rectangle (same as existing)
+    ctx.fillRect(rx, ry, rw, rh);
+    ctx.strokeRect(rx, ry, rw, rh);
+    ctx.fillStyle = color + "CC";
+    ctx.fillRect(rx, ry, rw, rh);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(rx, ry, rw, rh);
+  } else if (identity === "hostile") {
+    // Diamond
+    ctx.beginPath();
+    ctx.moveTo(cx, ry - 2);
+    ctx.lineTo(rx + rw + 2, cy);
+    ctx.lineTo(cx, ry + rh + 2);
+    ctx.lineTo(rx - 2, cy);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = color + "CC";
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, ry);
+    ctx.lineTo(rx + rw, cy);
+    ctx.lineTo(cx, ry + rh);
+    ctx.lineTo(rx, cy);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+  } else if (identity === "neutral") {
+    // Square
+    ctx.fillRect(rx, ry, rw, rh);
+    ctx.strokeRect(rx, ry, rw, rh);
+    ctx.fillStyle = color + "CC";
+    ctx.fillRect(rx, ry, rw, rh);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(rx, ry, rw, rh);
+  } else {
+    // Unknown: quatrefoil (clover shape)
+    const r = Math.min(hw, hh) * 0.55;
+    ctx.beginPath();
+    ctx.arc(cx, ry + r * 0.3, r, 0, Math.PI * 2);
+    ctx.arc(cx + hw * 0.6, cy, r, 0, Math.PI * 2);
+    ctx.arc(cx, ry + rh - r * 0.3, r, 0, Math.PI * 2);
+    ctx.arc(cx - hw * 0.6, cy, r, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = color + "CC";
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx, ry + r * 0.3, r, 0, Math.PI * 2);
+    ctx.arc(cx + hw * 0.6, cy, r, 0, Math.PI * 2);
+    ctx.arc(cx, ry + rh - r * 0.3, r, 0, Math.PI * 2);
+    ctx.arc(cx - hw * 0.6, cy, r, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+  }
+}
+
+function drawEntityIcon(ctx, entityType, threatType, cx, cy, color) {
+  ctx.fillStyle = "white";
+  ctx.strokeStyle = "white";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = "bold 11px sans-serif";
+
+  if (entityType === "uav") {
+    // Small drone silhouette: V-shape wings
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(cx - 10, cy + 4);
+    ctx.lineTo(cx, cy - 5);
+    ctx.lineTo(cx + 10, cy + 4);
+    ctx.stroke();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx - 10, cy + 4);
+    ctx.lineTo(cx, cy - 5);
+    ctx.lineTo(cx + 10, cy + 4);
+    ctx.stroke();
+  } else if (entityType === "ugv") {
+    ctx.fillText("UGV", cx, cy);
+    ctx.fillStyle = color;
+    ctx.fillText("UGV", cx, cy);
+  } else if (entityType === "sensor") {
+    // Antenna icon: vertical line with radiating arcs
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + 6);
+    ctx.lineTo(cx, cy - 4);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx, cy - 4, 5, -Math.PI * 0.8, -Math.PI * 0.2);
+    ctx.stroke();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + 6);
+    ctx.lineTo(cx, cy - 4);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx, cy - 4, 5, -Math.PI * 0.8, -Math.PI * 0.2);
+    ctx.stroke();
+  } else if (entityType === "artillery") {
+    // Circle with dot
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (entityType === "human") {
+    // Infantry X cross
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(cx - 8, cy - 6);
+    ctx.lineTo(cx + 8, cy + 6);
+    ctx.moveTo(cx + 8, cy - 6);
+    ctx.lineTo(cx - 8, cy + 6);
+    ctx.stroke();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx - 8, cy - 6);
+    ctx.lineTo(cx + 8, cy + 6);
+    ctx.moveTo(cx + 8, cy - 6);
+    ctx.lineTo(cx - 8, cy + 6);
+    ctx.stroke();
+  } else if (entityType === "threat") {
+    const label = threatType || "THR";
+    ctx.font = "bold 10px sans-serif";
+    ctx.fillText(label, cx, cy);
+    ctx.fillStyle = color;
+    ctx.fillText(label, cx, cy);
+  }
+}
+
+function drawOtherUnitSymbol(entityType, identity, threatType) {
+  const canvas = document.createElement("canvas");
+  canvas.width = SYMBOL_SIZE;
+  canvas.height = SYMBOL_SIZE;
+  const ctx = canvas.getContext("2d");
+
+  const rx = 8, ry = 14, rw = 48, rh = 28;
+  drawIdentityShape(ctx, identity, rx, ry, rw, rh);
+
+  const color = IDENTITY_COLORS[identity] || IDENTITY_COLORS.unknown;
+  const cx = rx + rw / 2;
+  const cy = ry + rh / 2;
+  drawEntityIcon(ctx, entityType, threatType, cx, cy, color);
+
+  return canvas;
+}
+
+const otherSymbolImages = {};
+function getOtherSymbolImage(entityType, identity, threatType) {
+  const key = `${identity}_${entityType}_${threatType || ""}`;
+  if (!otherSymbolImages[key]) {
+    otherSymbolImages[key] = drawOtherUnitSymbol(entityType, identity, threatType);
+  }
+  return otherSymbolImages[key];
+}
+
+export async function loadOtherUnits(viewer) {
+  const response = await fetch("/data/other-units.json");
+  const units = await response.json();
+
+  for (const unit of units) {
+    const image = getOtherSymbolImage(unit.entity, unit.identity, unit.threatType);
+    const position = Cesium.Cartesian3.fromDegrees(
+      unit.position.lon, unit.position.lat, unit.position.alt
+    );
+
+    viewer.entities.add({
+      name: unit.name,
+      position,
+      billboard: {
+        image,
+        width: SYMBOL_SIZE,
+        height: SYMBOL_SIZE,
+        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      },
+      label: {
+        text: unit.name,
+        font: "14px sans-serif",
+        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        outlineWidth: 2,
+        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE + 4)),
+        eyeOffset: new Cesium.Cartesian3(0, 0, -50),
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      },
+    });
+  }
+}
+
 // --- Data structures ---
 
 const LEVEL_ORDER = ["individual", "squad", "platoon", "company", "battalion", "regiment", "brigade"];
