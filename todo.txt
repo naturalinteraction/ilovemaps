@@ -1,3 +1,29 @@
+cmake --build build-linux
+
+SGM > HGM > HTM/HPM
+
+ostili fissi
+ostili tracciati dai droni
+threats sospetti (rombo)
+threats nemici (rombo)
+unita' nemiche (come le mie ma rosse)
+
+tutto quello che c'e' in map e' un superset di SIDC (ci sono cose non in SIDC)
+
+checklist on/off type/tipologia e' ortogonale alla gerarchia:
+- uav (droni)
+- uav con pilota
+- ugv (veicoli autonomi di terra)
+- ugv con pilota
+- sensori (direction finder o radar)
+- humani amici e nemici e sospetti
+
+i droni sono in parte associati a una squadra e in parte sparsi a giro per gli staff o squadre
+
+il tap vince sullo slider 1-7, ma c'e' bottone di reset per riportare i tap a nulli (cioe' ci si allinea allo slider 1-7)
+
+
+
 
 
 - decluttering gerarchico, cioe' si compatta insieme solo roba della stessa unita'... cioe', prima posso compattare lo staff, che e' vicino al comandante di plotone, e poi le squadre di quel plotone, non roba di altri plotoni. e' basato sulla viewer camera   +187 o +1 o +2 non fa grande differenza
