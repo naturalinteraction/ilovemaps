@@ -6,6 +6,33 @@ import { canvasArrows, canvasFrustumLines, canvasDots } from "./clustering.js";
 // Hardcoded 6-DOF pose 
 // ---------------------------------------------------------------------------
 
+// Extracted from DJI_0001.MOV via extract_drone_meta.sh (Mavic Pro, FC220-Se)
+// DJI camera angles converted: heading = camera_yaw normalized to 0..360,
+// pitch = -camera_pitch (DJI negative-down → positive-down),
+// altitude = MSL + ~47m geoid undulation for Florence area
+const DRONE_POSE_DJI_0001 = {
+  lat: 43.79773611,     // degrees
+  lon: 11.23880278,     // degrees
+  alt: 121.0,           // metres above ellipsoid (tuned visually)
+  heading: 339.9,       // degrees, 0 = North, clockwise (camera_yaw -20.1 + 360)
+  pitch: 90.0,          // degrees, 0 = horizontal, positive = looking down (camera_pitch was -90)
+  roll: 0.0,            // degrees
+  hFovDeg: 71.2,        // horizontal field of view (Mavic Pro 78.8 diag)
+  aspectRatio: 16 / 9,  // 3840x2160
+};
+
+// Extracted from DJI_0002.MOV via extract_drone_meta.sh (Mavic Pro, FC220-Se)
+const DRONE_POSE_DJI_0002 = {
+  lat: 43.79774167,     // degrees
+  lon: 11.23880278,     // degrees
+  alt: 116.6,           // metres above ellipsoid (20.1m above takeoff + ~96.5m ellipsoid offset)
+  heading: 24.2,        // degrees, 0 = North, clockwise (camera_yaw 24.2)
+  pitch: 38.3,          // degrees, 0 = horizontal, positive = looking down (camera_pitch was -38.3)
+  roll: 0.0,            // degrees
+  hFovDeg: 71.2,        // horizontal field of view (Mavic Pro 78.8 diag)
+  aspectRatio: 16 / 9,  // 3840x2160
+};
+
 const DRONE_POSE_5 = {
   lat: 46.3295,       // degrees
   lon: 10.3282,        // degrees
@@ -62,11 +89,13 @@ const DRONE_POSE_1 = {
 };
 
 const DRONE_FRAMES = [
+  { pose: DRONE_POSE_DJI_0001, url: "/data/DJI_0001_frame.png" },
+  { pose: DRONE_POSE_DJI_0002, url: "/data/DJI_0002_frame.png" },
   //{ pose: DRONE_POSE_1, url: "/data/drone_frame_1b.png" },
   //{ pose: DRONE_POSE_2, url: "/data/drone_frame_2b.png" },
   //{ pose: DRONE_POSE_3, url: "/data/drone_frame_3b.png" },
-  { pose: DRONE_POSE_4, url: "/data/drone_frame_4b.png" },
-  { pose: DRONE_POSE_5, url: "/data/drone_frame_5b.png" },
+  //{ pose: DRONE_POSE_4, url: "/data/drone_frame_4b.png" },
+  //{ pose: DRONE_POSE_5, url: "/data/drone_frame_5b.png" },
 ];
 
 let currentFrameIndex = 0;
@@ -224,7 +253,18 @@ export async function setupDroneVideoLayer(viewer) {
   const textures = await Promise.all(
     DRONE_FRAMES.map(async (f) => {
       const img = await Cesium.Resource.fetchImage({ url: f.url });
-      return new Cesium.Texture({ context: viewer.scene.context, source: img });
+      const tex = new Cesium.Texture({
+        context: viewer.scene.context,
+        source: img,
+        sampler: new Cesium.Sampler({
+          minificationFilter: Cesium.TextureMinificationFilter.LINEAR_MIPMAP_LINEAR,
+          magnificationFilter: Cesium.TextureMagnificationFilter.LINEAR,
+          wrapS: Cesium.TextureWrap.CLAMP_TO_EDGE,
+          wrapT: Cesium.TextureWrap.CLAMP_TO_EDGE,
+        }),
+      });
+      tex.generateMipmap();
+      return tex;
     }),
   );
   let drone = computeDroneCameraMatrix(DRONE_POSE);

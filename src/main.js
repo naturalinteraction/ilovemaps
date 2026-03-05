@@ -45,6 +45,8 @@ sscc.enableLook = true;
 viewer.scene.canvas.setAttribute("touch-action", "none");
 
 viewer.scene.globe.depthTestAgainstTerrain = true;
+// Higher terrain LOD for close-range drone draping (default is 2)
+viewer.scene.globe.maximumScreenSpaceError = 0.5;
 
 const waypointEntities = [];
 const waypointRouteInfo = new Map(); // entity -> { route: [{lat,lon,alt}...], wpIdx: number }
