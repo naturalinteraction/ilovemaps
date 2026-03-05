@@ -19,6 +19,7 @@ const DRONE_POSE_DJI_0001 = {
   roll: 0.0,            // degrees
   hFovDeg: 71.2,        // horizontal field of view (Mavic Pro 78.8 diag)
   aspectRatio: 16 / 9,  // 3840x2160
+  heightAboveGround: 24.5, // DJI reported altitude above takeoff
 };
 
 // Extracted from DJI_0002.MOV via extract_drone_meta.sh (Mavic Pro, FC220-Se)
@@ -31,6 +32,7 @@ const DRONE_POSE_DJI_0002 = {
   roll: 0.0,            // degrees
   hFovDeg: 71.2,        // horizontal field of view (Mavic Pro 78.8 diag)
   aspectRatio: 16 / 9,  // 3840x2160
+  heightAboveGround: 20.1, // DJI reported altitude above takeoff
 };
 
 const DRONE_POSE_5 = {
@@ -218,6 +220,7 @@ function computeDroneCameraMatrix(pose) {
     forward,
     matrix,
     inverseMatrix,
+    heightAboveGround: pose.heightAboveGround || 500.0,
   };
 }
 
@@ -278,10 +281,18 @@ export async function setupDroneVideoLayer(viewer) {
     const stage = new Cesium.PostProcessStage({
       fragmentShader: drapeShaderGLSL,
       uniforms: {
-        videoTexture:      () => textures[i],
-        droneEcefPosition: () => state.cam.ecef,
-        droneCameraMatrix: () => state.cam.matrix,
-        videoAlpha:        () => droneVisible ? state.alpha : 0.0,
+        videoTexture:           () => textures[i],
+        droneEcefPosition:      () => state.cam.ecef,
+        droneCameraMatrix:      () => state.cam.matrix,
+        videoAlpha:             () => droneVisible ? state.alpha : 0.0,
+        droneHeightAboveGround: () => state.cam.heightAboveGround,
+        // Camera-to-drone offset computed in 64-bit JS to avoid GPU float32 precision loss.
+        // ECEF coords are ~4.5M metres; subtracting on GPU loses ~0.5m precision.
+        cameraOffsetFromDrone:  () => {
+          const cam = viewer.camera.positionWC;
+          const d = state.cam.ecef;
+          return new Cesium.Cartesian3(cam.x - d.x, cam.y - d.y, cam.z - d.z);
+        },
       },
     });
     viewer.scene.postProcessStages.add(stage);
