@@ -1,6 +1,7 @@
 import * as Cesium from "cesium";
 import drapeShaderGLSL from "./drapeShader.glsl?raw";
 import { canvasArrows, canvasFrustumLines, canvasDots } from "./clustering.js";
+import { createDSMTerrainProvider } from "./dsmTerrain.js";
 
 // ---------------------------------------------------------------------------
 // Hardcoded 6-DOF pose 
@@ -101,7 +102,9 @@ const DRONE_FRAMES = [
 ];
 
 let currentFrameIndex = 0;
-let DRONE_POSE = { ...DRONE_FRAMES[0].pose };
+// Each frame gets its own mutable copy of the pose so adjustments are independent
+const framePoses = DRONE_FRAMES.map((f) => ({ ...f.pose }));
+let DRONE_POSE = framePoses[0];
 
 // ---------------------------------------------------------------------------
 // Build drone camera matrix (projection * view) in RTC frame
@@ -274,20 +277,26 @@ export async function setupDroneVideoLayer(viewer) {
   let droneAlpha = 1.0;
   let droneVisible = false; // toggled by 'v' key
 
+  // Load DSM terrain provider (optional — gracefully degrades if missing)
+  let dsmTerrain = null;
+  let savedTerrainProvider = null;
+  try {
+    dsmTerrain = await createDSMTerrainProvider();
+  } catch (e) {
+    console.warn("DSM terrain not loaded:", e.message);
+  }
+
   // One post-process stage per drone frame, all visible simultaneously
   const droneStates = DRONE_FRAMES.map((frame, i) => {
     const cam = computeDroneCameraMatrix(frame.pose);
     const state = { cam, alpha: droneAlpha };
+
     const stage = new Cesium.PostProcessStage({
       fragmentShader: drapeShaderGLSL,
       uniforms: {
         videoTexture:           () => textures[i],
-        droneEcefPosition:      () => state.cam.ecef,
         droneCameraMatrix:      () => state.cam.matrix,
         videoAlpha:             () => droneVisible ? state.alpha : 0.0,
-        droneHeightAboveGround: () => state.cam.heightAboveGround,
-        // Camera-to-drone offset computed in 64-bit JS to avoid GPU float32 precision loss.
-        // ECEF coords are ~4.5M metres; subtracting on GPU loses ~0.5m precision.
         cameraOffsetFromDrone:  () => {
           const cam = viewer.camera.positionWC;
           const d = state.cam.ecef;
@@ -317,7 +326,7 @@ export async function setupDroneVideoLayer(viewer) {
   }
 
   function poseLabel() {
-    return `${DRONE_POSE.lat.toFixed(6)}, ${DRONE_POSE.lon.toFixed(6)}, ${DRONE_POSE.alt.toFixed(1)}m\nH:${DRONE_POSE.heading.toFixed(2)}° P:${DRONE_POSE.pitch.toFixed(2)}° R:${DRONE_POSE.roll.toFixed(2)}° FOV:${DRONE_POSE.hFovDeg.toFixed(2)}° AR:${DRONE_POSE.aspectRatio.toFixed(4)}`;
+    return `[Frame ${currentFrameIndex + 1}/${DRONE_FRAMES.length}] ${DRONE_POSE.lat.toFixed(6)}, ${DRONE_POSE.lon.toFixed(6)}, ${DRONE_POSE.alt.toFixed(1)}m\nH:${DRONE_POSE.heading.toFixed(2)}° P:${DRONE_POSE.pitch.toFixed(2)}° R:${DRONE_POSE.roll.toFixed(2)}° FOV:${DRONE_POSE.hFovDeg.toFixed(2)}° AR:${DRONE_POSE.aspectRatio.toFixed(4)}`;
   }
 
   // HTML overlay for pose info (always visible regardless of camera)
@@ -363,6 +372,16 @@ export async function setupDroneVideoLayer(viewer) {
     };
   });
 
+  // DSM offset HUD (bottom-left, only visible in drone mode)
+  const dsmHud = document.createElement("div");
+  dsmHud.style.cssText = "position:absolute;bottom:10px;left:10px;padding:8px 12px;background:rgba(0,0,0,0.7);color:#0f0;font:14px monospace;white-space:pre;border-radius:4px;pointer-events:none;z-index:10;display:none";
+  viewer.container.appendChild(dsmHud);
+
+  function updateDsmHud() {
+    if (!dsmTerrain) return;
+    dsmHud.textContent = `DSM offset: E=${dsmTerrain.dsmOffsetE.toFixed(1)}m  N=${dsmTerrain.dsmOffsetN.toFixed(1)}m\nShift+Arrows to adjust (0.5m steps)`;
+  }
+
   function refreshIndicator() {
     const ind = indicators[currentFrameIndex];
     ind.canvasDotEntry.position = drone.ecef;
@@ -394,11 +413,22 @@ export async function setupDroneVideoLayer(viewer) {
       droneVisible = !droneVisible;
       // Toggle HUD and hide UI panels in drone mode
       poseOverlay.style.display = droneVisible ? "" : "none";
-      if (droneVisible) poseOverlay.textContent = poseLabel();
+      dsmHud.style.display = droneVisible && dsmTerrain ? "" : "none";
+      if (droneVisible) { poseOverlay.textContent = poseLabel(); updateDsmHud(); }
       const heatmapCtrl = document.getElementById("heatmap-controls");
       const claudePanel = document.getElementById("claude-panel");
       if (heatmapCtrl) heatmapCtrl.style.display = droneVisible ? "none" : "";
       if (claudePanel) claudePanel.style.display = droneVisible ? "none" : "";
+      // Swap terrain: DSM terrain in drone mode, world terrain otherwise
+      if (dsmTerrain) {
+        if (droneVisible) {
+          savedTerrainProvider = viewer.scene.terrainProvider;
+          viewer.scene.terrainProvider = dsmTerrain.provider;
+        } else if (savedTerrainProvider) {
+          viewer.scene.terrainProvider = savedTerrainProvider;
+          savedTerrainProvider = null;
+        }
+      }
       if (droneVisible) {
         viewer.camera.flyTo({
           destination: Cesium.Cartesian3.fromDegrees(DRONE_POSE.lon, DRONE_POSE.lat, DRONE_POSE.alt + 500),
@@ -413,6 +443,18 @@ export async function setupDroneVideoLayer(viewer) {
       viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(8.82, 46.23, 5000) });
     } else if (e.key === "u" || e.key === "U") {
       viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(7.97, 46.55, 8000) });
+    } else if (e.shiftKey && e.key === "ArrowUp" && dsmTerrain) {
+      dsmTerrain.dsmOffsetN += 0.5;
+      updateDsmHud();
+    } else if (e.shiftKey && e.key === "ArrowDown" && dsmTerrain) {
+      dsmTerrain.dsmOffsetN -= 0.5;
+      updateDsmHud();
+    } else if (e.shiftKey && e.key === "ArrowLeft" && dsmTerrain) {
+      dsmTerrain.dsmOffsetE -= 0.5;
+      updateDsmHud();
+    } else if (e.shiftKey && e.key === "ArrowRight" && dsmTerrain) {
+      dsmTerrain.dsmOffsetE += 0.5;
+      updateDsmHud();
     } else if (e.key === "ArrowUp") {
       DRONE_POSE.lat += MOVE_STEP * Math.cos(headRad);
       DRONE_POSE.lon += MOVE_STEP * Math.sin(headRad);
@@ -479,13 +521,11 @@ export async function setupDroneVideoLayer(viewer) {
       lookThroughDrone();
     } else if (e.key === "b" || e.key === "B") {
       currentFrameIndex = (currentFrameIndex + 1) % DRONE_FRAMES.length;
-      const frame = DRONE_FRAMES[currentFrameIndex];
-      currentTexture = textures[currentFrameIndex];
-      Object.assign(DRONE_POSE, frame.pose);
+      DRONE_POSE = framePoses[currentFrameIndex];
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
-      overlay.src = frame.url;
-      console.log("Switched to frame", currentFrameIndex + 2);
+      overlay.src = DRONE_FRAMES[currentFrameIndex].url;
+      console.log("Switched to frame", currentFrameIndex + 1);
       lookThroughDrone();
     } else if (e.key === "g" || e.key === "G") {
       poseOverlay.style.display = "";
