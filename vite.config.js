@@ -202,6 +202,30 @@ function claudePlugin() {
   };
 }
 
+function saveOtherUnitsPlugin() {
+  return {
+    name: "save-other-units",
+    configureServer(server) {
+      server.middlewares.use("/api/save-other-units", (req, res) => {
+        if (req.method !== "POST") { res.statusCode = 405; res.end("Method not allowed"); return; }
+        let body = "";
+        req.on("data", (chunk) => (body += chunk));
+        req.on("end", () => {
+          try {
+            const units = JSON.parse(body);
+            fs.writeFileSync(path.resolve("data/other-units.json"), JSON.stringify(units, null, 2) + "\n");
+            res.setHeader("Content-Type", "application/json");
+            res.end(JSON.stringify({ ok: true }));
+          } catch (e) {
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: e.message }));
+          }
+        });
+      });
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [cesium(), settingsPlugin(), saveRoutePlugin(), claudePlugin()],
+  plugins: [cesium(), settingsPlugin(), saveRoutePlugin(), saveOtherUnitsPlugin(), claudePlugin()],
 });

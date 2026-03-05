@@ -99,8 +99,8 @@ function getSymbolImage(type, hq) {
 const IDENTITY_COLORS = {
   friendly: "#2040FF",
   hostile:  "#FF2020",
-  neutral:  "#20AA20",
-  unknown:  "#FFD700",
+  neutral:  "#20AA80",
+  unknown:  "#C8A800",
 };
 
 function drawIdentityShape(ctx, identity, rx, ry, rw, rh) {
@@ -195,9 +195,27 @@ function drawEntityIcon(ctx, entityType, threatType, cx, cy, color) {
     ctx.lineTo(cx + 10, cy + 4);
     ctx.stroke();
   } else if (entityType === "ugv") {
-    ctx.fillText("UGV", cx, cy);
+    // Tracked vehicle: hull rectangle with two track wheels
+    const hw = 10, hh = 5;
+    // White outline
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "white";
+    ctx.strokeRect(cx - hw, cy - hh, hw * 2, hh * 2);
+    ctx.beginPath();
+    ctx.arc(cx - hw + 2, cy + hh, 3, 0, Math.PI * 2);
+    ctx.arc(cx + hw - 2, cy + hh, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    // Color layer
+    ctx.strokeStyle = color;
     ctx.fillStyle = color;
-    ctx.fillText("UGV", cx, cy);
+    ctx.lineWidth = 2;
+    ctx.strokeRect(cx - hw, cy - hh, hw * 2, hh * 2);
+    ctx.beginPath();
+    ctx.arc(cx - hw + 2, cy + hh, 3, 0, Math.PI * 2);
+    ctx.arc(cx + hw - 2, cy + hh, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
   } else if (entityType === "sensor") {
     // Antenna icon: vertical line with radiating arcs
     ctx.lineWidth = 4;
@@ -250,11 +268,30 @@ function drawEntityIcon(ctx, entityType, threatType, cx, cy, color) {
     ctx.lineTo(cx - 8, cy + 6);
     ctx.stroke();
   } else if (entityType === "threat") {
-    const label = threatType || "THR";
-    ctx.font = "bold 10px sans-serif";
-    ctx.fillText(label, cx, cy);
+    // Downward-pointing triangle (hazard/threat)
+    const s = 9;
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "white";
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + s);
+    ctx.lineTo(cx - s, cy - s * 0.6);
+    ctx.lineTo(cx + s, cy - s * 0.6);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + s);
+    ctx.lineTo(cx - s, cy - s * 0.6);
+    ctx.lineTo(cx + s, cy - s * 0.6);
+    ctx.closePath();
+    ctx.stroke();
+    // Exclamation mark inside
     ctx.fillStyle = color;
-    ctx.fillText(label, cx, cy);
+    ctx.fillRect(cx - 1, cy - 4, 2.5, 6);
+    ctx.beginPath();
+    ctx.arc(cx + 0.25, cy + 5, 1.5, 0, Math.PI * 2);
+    ctx.fill();
   }
 }
 
@@ -288,10 +325,39 @@ export async function loadOtherUnits(viewer) {
   const response = await fetch("/data/other-units.json");
   const units = await response.json();
 
-  for (const unit of units) {
+  // Wait for terrain provider to be ready, then sample ground altitudes
+  let terrainProvider = viewer.terrainProvider;
+  if (!terrainProvider || terrainProvider instanceof Cesium.EllipsoidTerrainProvider) {
+    await new Promise(resolve => {
+      const remove = viewer.scene.terrainProviderChanged.addEventListener((tp) => {
+        if (!(tp instanceof Cesium.EllipsoidTerrainProvider)) {
+          remove();
+          terrainProvider = tp;
+          resolve();
+        }
+      });
+    });
+  }
+  const cartographics = units.map(u =>
+    Cesium.Cartographic.fromDegrees(u.position.lon, u.position.lat)
+  );
+  await Cesium.sampleTerrainMostDetailed(terrainProvider, cartographics);
+
+  let needsSave = false;
+  for (let i = 0; i < units.length; i++) {
+    const unit = units[i];
+    const groundAlt = cartographics[i].height || 0;
+    const aboveGround = unit.entity === "uav"
+      ? 100 + Math.random() * 200
+      : 2;
+    const correctedAlt = Math.round(groundAlt + aboveGround);
+    if (unit.position.alt !== correctedAlt) {
+      unit.position.alt = correctedAlt;
+      needsSave = true;
+    }
     const image = getOtherSymbolImage(unit.entity, unit.identity, unit.threatType);
     const position = Cesium.Cartesian3.fromDegrees(
-      unit.position.lon, unit.position.lat, unit.position.alt
+      unit.position.lon, unit.position.lat, correctedAlt
     );
 
     viewer.entities.add({
@@ -302,7 +368,6 @@ export async function loadOtherUnits(viewer) {
         width: SYMBOL_SIZE,
         height: SYMBOL_SIZE,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-        disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
       label: {
         text: unit.name,
@@ -312,9 +377,17 @@ export async function loadOtherUnits(viewer) {
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
         pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE + 4)),
         eyeOffset: new Cesium.Cartesian3(0, 0, -50),
-        disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
     });
+  }
+
+  if (needsSave) {
+    fetch("/api/save-other-units", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(units),
+    }).then(() => console.log("other-units.json altitudes updated from Cesium terrain"))
+      .catch(e => console.warn("Failed to save other-units.json:", e));
   }
 }
 

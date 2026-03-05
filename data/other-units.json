@@ -1,1503 +1,1503 @@
 [
   {
     "id": "uav_f_1",
-    "name": "Phantom",
+    "name": "friendly uav 1",
     "entity": "uav",
     "identity": "friendly",
     "position": {
-      "lat": 46.536214,
-      "lon": 7.936999,
-      "alt": 2571
+      "lat": 46.605531,
+      "lon": 7.922621,
+      "alt": 1490
     }
   },
   {
     "id": "uav_f_2",
-    "name": "Specter",
+    "name": "friendly uav 2",
     "entity": "uav",
     "identity": "friendly",
     "position": {
-      "lat": 46.564018,
-      "lon": 7.949936,
-      "alt": 2768
+      "lat": 46.504517,
+      "lon": 8.053366,
+      "alt": 2912
     }
   },
   {
     "id": "uav_f_3",
-    "name": "Hawk",
+    "name": "friendly uav 3",
     "entity": "uav",
     "identity": "friendly",
     "position": {
-      "lat": 46.611779,
-      "lon": 8.010396,
-      "alt": 2949
+      "lat": 46.586569,
+      "lon": 7.940839,
+      "alt": 2224
     }
   },
   {
     "id": "uav_f_4",
-    "name": "Raven",
+    "name": "friendly uav 4",
     "entity": "uav",
     "identity": "friendly",
     "position": {
-      "lat": 46.638499,
-      "lon": 8.058382,
-      "alt": 2765
+      "lat": 46.565937,
+      "lon": 7.962526,
+      "alt": 2429
     }
   },
   {
     "id": "uav_f_5",
-    "name": "Vulture",
+    "name": "friendly uav 5",
     "entity": "uav",
     "identity": "friendly",
     "position": {
-      "lat": 46.604607,
-      "lon": 8.034618,
-      "alt": 2193
-    }
-  },
-  {
-    "id": "uav_f_6",
-    "name": "Condor",
-    "entity": "uav",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.628414,
-      "lon": 8.069671,
-      "alt": 2944
-    }
-  },
-  {
-    "id": "uav_f_7",
-    "name": "Eagle",
-    "entity": "uav",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.584096,
-      "lon": 7.991015,
-      "alt": 3047
-    }
-  },
-  {
-    "id": "uav_f_8",
-    "name": "Osprey",
-    "entity": "uav",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.6144,
-      "lon": 8.028589,
-      "alt": 2945
-    }
-  },
-  {
-    "id": "uav_f_9",
-    "name": "Falcon",
-    "entity": "uav",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.535794,
-      "lon": 7.924612,
-      "alt": 2959
-    }
-  },
-  {
-    "id": "uav_f_10",
-    "name": "Kite",
-    "entity": "uav",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.612282,
-      "lon": 8.040035,
-      "alt": 2044
-    }
-  },
-  {
-    "id": "uav_f_11",
-    "name": "Harrier",
-    "entity": "uav",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.553754,
-      "lon": 7.96399,
-      "alt": 3173
-    }
-  },
-  {
-    "id": "uav_f_12",
-    "name": "Buzzard",
-    "entity": "uav",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.544045,
-      "lon": 7.915012,
-      "alt": 3012
-    }
-  },
-  {
-    "id": "ugv_f_13",
-    "name": "Mule",
-    "entity": "ugv",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.524008,
-      "lon": 7.915539,
-      "alt": 2933
-    }
-  },
-  {
-    "id": "ugv_f_14",
-    "name": "Bulldog",
-    "entity": "ugv",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.6418,
-      "lon": 8.067047,
-      "alt": 2162
-    }
-  },
-  {
-    "id": "ugv_f_15",
-    "name": "Rover",
-    "entity": "ugv",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.573092,
-      "lon": 7.969407,
-      "alt": 3277
-    }
-  },
-  {
-    "id": "ugv_f_16",
-    "name": "Tank",
-    "entity": "ugv",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.561549,
-      "lon": 7.951591,
-      "alt": 3332
-    }
-  },
-  {
-    "id": "ugv_f_17",
-    "name": "Lynx",
-    "entity": "ugv",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.576619,
-      "lon": 7.988352,
-      "alt": 2246
-    }
-  },
-  {
-    "id": "ugv_f_18",
-    "name": "Badger",
-    "entity": "ugv",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.632958,
-      "lon": 8.076787,
-      "alt": 2955
-    }
-  },
-  {
-    "id": "ugv_f_19",
-    "name": "Rhino",
-    "entity": "ugv",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.621073,
-      "lon": 8.058644,
-      "alt": 3407
-    }
-  },
-  {
-    "id": "ugv_f_20",
-    "name": "Bison",
-    "entity": "ugv",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.570467,
-      "lon": 7.984133,
-      "alt": 2433
-    }
-  },
-  {
-    "id": "ugv_f_21",
-    "name": "Wolf",
-    "entity": "ugv",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.546887,
-      "lon": 7.951278,
-      "alt": 3229
-    }
-  },
-  {
-    "id": "ugv_f_22",
-    "name": "Titan",
-    "entity": "ugv",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.625643,
-      "lon": 8.063326,
-      "alt": 2652
-    }
-  },
-  {
-    "id": "sen_f_23",
-    "name": "Echo",
-    "entity": "sensor",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.610921,
-      "lon": 8.042705,
-      "alt": 3088
-    }
-  },
-  {
-    "id": "sen_f_24",
-    "name": "Pulse",
-    "entity": "sensor",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.522725,
-      "lon": 7.902011,
-      "alt": 2126
-    }
-  },
-  {
-    "id": "sen_f_25",
-    "name": "Signal",
-    "entity": "sensor",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.602694,
-      "lon": 8.016971,
-      "alt": 2923
-    }
-  },
-  {
-    "id": "sen_f_26",
-    "name": "Beacon",
-    "entity": "sensor",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.610152,
-      "lon": 8.031142,
-      "alt": 3185
-    }
-  },
-  {
-    "id": "sen_f_27",
-    "name": "Prism",
-    "entity": "sensor",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.520491,
-      "lon": 7.898931,
-      "alt": 2757
-    }
-  },
-  {
-    "id": "sen_f_28",
-    "name": "Scope",
-    "entity": "sensor",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.503534,
-      "lon": 7.886694,
-      "alt": 3375
-    }
-  },
-  {
-    "id": "sen_f_29",
-    "name": "Radar",
-    "entity": "sensor",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.620189,
-      "lon": 8.053868,
-      "alt": 3222
-    }
-  },
-  {
-    "id": "sen_f_30",
-    "name": "Sonar",
-    "entity": "sensor",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.56888,
-      "lon": 7.974625,
-      "alt": 2241
-    }
-  },
-  {
-    "id": "sen_f_31",
-    "name": "Wave",
-    "entity": "sensor",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.565609,
-      "lon": 7.980597,
-      "alt": 2717
-    }
-  },
-  {
-    "id": "sen_f_32",
-    "name": "Node",
-    "entity": "sensor",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.5728,
-      "lon": 7.978045,
-      "alt": 2586
-    }
-  },
-  {
-    "id": "sen_f_33",
-    "name": "Grid",
-    "entity": "sensor",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.528132,
-      "lon": 7.927862,
-      "alt": 2636
-    }
-  },
-  {
-    "id": "sen_f_34",
-    "name": "Link",
-    "entity": "sensor",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.539962,
-      "lon": 7.935681,
-      "alt": 2652
-    }
-  },
-  {
-    "id": "art_f_35",
-    "name": "Thor",
-    "entity": "artillery",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.636424,
-      "lon": 8.065612,
-      "alt": 3393
-    }
-  },
-  {
-    "id": "art_f_36",
-    "name": "Zeus",
-    "entity": "artillery",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.581754,
-      "lon": 7.975693,
-      "alt": 3047
-    }
-  },
-  {
-    "id": "art_f_37",
-    "name": "Hammer",
-    "entity": "artillery",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.576297,
-      "lon": 7.978566,
-      "alt": 2984
-    }
-  },
-  {
-    "id": "art_f_38",
-    "name": "Anvil",
-    "entity": "artillery",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.567789,
-      "lon": 7.94615,
-      "alt": 2793
-    }
-  },
-  {
-    "id": "art_f_39",
-    "name": "Storm",
-    "entity": "artillery",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.588427,
-      "lon": 7.975135,
-      "alt": 3135
-    }
-  },
-  {
-    "id": "art_f_40",
-    "name": "Thunder",
-    "entity": "artillery",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.56354,
-      "lon": 7.954608,
-      "alt": 2870
-    }
-  },
-  {
-    "id": "art_f_41",
-    "name": "Lightning",
-    "entity": "artillery",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.616782,
-      "lon": 8.018533,
-      "alt": 2402
-    }
-  },
-  {
-    "id": "art_f_42",
-    "name": "Bolt",
-    "entity": "artillery",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.612528,
-      "lon": 8.004913,
-      "alt": 2083
-    }
-  },
-  {
-    "id": "art_f_43",
-    "name": "Fury",
-    "entity": "artillery",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.644297,
-      "lon": 8.058294,
-      "alt": 2878
-    }
-  },
-  {
-    "id": "art_f_44",
-    "name": "Blaze",
-    "entity": "artillery",
-    "identity": "friendly",
-    "position": {
-      "lat": 46.549552,
-      "lon": 7.921277,
-      "alt": 2301
-    }
-  },
-  {
-    "id": "hum_h_45",
-    "name": "Alpha",
-    "entity": "human",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.520988,
-      "lon": 7.961618,
-      "alt": 2976
-    }
-  },
-  {
-    "id": "hum_h_46",
-    "name": "Bravo",
-    "entity": "human",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.612993,
-      "lon": 8.079226,
-      "alt": 3006
-    }
-  },
-  {
-    "id": "hum_h_47",
-    "name": "Charlie",
-    "entity": "human",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.567038,
-      "lon": 8.004007,
-      "alt": 2261
-    }
-  },
-  {
-    "id": "hum_h_48",
-    "name": "Delta",
-    "entity": "human",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.570098,
-      "lon": 8.021483,
-      "alt": 2341
-    }
-  },
-  {
-    "id": "hum_h_49",
-    "name": "Echo",
-    "entity": "human",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.584273,
-      "lon": 8.034087,
-      "alt": 2587
-    }
-  },
-  {
-    "id": "hum_h_50",
-    "name": "Fox",
-    "entity": "human",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.546633,
-      "lon": 7.977366,
-      "alt": 3166
-    }
-  },
-  {
-    "id": "hum_h_51",
-    "name": "Golf",
-    "entity": "human",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.505289,
-      "lon": 7.918896,
-      "alt": 2474
-    }
-  },
-  {
-    "id": "hum_h_52",
-    "name": "Hotel",
-    "entity": "human",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.612219,
-      "lon": 8.083946,
-      "alt": 2421
-    }
-  },
-  {
-    "id": "hum_h_53",
-    "name": "India",
-    "entity": "human",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.549803,
-      "lon": 8.00001,
-      "alt": 2073
-    }
-  },
-  {
-    "id": "hum_h_54",
-    "name": "Juliet",
-    "entity": "human",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.566961,
-      "lon": 7.998945,
-      "alt": 3328
-    }
-  },
-  {
-    "id": "hum_h_55",
-    "name": "Kilo",
-    "entity": "human",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.519737,
-      "lon": 7.956204,
-      "alt": 2022
-    }
-  },
-  {
-    "id": "hum_h_56",
-    "name": "Lima",
-    "entity": "human",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.541257,
-      "lon": 7.975059,
-      "alt": 2036
-    }
-  },
-  {
-    "id": "hum_h_57",
-    "name": "Mike",
-    "entity": "human",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.61133,
-      "lon": 8.090554,
-      "alt": 3419
-    }
-  },
-  {
-    "id": "hum_h_58",
-    "name": "Nov",
-    "entity": "human",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.537652,
-      "lon": 7.945485,
-      "alt": 2810
-    }
-  },
-  {
-    "id": "hum_h_59",
-    "name": "Oscar",
-    "entity": "human",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.541266,
-      "lon": 7.985951,
-      "alt": 2136
-    }
-  },
-  {
-    "id": "uav_h_60",
-    "name": "Phantom",
-    "entity": "uav",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.546446,
-      "lon": 7.991289,
-      "alt": 3444
-    }
-  },
-  {
-    "id": "uav_h_61",
-    "name": "Specter",
-    "entity": "uav",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.547676,
-      "lon": 7.974007,
-      "alt": 2315
-    }
-  },
-  {
-    "id": "uav_h_62",
-    "name": "Hawk",
-    "entity": "uav",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.553981,
-      "lon": 7.974506,
-      "alt": 3029
-    }
-  },
-  {
-    "id": "uav_h_63",
-    "name": "Raven",
-    "entity": "uav",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.590114,
-      "lon": 8.063514,
-      "alt": 2675
-    }
-  },
-  {
-    "id": "uav_h_64",
-    "name": "Vulture",
-    "entity": "uav",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.535972,
-      "lon": 7.961535,
-      "alt": 2335
-    }
-  },
-  {
-    "id": "uav_h_65",
-    "name": "Condor",
-    "entity": "uav",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.478083,
-      "lon": 7.897128,
-      "alt": 2096
-    }
-  },
-  {
-    "id": "uav_h_66",
-    "name": "Eagle",
-    "entity": "uav",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.617842,
-      "lon": 8.085325,
-      "alt": 3342
-    }
-  },
-  {
-    "id": "uav_h_67",
-    "name": "Osprey",
-    "entity": "uav",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.525991,
-      "lon": 7.932263,
-      "alt": 2763
-    }
-  },
-  {
-    "id": "uav_h_68",
-    "name": "Falcon",
-    "entity": "uav",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.575434,
-      "lon": 8.01003,
-      "alt": 3428
-    }
-  },
-  {
-    "id": "uav_h_69",
-    "name": "Kite",
-    "entity": "uav",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.570591,
-      "lon": 7.997538,
-      "alt": 3186
-    }
-  },
-  {
-    "id": "uav_h_70",
-    "name": "Harrier",
-    "entity": "uav",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.552727,
-      "lon": 7.995116,
-      "alt": 2351
-    }
-  },
-  {
-    "id": "uav_h_71",
-    "name": "Buzzard",
-    "entity": "uav",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.595683,
-      "lon": 8.049184,
-      "alt": 2282
-    }
-  },
-  {
-    "id": "ugv_h_72",
-    "name": "Mule",
-    "entity": "ugv",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.523913,
-      "lon": 7.939821,
-      "alt": 2504
-    }
-  },
-  {
-    "id": "ugv_h_73",
-    "name": "Bulldog",
-    "entity": "ugv",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.546675,
-      "lon": 7.972443,
-      "alt": 2265
-    }
-  },
-  {
-    "id": "ugv_h_74",
-    "name": "Rover",
-    "entity": "ugv",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.564239,
-      "lon": 8.003706,
-      "alt": 2625
-    }
-  },
-  {
-    "id": "ugv_h_75",
-    "name": "Tank",
-    "entity": "ugv",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.615913,
-      "lon": 8.057317,
-      "alt": 2210
-    }
-  },
-  {
-    "id": "ugv_h_76",
-    "name": "Lynx",
-    "entity": "ugv",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.582978,
-      "lon": 8.011372,
-      "alt": 2127
-    }
-  },
-  {
-    "id": "ugv_h_77",
-    "name": "Badger",
-    "entity": "ugv",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.583122,
-      "lon": 8.041237,
-      "alt": 3415
-    }
-  },
-  {
-    "id": "ugv_h_78",
-    "name": "Rhino",
-    "entity": "ugv",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.581179,
-      "lon": 8.040464,
-      "alt": 3226
-    }
-  },
-  {
-    "id": "ugv_h_79",
-    "name": "Bison",
-    "entity": "ugv",
-    "identity": "hostile",
-    "position": {
-      "lat": 46.613487,
-      "lon": 8.06843,
+      "lat": 46.526723,
+      "lon": 8.039856,
       "alt": 3500
     }
   },
   {
-    "id": "ugv_h_80",
-    "name": "Wolf",
+    "id": "uav_f_6",
+    "name": "friendly uav 6",
+    "entity": "uav",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.565448,
+      "lon": 7.987144,
+      "alt": 3154
+    }
+  },
+  {
+    "id": "uav_f_7",
+    "name": "friendly uav 7",
+    "entity": "uav",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.619253,
+      "lon": 7.927119,
+      "alt": 2096
+    }
+  },
+  {
+    "id": "uav_f_8",
+    "name": "friendly uav 8",
+    "entity": "uav",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.593736,
+      "lon": 7.956305,
+      "alt": 2429
+    }
+  },
+  {
+    "id": "uav_f_9",
+    "name": "friendly uav 9",
+    "entity": "uav",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.530496,
+      "lon": 8.012646,
+      "alt": 3376
+    }
+  },
+  {
+    "id": "uav_f_10",
+    "name": "friendly uav 10",
+    "entity": "uav",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.587256,
+      "lon": 7.965327,
+      "alt": 2287
+    }
+  },
+  {
+    "id": "uav_f_11",
+    "name": "friendly uav 11",
+    "entity": "uav",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.551334,
+      "lon": 7.987273,
+      "alt": 3593
+    }
+  },
+  {
+    "id": "uav_f_12",
+    "name": "friendly uav 12",
+    "entity": "uav",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.604707,
+      "lon": 7.948788,
+      "alt": 2543
+    }
+  },
+  {
+    "id": "ugv_f_13",
+    "name": "friendly ugv 1",
+    "entity": "ugv",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.615926,
+      "lon": 7.904452,
+      "alt": 829
+    }
+  },
+  {
+    "id": "ugv_f_14",
+    "name": "friendly ugv 2",
+    "entity": "ugv",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.519494,
+      "lon": 8.049815,
+      "alt": 3107
+    }
+  },
+  {
+    "id": "ugv_f_15",
+    "name": "friendly ugv 3",
+    "entity": "ugv",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.588357,
+      "lon": 7.968824,
+      "alt": 1970
+    }
+  },
+  {
+    "id": "ugv_f_16",
+    "name": "friendly ugv 4",
+    "entity": "ugv",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.598783,
+      "lon": 7.929743,
+      "alt": 1452
+    }
+  },
+  {
+    "id": "ugv_f_17",
+    "name": "friendly ugv 5",
+    "entity": "ugv",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.506307,
+      "lon": 8.047395,
+      "alt": 2790
+    }
+  },
+  {
+    "id": "ugv_f_18",
+    "name": "friendly ugv 6",
+    "entity": "ugv",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.612982,
+      "lon": 7.916623,
+      "alt": 1379
+    }
+  },
+  {
+    "id": "ugv_f_19",
+    "name": "friendly ugv 7",
+    "entity": "ugv",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.588572,
+      "lon": 7.93887,
+      "alt": 1926
+    }
+  },
+  {
+    "id": "ugv_f_20",
+    "name": "friendly ugv 8",
+    "entity": "ugv",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.53083,
+      "lon": 8.034907,
+      "alt": 3353
+    }
+  },
+  {
+    "id": "ugv_f_21",
+    "name": "friendly ugv 9",
+    "entity": "ugv",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.619187,
+      "lon": 7.922105,
+      "alt": 1815
+    }
+  },
+  {
+    "id": "ugv_f_22",
+    "name": "friendly ugv 10",
+    "entity": "ugv",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.54905,
+      "lon": 7.990222,
+      "alt": 3520
+    }
+  },
+  {
+    "id": "sen_f_23",
+    "name": "friendly sensor 1",
+    "entity": "sensor",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.607133,
+      "lon": 7.944553,
+      "alt": 2261
+    }
+  },
+  {
+    "id": "sen_f_24",
+    "name": "friendly sensor 2",
+    "entity": "sensor",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.49465,
+      "lon": 8.065158,
+      "alt": 2843
+    }
+  },
+  {
+    "id": "sen_f_25",
+    "name": "friendly sensor 3",
+    "entity": "sensor",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.573204,
+      "lon": 7.97638,
+      "alt": 2335
+    }
+  },
+  {
+    "id": "sen_f_26",
+    "name": "friendly sensor 4",
+    "entity": "sensor",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.533219,
+      "lon": 8.03886,
+      "alt": 3279
+    }
+  },
+  {
+    "id": "sen_f_27",
+    "name": "friendly sensor 5",
+    "entity": "sensor",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.57067,
+      "lon": 7.97872,
+      "alt": 2441
+    }
+  },
+  {
+    "id": "sen_f_28",
+    "name": "friendly sensor 6",
+    "entity": "sensor",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.506963,
+      "lon": 8.065869,
+      "alt": 2944
+    }
+  },
+  {
+    "id": "sen_f_29",
+    "name": "friendly sensor 7",
+    "entity": "sensor",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.567156,
+      "lon": 7.983908,
+      "alt": 2770
+    }
+  },
+  {
+    "id": "sen_f_30",
+    "name": "friendly sensor 8",
+    "entity": "sensor",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.539103,
+      "lon": 8.031214,
+      "alt": 3443
+    }
+  },
+  {
+    "id": "sen_f_31",
+    "name": "friendly sensor 9",
+    "entity": "sensor",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.617719,
+      "lon": 7.904518,
+      "alt": 784
+    }
+  },
+  {
+    "id": "sen_f_32",
+    "name": "friendly sensor 10",
+    "entity": "sensor",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.581148,
+      "lon": 7.95832,
+      "alt": 2060
+    }
+  },
+  {
+    "id": "sen_f_33",
+    "name": "friendly sensor 11",
+    "entity": "sensor",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.528976,
+      "lon": 8.029123,
+      "alt": 3240
+    }
+  },
+  {
+    "id": "sen_f_34",
+    "name": "friendly sensor 12",
+    "entity": "sensor",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.625493,
+      "lon": 7.919378,
+      "alt": 1369
+    }
+  },
+  {
+    "id": "art_f_35",
+    "name": "friendly artillery 1",
+    "entity": "artillery",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.535195,
+      "lon": 8.030287,
+      "alt": 3492
+    }
+  },
+  {
+    "id": "art_f_36",
+    "name": "friendly artillery 2",
+    "entity": "artillery",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.562871,
+      "lon": 7.968956,
+      "alt": 2484
+    }
+  },
+  {
+    "id": "art_f_37",
+    "name": "friendly artillery 3",
+    "entity": "artillery",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.586158,
+      "lon": 7.971803,
+      "alt": 1978
+    }
+  },
+  {
+    "id": "art_f_38",
+    "name": "friendly artillery 4",
+    "entity": "artillery",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.56649,
+      "lon": 7.973112,
+      "alt": 2453
+    }
+  },
+  {
+    "id": "art_f_39",
+    "name": "friendly artillery 5",
+    "entity": "artillery",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.607562,
+      "lon": 7.91924,
+      "alt": 1330
+    }
+  },
+  {
+    "id": "art_f_40",
+    "name": "friendly artillery 6",
+    "entity": "artillery",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.519212,
+      "lon": 8.063981,
+      "alt": 3452
+    }
+  },
+  {
+    "id": "art_f_41",
+    "name": "friendly artillery 7",
+    "entity": "artillery",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.55268,
+      "lon": 7.989809,
+      "alt": 3615
+    }
+  },
+  {
+    "id": "art_f_42",
+    "name": "friendly artillery 8",
+    "entity": "artillery",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.523297,
+      "lon": 8.061391,
+      "alt": 3387
+    }
+  },
+  {
+    "id": "art_f_43",
+    "name": "friendly artillery 9",
+    "entity": "artillery",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.605969,
+      "lon": 7.907668,
+      "alt": 843
+    }
+  },
+  {
+    "id": "art_f_44",
+    "name": "friendly artillery 10",
+    "entity": "artillery",
+    "identity": "friendly",
+    "position": {
+      "lat": 46.498358,
+      "lon": 8.06674,
+      "alt": 3102
+    }
+  },
+  {
+    "id": "hum_h_45",
+    "name": "hostile human 1",
+    "entity": "human",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.59782,
+      "lon": 7.974931,
+      "alt": 1906
+    }
+  },
+  {
+    "id": "hum_h_46",
+    "name": "hostile human 2",
+    "entity": "human",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.619638,
+      "lon": 7.958385,
+      "alt": 1956
+    }
+  },
+  {
+    "id": "hum_h_47",
+    "name": "hostile human 3",
+    "entity": "human",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.550846,
+      "lon": 8.04633,
+      "alt": 3526
+    }
+  },
+  {
+    "id": "hum_h_48",
+    "name": "hostile human 4",
+    "entity": "human",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.582552,
+      "lon": 8.003475,
+      "alt": 2849
+    }
+  },
+  {
+    "id": "hum_h_49",
+    "name": "hostile human 5",
+    "entity": "human",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.626017,
+      "lon": 7.929632,
+      "alt": 1555
+    }
+  },
+  {
+    "id": "hum_h_50",
+    "name": "hostile human 6",
+    "entity": "human",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.634415,
+      "lon": 7.929673,
+      "alt": 829
+    }
+  },
+  {
+    "id": "hum_h_51",
+    "name": "hostile human 7",
+    "entity": "human",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.5422,
+      "lon": 8.056691,
+      "alt": 3496
+    }
+  },
+  {
+    "id": "hum_h_52",
+    "name": "hostile human 8",
+    "entity": "human",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.555485,
+      "lon": 8.051096,
+      "alt": 3771
+    }
+  },
+  {
+    "id": "hum_h_53",
+    "name": "hostile human 9",
+    "entity": "human",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.57936,
+      "lon": 7.99973,
+      "alt": 3174
+    }
+  },
+  {
+    "id": "hum_h_54",
+    "name": "hostile human 10",
+    "entity": "human",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.630183,
+      "lon": 7.919472,
+      "alt": 1047
+    }
+  },
+  {
+    "id": "hum_h_55",
+    "name": "hostile human 11",
+    "entity": "human",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.632444,
+      "lon": 7.927563,
+      "alt": 950
+    }
+  },
+  {
+    "id": "hum_h_56",
+    "name": "hostile human 12",
+    "entity": "human",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.605614,
+      "lon": 7.968816,
+      "alt": 1848
+    }
+  },
+  {
+    "id": "hum_h_57",
+    "name": "hostile human 13",
+    "entity": "human",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.637331,
+      "lon": 7.911754,
+      "alt": 891
+    }
+  },
+  {
+    "id": "hum_h_58",
+    "name": "hostile human 14",
+    "entity": "human",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.554017,
+      "lon": 8.052191,
+      "alt": 3758
+    }
+  },
+  {
+    "id": "hum_h_59",
+    "name": "hostile human 15",
+    "entity": "human",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.609763,
+      "lon": 7.980918,
+      "alt": 1715
+    }
+  },
+  {
+    "id": "uav_h_60",
+    "name": "hostile uav 1",
+    "entity": "uav",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.613672,
+      "lon": 7.943995,
+      "alt": 2371
+    }
+  },
+  {
+    "id": "uav_h_61",
+    "name": "hostile uav 2",
+    "entity": "uav",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.584527,
+      "lon": 7.979799,
+      "alt": 2319
+    }
+  },
+  {
+    "id": "uav_h_62",
+    "name": "hostile uav 3",
+    "entity": "uav",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.602575,
+      "lon": 7.960601,
+      "alt": 2297
+    }
+  },
+  {
+    "id": "uav_h_63",
+    "name": "hostile uav 4",
+    "entity": "uav",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.591253,
+      "lon": 7.97964,
+      "alt": 2148
+    }
+  },
+  {
+    "id": "uav_h_64",
+    "name": "hostile uav 5",
+    "entity": "uav",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.523423,
+      "lon": 8.065517,
+      "alt": 3738
+    }
+  },
+  {
+    "id": "uav_h_65",
+    "name": "hostile uav 6",
+    "entity": "uav",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.570491,
+      "lon": 8.01689,
+      "alt": 3251
+    }
+  },
+  {
+    "id": "uav_h_66",
+    "name": "hostile uav 7",
+    "entity": "uav",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.599764,
+      "lon": 7.957624,
+      "alt": 2387
+    }
+  },
+  {
+    "id": "uav_h_67",
+    "name": "hostile uav 8",
+    "entity": "uav",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.637812,
+      "lon": 7.906944,
+      "alt": 1094
+    }
+  },
+  {
+    "id": "uav_h_68",
+    "name": "hostile uav 9",
+    "entity": "uav",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.531169,
+      "lon": 8.071434,
+      "alt": 3784
+    }
+  },
+  {
+    "id": "uav_h_69",
+    "name": "hostile uav 10",
+    "entity": "uav",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.562042,
+      "lon": 8.044179,
+      "alt": 3318
+    }
+  },
+  {
+    "id": "uav_h_70",
+    "name": "hostile uav 11",
+    "entity": "uav",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.536645,
+      "lon": 8.076661,
+      "alt": 3840
+    }
+  },
+  {
+    "id": "uav_h_71",
+    "name": "hostile uav 12",
+    "entity": "uav",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.558305,
+      "lon": 8.016698,
+      "alt": 3634
+    }
+  },
+  {
+    "id": "ugv_h_72",
+    "name": "hostile ugv 1",
     "entity": "ugv",
     "identity": "hostile",
     "position": {
-      "lat": 46.541352,
-      "lon": 7.952672,
-      "alt": 3189
+      "lat": 46.596993,
+      "lon": 8.000176,
+      "alt": 1734
+    }
+  },
+  {
+    "id": "ugv_h_73",
+    "name": "hostile ugv 2",
+    "entity": "ugv",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.63976,
+      "lon": 7.917,
+      "alt": 1022
+    }
+  },
+  {
+    "id": "ugv_h_74",
+    "name": "hostile ugv 3",
+    "entity": "ugv",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.521481,
+      "lon": 8.066739,
+      "alt": 3599
+    }
+  },
+  {
+    "id": "ugv_h_75",
+    "name": "hostile ugv 4",
+    "entity": "ugv",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.572903,
+      "lon": 8.007076,
+      "alt": 3608
+    }
+  },
+  {
+    "id": "ugv_h_76",
+    "name": "hostile ugv 5",
+    "entity": "ugv",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.584548,
+      "lon": 7.975169,
+      "alt": 2034
+    }
+  },
+  {
+    "id": "ugv_h_77",
+    "name": "hostile ugv 6",
+    "entity": "ugv",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.619798,
+      "lon": 7.947339,
+      "alt": 2119
+    }
+  },
+  {
+    "id": "ugv_h_78",
+    "name": "hostile ugv 7",
+    "entity": "ugv",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.609394,
+      "lon": 7.964913,
+      "alt": 2028
+    }
+  },
+  {
+    "id": "ugv_h_79",
+    "name": "hostile ugv 8",
+    "entity": "ugv",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.593055,
+      "lon": 8.003479,
+      "alt": 1926
+    }
+  },
+  {
+    "id": "ugv_h_80",
+    "name": "hostile ugv 9",
+    "entity": "ugv",
+    "identity": "hostile",
+    "position": {
+      "lat": 46.598831,
+      "lon": 7.972368,
+      "alt": 1946
     }
   },
   {
     "id": "ugv_h_81",
-    "name": "Titan",
+    "name": "hostile ugv 10",
     "entity": "ugv",
     "identity": "hostile",
     "position": {
-      "lat": 46.535565,
-      "lon": 7.949584,
-      "alt": 3448
+      "lat": 46.548317,
+      "lon": 8.032797,
+      "alt": 3399
     }
   },
   {
     "id": "art_h_82",
-    "name": "Thor",
+    "name": "hostile artillery 1",
     "entity": "artillery",
     "identity": "hostile",
     "position": {
-      "lat": 46.478153,
-      "lon": 7.917615,
-      "alt": 2131
+      "lat": 46.609085,
+      "lon": 7.987223,
+      "alt": 1594
     }
   },
   {
     "id": "art_h_83",
-    "name": "Zeus",
+    "name": "hostile artillery 2",
     "entity": "artillery",
     "identity": "hostile",
     "position": {
-      "lat": 46.52245,
-      "lon": 7.94936,
-      "alt": 3066
+      "lat": 46.612911,
+      "lon": 7.976163,
+      "alt": 1744
     }
   },
   {
     "id": "art_h_84",
-    "name": "Hammer",
+    "name": "hostile artillery 3",
     "entity": "artillery",
     "identity": "hostile",
     "position": {
-      "lat": 46.582404,
-      "lon": 8.047749,
-      "alt": 3186
+      "lat": 46.581009,
+      "lon": 8.003266,
+      "alt": 3165
     }
   },
   {
     "id": "art_h_85",
-    "name": "Anvil",
+    "name": "hostile artillery 4",
     "entity": "artillery",
     "identity": "hostile",
     "position": {
-      "lat": 46.486907,
-      "lon": 7.92856,
-      "alt": 2804
+      "lat": 46.590537,
+      "lon": 8.003791,
+      "alt": 2064
     }
   },
   {
     "id": "art_h_86",
-    "name": "Storm",
+    "name": "hostile artillery 5",
     "entity": "artillery",
     "identity": "hostile",
     "position": {
-      "lat": 46.51899,
-      "lon": 7.974784,
-      "alt": 2639
+      "lat": 46.515057,
+      "lon": 8.074584,
+      "alt": 3232
     }
   },
   {
     "id": "art_h_87",
-    "name": "Thunder",
+    "name": "hostile artillery 6",
     "entity": "artillery",
     "identity": "hostile",
     "position": {
-      "lat": 46.527525,
-      "lon": 7.945053,
-      "alt": 2443
+      "lat": 46.559057,
+      "lon": 8.048867,
+      "alt": 3267
     }
   },
   {
     "id": "art_h_88",
-    "name": "Lightning",
+    "name": "hostile artillery 7",
     "entity": "artillery",
     "identity": "hostile",
     "position": {
-      "lat": 46.550432,
-      "lon": 7.974838,
-      "alt": 2591
+      "lat": 46.592573,
+      "lon": 7.977752,
+      "alt": 1867
     }
   },
   {
     "id": "art_h_89",
-    "name": "Bolt",
+    "name": "hostile artillery 8",
     "entity": "artillery",
     "identity": "hostile",
     "position": {
-      "lat": 46.607704,
-      "lon": 8.062694,
-      "alt": 2799
+      "lat": 46.622936,
+      "lon": 7.939118,
+      "alt": 1941
     }
   },
   {
     "id": "art_h_90",
-    "name": "Fury",
+    "name": "hostile artillery 9",
     "entity": "artillery",
     "identity": "hostile",
     "position": {
-      "lat": 46.500724,
-      "lon": 7.947221,
-      "alt": 2073
+      "lat": 46.57621,
+      "lon": 8.018125,
+      "alt": 3004
     }
   },
   {
     "id": "art_h_91",
-    "name": "Blaze",
+    "name": "hostile artillery 10",
     "entity": "artillery",
     "identity": "hostile",
     "position": {
-      "lat": 46.492041,
-      "lon": 7.937076,
-      "alt": 2395
+      "lat": 46.633124,
+      "lon": 7.926634,
+      "alt": 869
     }
   },
   {
     "id": "thr_h_92",
-    "name": "SGM-1",
+    "name": "hostile threat 1",
     "entity": "threat",
     "identity": "hostile",
     "position": {
-      "lat": 46.494134,
-      "lon": 7.908755,
-      "alt": 2503
+      "lat": 46.609736,
+      "lon": 7.959706,
+      "alt": 2027
     },
     "threatType": "SGM"
   },
   {
     "id": "thr_h_93",
-    "name": "HGM-1",
+    "name": "hostile threat 2",
     "entity": "threat",
     "identity": "hostile",
     "position": {
-      "lat": 46.574363,
-      "lon": 8.036256,
-      "alt": 2483
+      "lat": 46.533327,
+      "lon": 8.068247,
+      "alt": 3663
     },
     "threatType": "HGM"
   },
   {
     "id": "thr_h_94",
-    "name": "HTM-1",
+    "name": "hostile threat 3",
     "entity": "threat",
     "identity": "hostile",
     "position": {
-      "lat": 46.58353,
-      "lon": 8.04056,
-      "alt": 2230
+      "lat": 46.610417,
+      "lon": 7.982257,
+      "alt": 1679
     },
     "threatType": "HTM"
   },
   {
     "id": "thr_h_95",
-    "name": "HPM-1",
+    "name": "hostile threat 4",
     "entity": "threat",
     "identity": "hostile",
     "position": {
-      "lat": 46.511582,
-      "lon": 7.924745,
-      "alt": 2113
+      "lat": 46.615436,
+      "lon": 7.941487,
+      "alt": 2297
     },
     "threatType": "HPM"
   },
   {
     "id": "thr_h_96",
-    "name": "SGM-2",
+    "name": "hostile threat 5",
     "entity": "threat",
     "identity": "hostile",
     "position": {
-      "lat": 46.574386,
-      "lon": 8.046934,
-      "alt": 2372
+      "lat": 46.607403,
+      "lon": 7.945323,
+      "alt": 2262
     },
     "threatType": "SGM"
   },
   {
     "id": "thr_h_97",
-    "name": "HGM-2",
+    "name": "hostile threat 6",
     "entity": "threat",
     "identity": "hostile",
     "position": {
-      "lat": 46.499853,
-      "lon": 7.925777,
-      "alt": 3448
+      "lat": 46.617389,
+      "lon": 7.949811,
+      "alt": 2045
     },
     "threatType": "HGM"
   },
   {
     "id": "thr_h_98",
-    "name": "HTM-2",
+    "name": "hostile threat 7",
     "entity": "threat",
     "identity": "hostile",
     "position": {
-      "lat": 46.505479,
-      "lon": 7.901321,
-      "alt": 3082
+      "lat": 46.554922,
+      "lon": 8.040912,
+      "alt": 3554
     },
     "threatType": "HTM"
   },
   {
     "id": "thr_h_99",
-    "name": "HPM-2",
+    "name": "hostile threat 8",
     "entity": "threat",
     "identity": "hostile",
     "position": {
-      "lat": 46.512946,
-      "lon": 7.94694,
-      "alt": 3405
+      "lat": 46.54127,
+      "lon": 8.051331,
+      "alt": 3323
     },
     "threatType": "HPM"
   },
   {
     "id": "thr_h_100",
-    "name": "SGM-3",
+    "name": "hostile threat 9",
     "entity": "threat",
     "identity": "hostile",
     "position": {
-      "lat": 46.611507,
-      "lon": 8.068067,
-      "alt": 3118
+      "lat": 46.601336,
+      "lon": 7.960345,
+      "alt": 2078
     },
     "threatType": "SGM"
   },
   {
     "id": "thr_h_101",
-    "name": "HGM-3",
+    "name": "hostile threat 10",
     "entity": "threat",
     "identity": "hostile",
     "position": {
-      "lat": 46.537478,
-      "lon": 7.956164,
-      "alt": 2095
+      "lat": 46.599348,
+      "lon": 7.985928,
+      "alt": 1739
     },
     "threatType": "HGM"
   },
   {
     "id": "thr_h_102",
-    "name": "HTM-3",
+    "name": "hostile threat 11",
     "entity": "threat",
     "identity": "hostile",
     "position": {
-      "lat": 46.567046,
-      "lon": 8.02445,
-      "alt": 3341
+      "lat": 46.531813,
+      "lon": 8.076314,
+      "alt": 3920
     },
     "threatType": "HTM"
   },
   {
     "id": "thr_h_103",
-    "name": "HPM-3",
+    "name": "hostile threat 12",
     "entity": "threat",
     "identity": "hostile",
     "position": {
-      "lat": 46.541105,
-      "lon": 8.00115,
-      "alt": 2624
+      "lat": 46.61918,
+      "lon": 7.95651,
+      "alt": 1968
     },
     "threatType": "HPM"
   },
   {
     "id": "thr_h_104",
-    "name": "SGM-4",
+    "name": "hostile threat 13",
     "entity": "threat",
     "identity": "hostile",
     "position": {
-      "lat": 46.550448,
-      "lon": 7.975542,
-      "alt": 3431
+      "lat": 46.630793,
+      "lon": 7.912377,
+      "alt": 736
     },
     "threatType": "SGM"
   },
   {
     "id": "thr_h_105",
-    "name": "HGM-4",
+    "name": "hostile threat 14",
     "entity": "threat",
     "identity": "hostile",
     "position": {
-      "lat": 46.573463,
-      "lon": 8.012604,
-      "alt": 2224
+      "lat": 46.60645,
+      "lon": 7.95016,
+      "alt": 2209
     },
     "threatType": "HGM"
   },
   {
     "id": "thr_h_106",
-    "name": "HTM-4",
+    "name": "hostile threat 15",
     "entity": "threat",
     "identity": "hostile",
     "position": {
-      "lat": 46.600858,
-      "lon": 8.049223,
-      "alt": 2977
+      "lat": 46.577998,
+      "lon": 8.02657,
+      "alt": 2860
     },
     "threatType": "HTM"
   },
   {
     "id": "thr_h_107",
-    "name": "HPM-4",
+    "name": "hostile threat 16",
     "entity": "threat",
     "identity": "hostile",
     "position": {
-      "lat": 46.502327,
-      "lon": 7.940983,
-      "alt": 2871
+      "lat": 46.564726,
+      "lon": 8.003761,
+      "alt": 3780
     },
     "threatType": "HPM"
   },
   {
     "id": "uav_n_108",
-    "name": "Phantom",
+    "name": "neutral uav 1",
     "entity": "uav",
     "identity": "neutral",
     "position": {
-      "lat": 46.524342,
-      "lon": 7.918063,
-      "alt": 2548
+      "lat": 46.587233,
+      "lon": 7.983415,
+      "alt": 2120
     }
   },
   {
     "id": "uav_n_109",
-    "name": "Specter",
+    "name": "neutral uav 2",
     "entity": "uav",
     "identity": "neutral",
     "position": {
-      "lat": 46.595213,
-      "lon": 8.016288,
-      "alt": 2813
+      "lat": 46.559538,
+      "lon": 7.98934,
+      "alt": 3780
     }
   },
   {
     "id": "uav_n_110",
-    "name": "Hawk",
+    "name": "neutral uav 3",
     "entity": "uav",
     "identity": "neutral",
     "position": {
-      "lat": 46.581712,
-      "lon": 7.977696,
-      "alt": 3299
+      "lat": 46.551527,
+      "lon": 7.992976,
+      "alt": 3751
     }
   },
   {
     "id": "uav_n_111",
-    "name": "Raven",
+    "name": "neutral uav 4",
     "entity": "uav",
     "identity": "neutral",
     "position": {
-      "lat": 46.584293,
-      "lon": 8.024165,
-      "alt": 3115
+      "lat": 46.514904,
+      "lon": 8.05962,
+      "alt": 3534
     }
   },
   {
     "id": "uav_n_112",
-    "name": "Vulture",
+    "name": "neutral uav 5",
     "entity": "uav",
     "identity": "neutral",
     "position": {
-      "lat": 46.628261,
-      "lon": 8.066947,
-      "alt": 2733
+      "lat": 46.588096,
+      "lon": 7.961058,
+      "alt": 2353
     }
   },
   {
     "id": "uav_n_113",
-    "name": "Condor",
+    "name": "neutral uav 6",
     "entity": "uav",
     "identity": "neutral",
     "position": {
-      "lat": 46.614265,
-      "lon": 8.05165,
-      "alt": 3377
+      "lat": 46.514505,
+      "lon": 8.080431,
+      "alt": 3643
     }
   },
   {
     "id": "uav_n_114",
-    "name": "Eagle",
+    "name": "neutral uav 7",
     "entity": "uav",
     "identity": "neutral",
     "position": {
-      "lat": 46.615495,
-      "lon": 8.045558,
-      "alt": 3442
+      "lat": 46.571202,
+      "lon": 7.96285,
+      "alt": 2280
     }
   },
   {
     "id": "uav_n_115",
-    "name": "Osprey",
+    "name": "neutral uav 8",
     "entity": "uav",
     "identity": "neutral",
     "position": {
-      "lat": 46.541653,
-      "lon": 7.965554,
-      "alt": 2725
+      "lat": 46.610083,
+      "lon": 7.917984,
+      "alt": 1488
     }
   },
   {
     "id": "sen_n_116",
-    "name": "Echo",
+    "name": "neutral sensor 1",
     "entity": "sensor",
     "identity": "neutral",
     "position": {
-      "lat": 46.524027,
-      "lon": 7.907376,
-      "alt": 2440
+      "lat": 46.572942,
+      "lon": 7.961201,
+      "alt": 2061
     }
   },
   {
     "id": "sen_n_117",
-    "name": "Pulse",
+    "name": "neutral sensor 2",
     "entity": "sensor",
     "identity": "neutral",
     "position": {
-      "lat": 46.515703,
-      "lon": 7.890601,
-      "alt": 2939
+      "lat": 46.628768,
+      "lon": 7.922004,
+      "alt": 1170
     }
   },
   {
     "id": "sen_n_118",
-    "name": "Signal",
+    "name": "neutral sensor 3",
     "entity": "sensor",
     "identity": "neutral",
     "position": {
-      "lat": 46.5272,
-      "lon": 7.909269,
-      "alt": 2942
+      "lat": 46.614169,
+      "lon": 7.919022,
+      "alt": 1477
     }
   },
   {
     "id": "sen_n_119",
-    "name": "Beacon",
+    "name": "neutral sensor 4",
     "entity": "sensor",
     "identity": "neutral",
     "position": {
-      "lat": 46.601409,
-      "lon": 8.033336,
-      "alt": 2560
+      "lat": 46.602447,
+      "lon": 7.930943,
+      "alt": 1481
     }
   },
   {
     "id": "sen_n_120",
-    "name": "Prism",
+    "name": "neutral sensor 5",
     "entity": "sensor",
     "identity": "neutral",
     "position": {
-      "lat": 46.589535,
-      "lon": 8.012852,
-      "alt": 2070
+      "lat": 46.518526,
+      "lon": 8.045678,
+      "alt": 3079
     }
   },
   {
     "id": "sen_n_121",
-    "name": "Scope",
+    "name": "neutral sensor 6",
     "entity": "sensor",
     "identity": "neutral",
     "position": {
-      "lat": 46.566018,
-      "lon": 7.97588,
-      "alt": 3290
+      "lat": 46.513757,
+      "lon": 8.0674,
+      "alt": 3169
     }
   },
   {
     "id": "uav_u_122",
-    "name": "Phantom",
+    "name": "unknown uav 1",
     "entity": "uav",
     "identity": "unknown",
     "position": {
-      "lat": 46.544536,
-      "lon": 7.91939,
-      "alt": 3491
+      "lat": 46.590907,
+      "lon": 7.980392,
+      "alt": 2119
     }
   },
   {
     "id": "uav_u_123",
-    "name": "Specter",
+    "name": "unknown uav 2",
     "entity": "uav",
     "identity": "unknown",
     "position": {
-      "lat": 46.615408,
-      "lon": 8.036391,
-      "alt": 3242
+      "lat": 46.561807,
+      "lon": 7.997542,
+      "alt": 3890
     }
   },
   {
     "id": "uav_u_124",
-    "name": "Hawk",
+    "name": "unknown uav 3",
     "entity": "uav",
     "identity": "unknown",
     "position": {
-      "lat": 46.536898,
-      "lon": 7.935797,
-      "alt": 2389
+      "lat": 46.578132,
+      "lon": 7.974047,
+      "alt": 2483
     }
   },
   {
     "id": "uav_u_125",
-    "name": "Raven",
+    "name": "unknown uav 4",
     "entity": "uav",
     "identity": "unknown",
     "position": {
-      "lat": 46.544046,
-      "lon": 7.953537,
-      "alt": 2581
+      "lat": 46.635729,
+      "lon": 7.90592,
+      "alt": 950
     }
   },
   {
     "id": "uav_u_126",
-    "name": "Vulture",
+    "name": "unknown uav 5",
     "entity": "uav",
     "identity": "unknown",
     "position": {
-      "lat": 46.529259,
-      "lon": 7.907795,
-      "alt": 2063
+      "lat": 46.532478,
+      "lon": 8.026427,
+      "alt": 3646
     }
   },
   {
     "id": "uav_u_127",
-    "name": "Condor",
+    "name": "unknown uav 6",
     "entity": "uav",
     "identity": "unknown",
     "position": {
-      "lat": 46.557639,
-      "lon": 7.949198,
-      "alt": 3064
+      "lat": 46.580083,
+      "lon": 7.960022,
+      "alt": 2273
     }
   },
   {
     "id": "uav_u_128",
-    "name": "Eagle",
+    "name": "unknown uav 7",
     "entity": "uav",
     "identity": "unknown",
     "position": {
-      "lat": 46.617614,
-      "lon": 8.019498,
-      "alt": 2639
+      "lat": 46.590322,
+      "lon": 7.95492,
+      "alt": 2461
     }
   },
   {
     "id": "uav_u_129",
-    "name": "Osprey",
+    "name": "unknown uav 8",
     "entity": "uav",
     "identity": "unknown",
     "position": {
-      "lat": 46.580317,
-      "lon": 8.007446,
-      "alt": 2730
+      "lat": 46.53407,
+      "lon": 8.034619,
+      "alt": 3572
     }
   },
   {
     "id": "ugv_u_130",
-    "name": "Mule",
+    "name": "unknown ugv 1",
     "entity": "ugv",
     "identity": "unknown",
     "position": {
-      "lat": 46.547731,
-      "lon": 7.931861,
-      "alt": 2561
+      "lat": 46.518535,
+      "lon": 8.083774,
+      "alt": 3461
     }
   },
   {
     "id": "ugv_u_131",
-    "name": "Bulldog",
+    "name": "unknown ugv 2",
     "entity": "ugv",
     "identity": "unknown",
     "position": {
-      "lat": 46.568319,
-      "lon": 7.988466,
-      "alt": 2463
+      "lat": 46.589457,
+      "lon": 7.968061,
+      "alt": 1964
     }
   },
   {
     "id": "ugv_u_132",
-    "name": "Rover",
+    "name": "unknown ugv 3",
     "entity": "ugv",
     "identity": "unknown",
     "position": {
-      "lat": 46.527821,
-      "lon": 7.917011,
-      "alt": 3467
+      "lat": 46.610547,
+      "lon": 7.941114,
+      "alt": 2218
     }
   },
   {
     "id": "ugv_u_133",
-    "name": "Tank",
+    "name": "unknown ugv 4",
     "entity": "ugv",
     "identity": "unknown",
     "position": {
-      "lat": 46.545633,
-      "lon": 7.948296,
-      "alt": 3122
+      "lat": 46.536427,
+      "lon": 8.059325,
+      "alt": 3431
     }
   },
   {
     "id": "ugv_u_134",
-    "name": "Lynx",
+    "name": "unknown ugv 5",
     "entity": "ugv",
     "identity": "unknown",
     "position": {
-      "lat": 46.572318,
-      "lon": 8.013125,
-      "alt": 2548
+      "lat": 46.580877,
+      "lon": 7.995432,
+      "alt": 2600
     }
   },
   {
     "id": "ugv_u_135",
-    "name": "Badger",
+    "name": "unknown ugv 6",
     "entity": "ugv",
     "identity": "unknown",
     "position": {
-      "lat": 46.548738,
-      "lon": 7.971971,
-      "alt": 3018
+      "lat": 46.568579,
+      "lon": 7.968623,
+      "alt": 2180
     }
   }
 ]
