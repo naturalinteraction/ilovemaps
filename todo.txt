@@ -1,36 +1,66 @@
-cmake --build build-linux
 
-SGM > HGM > HTM/HPM
+*Identity:
+- friendly (blue)
+- neutral  (green)
+- unknown  (yellow)
+- hostile (red)
 
-ostili fissi
-ostili tracciati dai droni
-threats sospetti (rombo)
-threats nemici (rombo)
-unita' nemiche (come le mie ma rosse)
-
-tutto quello che c'e' in map e' un superset di SIDC (ci sono cose non in SIDC)
-
-checklist on/off type/tipologia e' ortogonale alla gerarchia:
-- uav (droni)
-- uav con pilota
-- ugv (veicoli autonomi di terra)
-- ugv con pilota
-- sensori (direction finder o radar)
-- humani amici e nemici e sospetti
-
-i droni sono in parte associati a una squadra e in parte sparsi a giro per gli staff o squadre
-
-il tap vince sullo slider 1-7, ma c'e' bottone di reset per riportare i tap a nulli (cioe' ci si allinea allo slider 1-7)
+*Entity:
+- UAV (i droni sono in parte associati a una squadra e in parte sparsi a giro per gli staff o squadre)
+- UGV (in parte associati a una squadra e in parte sparsi)
+- sensors (direction finder, radar se su mappa, ecc.)
+- humans
+- artillery
+- threats  (rombo)  SGM > HGM > HTM/HPM 
 
 
+
+Regole di Decluttering Automatico Gerarchico
+
+  Slider di Granularità                                                         
+   
+  Uno slider controlla il livello minimo di espansione gerarchica (da Brigata → 
+  Battaglione → Compagnia → Plotone → Individuo). Lo zoom della camera determina
+   automaticamente il livello di aggregazione/disaggregazione visibile, con lo
+  slider che impone un floor (livello minimo) sotto il quale la gerarchia non
+  viene esplosa.
+
+  - Zoom out → aggregazione automatica verso i livelli superiori
+  - Zoom in → disaggregazione automatica fino al livello impostato dallo slider
+
+  Override Manuale (Tap)
+
+  Il tap su un'unità forza l'espansione del nodo, indipendentemente dal livello
+  impostato dallo slider. Il tap ha priorità sullo slider (override locale per
+  nodo).
+
+  Questione aperta — riassorbimento degli override:
+  - Opzione A: Lo zoom out riassorbe automaticamente anche i nodi espansi
+  manualmente (l'override è volatile e legato al livello di zoom corrente)
+  - Opzione B: Gli override persistono fino a reset esplicito (il nodo resta
+  espanso anche a zoom out)
+
+  Reset
+
+  Un pulsante di reset adiacente allo slider cancella tutti gli override manuali
+   e riallinea la visualizzazione al livello definito dallo slider.
+
+  Feedback Visivo dello Slider a Zoom Basso
+
+  A zoom basso, cambiare lo slider potrebbe non produrre effetti visibili (tutto
+   è già aggregato).
+
+  Questione aperta — comportamento dello slider a zoom basso:
+  - Opzione A: Lo slider mostra chiaramente il livello impostato
+  (label/indicatore) anche se l'effetto non è visibile al livello di zoom
+  corrente (si manifesterà allo zoom in)
+  - Opzione B: Forzare la visualizzazione del livello impostato
+  indipendentemente dallo zoom (ignora lo zoom, mostra sempre fino al livello
+  dello slider)
 
 
 
 - decluttering gerarchico, cioe' si compatta insieme solo roba della stessa unita'... cioe', prima posso compattare lo staff, che e' vicino al comandante di plotone, e poi le squadre di quel plotone, non roba di altri plotoni. e' basato sulla viewer camera   +187 o +1 o +2 non fa grande differenza
-
-- Forzare la continuita' della heatmap in modo che tutti siano parte di un unico blob crea dei casi ambigui. Nel caso le sottoparti siano molto distanti tra loro possiamo accettare la separazione in piu' chiazze?
-
-- sembra che AR debba essere 1.0 per il draping
 
 - gps puo' avere svarioni e mandare un commander in africa
 - assumiamo che tutti abbiano la radio+gps, se i commander non la avessero, in particolare, sarebbe un casino
