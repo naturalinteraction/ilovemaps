@@ -246,7 +246,7 @@ function computeFrustumCorners(droneResult) {
 
 // Length of the look-direction arrow in metres
 const ARROW_LENGTH = 40;
-const MOVE_STEP = 0.0000225; // degrees ~2.5m at equator
+const MOVE_STEP = 0.0000056; // degrees ~0.6m at equator
 
 // ---------------------------------------------------------------------------
 // Public API
