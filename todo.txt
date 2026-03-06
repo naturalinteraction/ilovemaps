@@ -1,3 +1,9 @@
+TODO:
+
+1. applicare il declutter delle scritte indifferentemente a gerarchia e altre categorie di entity (dovrebbe essere identico a parte che manca rank > rank, e' come se avessero tutti lo stesso rank)
+
+2. applicare il declutter degli echelon basato su zoom anche alle altre categorie di entity, oltre alla gerarchia. come il tap fa override dello slider, cosi' qui lo zoom fa override delle checkbox che invece hanno il significato di "fammi vedere sempre e comunque questo"
+
 
 *Identity:
 - friendly (blue)
@@ -12,6 +18,8 @@
 - humans
 - artillery
 - threats  (rombo)  SGM > HGM > HTM/HPM 
+
+
 
 
 
@@ -45,18 +53,10 @@ Regole di Decluttering Automatico Gerarchico
   Un pulsante di reset adiacente allo slider cancella tutti gli override manuali
    e riallinea la visualizzazione al livello definito dallo slider.
 
-  Feedback Visivo dello Slider a Zoom Basso
 
-  A zoom basso, cambiare lo slider potrebbe non produrre effetti visibili (tutto
-   è già aggregato).
 
-  Questione aperta — comportamento dello slider a zoom basso:
-  - Opzione A: Lo slider mostra chiaramente il livello impostato
-  (label/indicatore) anche se l'effetto non è visibile al livello di zoom
-  corrente (si manifesterà allo zoom in)
-  - Opzione B: Forzare la visualizzazione del livello impostato
-  indipendentemente dallo zoom (ignora lo zoom, mostra sempre fino al livello
-  dello slider)
+
+
 
 
 
