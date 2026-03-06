@@ -424,13 +424,13 @@ let autoCurrentLevel = 6;        // current level determined by camera
 const manuallyExpanded = new Set(); // node IDs expanded manually via tap
 
 const LEVEL_THRESHOLDS = [
-  { level: 6, minHeight: 100000 }, // brigade
-  { level: 5, minHeight: 50000 },  // regiment
-  { level: 4, minHeight: 20000 },  // battalion
-  { level: 3, minHeight: 8000 },   // company
+  { level: 6, minHeight: 65000 }, // brigade
+  { level: 5, minHeight: 30000 },  // regiment
+  { level: 4, minHeight: 11000 },  // battalion
+  { level: 3, minHeight: 7000 },   // company
   { level: 2, minHeight: 3000 },   // platoon
-  { level: 1, minHeight: 1500 },   // squad
-  { level: 0, minHeight: 500 },    // individual
+  { level: 1, minHeight: 1700 },   // squad
+  { level: 0, minHeight: 1000 },    // individual
 ];
 
 // Heatmap state
@@ -1031,6 +1031,7 @@ function createFloorSlider() {
     const val = parseInt(input.value);
     label.textContent = LEVEL_ORDER[val];
     floorLevel = val;
+    document.getElementById("val-floor-min-height").textContent = "(" + moduleViewer.camera.positionCartographic.height.toFixed(0) + ")";
     manuallyExpanded.clear();
     if (autoLevelEnabled && moduleViewer) {
       const height = moduleViewer.camera.positionCartographic.height;
@@ -1051,6 +1052,17 @@ function createFloorSlider() {
   `;
   title.textContent = "floor";
   wrapper.appendChild(title);
+
+  const floorMinHeight = document.createElement("div");
+  floorMinHeight.id = "val-floor-min-height";
+  floorMinHeight.style.cssText = `
+    color: rgba(255,255,255,0.35);
+    font-family: sans-serif;
+    font-size: 9px;
+    margin-top: 2px;
+  `;
+  floorMinHeight.textContent = "(?)";
+  wrapper.appendChild(floorMinHeight);
 
   container.appendChild(wrapper);
 }
@@ -1795,6 +1807,10 @@ export function setupZoomListener(viewer) {
         applyAutoLevel(levelFromCameraHeight(height));
       }
     }, LABEL_SETTLE_MS);
+    // Update camera height display
+    const h = viewer.camera.positionCartographic.height;
+    const el = document.getElementById("val-floor-min-height");
+    if (el) el.textContent = "(" + h.toFixed(0) + ")";
   });
   viewer.camera.percentageChanged = 0.1;
 }
@@ -1837,6 +1853,8 @@ export function handleKeydown(event, viewer) {
     if (slider) slider.value = floorLevel;
     const label = document.getElementById("val-floor-level");
     if (label) label.textContent = LEVEL_ORDER[floorLevel];
+    const minHeightEl = document.getElementById("val-floor-min-height");
+    if (minHeightEl) minHeightEl.textContent = "(" + moduleViewer.camera.positionCartographic.height.toFixed(0) + ")";
     // Trigger auto level with current camera height
     if (autoLevelEnabled && moduleViewer) {
       const height = moduleViewer.camera.positionCartographic.height;
