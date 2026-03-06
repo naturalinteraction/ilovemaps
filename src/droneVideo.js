@@ -12,10 +12,10 @@ import { createDSMTerrainProvider } from "./dsmTerrain.js";
 // pitch = -camera_pitch (DJI negative-down → positive-down),
 // altitude = MSL + ~47m geoid undulation for Florence area
 const DRONE_POSE_DJI_0001 = {
-  lat: 43.79773611,     // degrees
-  lon: 11.23880278,     // degrees
-  alt: 121.0,           // metres above ellipsoid (tuned visually)
-  heading: 339.9,       // degrees, 0 = North, clockwise (camera_yaw -20.1 + 360)
+  lat: 43.797764,     // degrees
+  lon: 11.238763,     // degrees
+  alt: 117.5,           // metres above ellipsoid (tuned visually)
+  heading: 344.9,       // degrees, 0 = North, clockwise (camera_yaw -20.1 + 360)
   pitch: 90.0,          // degrees, 0 = horizontal, positive = looking down (camera_pitch was -90)
   roll: 0.0,            // degrees
   hFovDeg: 71.2,        // horizontal field of view (Mavic Pro 78.8 diag)
@@ -25,12 +25,12 @@ const DRONE_POSE_DJI_0001 = {
 
 // Extracted from DJI_0002.MOV via extract_drone_meta.sh (Mavic Pro, FC220-Se)
 const DRONE_POSE_DJI_0002 = {
-  lat: 43.79774167,     // degrees
-  lon: 11.23880278,     // degrees
-  alt: 116.6,           // metres above ellipsoid (20.1m above takeoff + ~96.5m ellipsoid offset)
-  heading: 24.2,        // degrees, 0 = North, clockwise (camera_yaw 24.2)
+  lat: 43.797789,     // degrees
+  lon: 11.238794,     // degrees
+  alt: 115.6,           // metres above ellipsoid (20.1m above takeoff + ~96.5m ellipsoid offset)
+  heading: 25.2,        // degrees, 0 = North, clockwise (camera_yaw 24.2)
   pitch: 38.3,          // degrees, 0 = horizontal, positive = looking down (camera_pitch was -38.3)
-  roll: 0.0,            // degrees
+  roll: 1.0,            // degrees
   hFovDeg: 71.2,        // horizontal field of view (Mavic Pro 78.8 diag)
   aspectRatio: 16 / 9,  // 3840x2160
   heightAboveGround: 20.1, // DJI reported altitude above takeoff
@@ -460,65 +460,65 @@ export async function setupDroneVideoLayer(viewer) {
       DRONE_POSE.lon += MOVE_STEP * Math.sin(headRad);
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
-      lookThroughDrone();
+      // lookThroughDrone();
     } else if (e.key === "ArrowDown") {
       DRONE_POSE.lat -= MOVE_STEP * Math.cos(headRad);
       DRONE_POSE.lon -= MOVE_STEP * Math.sin(headRad);
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
-      lookThroughDrone();
+      // lookThroughDrone();
     } else if (e.key === "ArrowLeft") {
       DRONE_POSE.lat += MOVE_STEP * Math.sin(headRad);
       DRONE_POSE.lon -= MOVE_STEP * Math.cos(headRad);
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
-      lookThroughDrone();
+      // lookThroughDrone();
     } else if (e.key === "ArrowRight") {
       DRONE_POSE.lat -= MOVE_STEP * Math.sin(headRad);
       DRONE_POSE.lon += MOVE_STEP * Math.cos(headRad);
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
-      lookThroughDrone();
+      // lookThroughDrone();
     } else if (e.key === "a") {
       DRONE_POSE.heading -= 0.5;
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
-      lookThroughDrone();
+      // lookThroughDrone();
     } else if (e.key === "d") {
       DRONE_POSE.heading += 0.5;
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
-      lookThroughDrone();
+      // lookThroughDrone();
     } else if (e.key === "w") {
       DRONE_POSE.pitch += 0.5;
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
-      lookThroughDrone();
+      // lookThroughDrone();
     } else if (e.key === "s") {
       DRONE_POSE.pitch -= 0.5;
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
-      lookThroughDrone();
+      // lookThroughDrone();
     } else if (e.key === "q") {
       DRONE_POSE.roll += 0.5;
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
-      lookThroughDrone();
+      // lookThroughDrone();
     } else if (e.key === "e") {
       DRONE_POSE.roll -= 0.5;
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
-      lookThroughDrone();
+      // lookThroughDrone();
     } else if (e.key === "i") {
       DRONE_POSE.alt += 0.5;
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
-      lookThroughDrone();
+      // lookThroughDrone();
     } else if (e.key === "k") {
       DRONE_POSE.alt -= 0.5;
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
-      lookThroughDrone();
+      // lookThroughDrone();
     } else if (e.key === "b" || e.key === "B") {
       currentFrameIndex = (currentFrameIndex + 1) % DRONE_FRAMES.length;
       DRONE_POSE = framePoses[currentFrameIndex];
@@ -526,10 +526,10 @@ export async function setupDroneVideoLayer(viewer) {
       refreshIndicator();
       overlay.src = DRONE_FRAMES[currentFrameIndex].url;
       console.log("Switched to frame", currentFrameIndex + 1);
-      lookThroughDrone();
+      // lookThroughDrone();
     } else if (e.key === "g" || e.key === "G") {
       poseOverlay.style.display = "";
-      lookThroughDrone();
+      // lookThroughDrone();
     } else if (e.key === "o" || e.key === "O") {
       const cur = parseFloat(overlay.style.opacity);
       overlay.style.opacity = cur < 0.01 ? "0.5" : cur < 0.6 ? "1.0" : "0.0";
@@ -549,27 +549,27 @@ export async function setupDroneVideoLayer(viewer) {
       }
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
-      lookThroughDrone();
+      // lookThroughDrone();
     } else if (e.key === "-") {
       DRONE_POSE.hFovDeg -= 0.5;
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
-      lookThroughDrone();
+      // lookThroughDrone();
     } else if (e.key === "=") {
       DRONE_POSE.hFovDeg += 0.5;
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
-      lookThroughDrone();
+      // lookThroughDrone();
     } else if (e.key === "[") {
       DRONE_POSE.aspectRatio -= 0.0125;
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
-      lookThroughDrone();
+      // lookThroughDrone();
     } else if (e.key === "]") {
       DRONE_POSE.aspectRatio += 0.0125;
       drone = computeDroneCameraMatrix(DRONE_POSE);
       refreshIndicator();
-      lookThroughDrone();
+      // lookThroughDrone();
     } else if (e.key === "x" || e.key === "X") {
       const layers = viewer.imageryLayers;
       const current = layers.get(0).imageryProvider;
