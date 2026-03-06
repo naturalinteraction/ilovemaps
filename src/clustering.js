@@ -417,6 +417,22 @@ let militaryVisible = true;
 let labelsEnabled = true; // when true, text labels are shown on military entities
 let moduleViewer = null;          // viewer reference for dot updates
 
+// Auto-level state
+let autoLevelEnabled = true;
+let floorLevel = 0;              // 0=individual (allow all), 6=brigade (block all)
+let autoCurrentLevel = 6;        // current level determined by camera
+const manuallyExpanded = new Set(); // node IDs expanded manually via tap
+
+const LEVEL_THRESHOLDS = [
+  { level: 6, minHeight: 100000 }, // brigade
+  { level: 5, minHeight: 50000 },  // regiment
+  { level: 4, minHeight: 20000 },  // battalion
+  { level: 3, minHeight: 8000 },   // company
+  { level: 2, minHeight: 3000 },   // platoon
+  { level: 1, minHeight: 1500 },   // squad
+  { level: 0, minHeight: 500 },    // individual
+];
+
 // Heatmap state
 let oldHeatmap = null;
 let heatmapLayer = null;          // Cesium.ImageryLayer
@@ -698,6 +714,7 @@ export async function loadMilitaryUnits(viewer) {
   ro.observe(viewer.canvas);
 
   createHeatmapControls();
+  createFloorSlider();
   updateHeatmapLayer();
   return { entitiesById, nodesById, allNodes };
 }
@@ -956,6 +973,87 @@ function updateLabelDeclutter(viewer) {
 }
 
 // --- Heatmap ---
+
+function createFloorSlider() {
+  const container = document.getElementById("cesiumContainer");
+  if (!container) return;
+
+  const wrapper = document.createElement("div");
+  wrapper.id = "floor-slider-widget";
+  wrapper.style.cssText = `
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(20, 20, 20, 0.85);
+    padding: 14px 10px;
+    border-radius: 8px;
+    z-index: 100;
+    user-select: none;
+  `;
+
+  const label = document.createElement("div");
+  label.id = "val-floor-level";
+  label.style.cssText = `
+    color: #fff;
+    font-family: sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    text-align: center;
+    white-space: nowrap;
+  `;
+  label.textContent = LEVEL_ORDER[floorLevel];
+  wrapper.appendChild(label);
+
+  const input = document.createElement("input");
+  input.type = "range";
+  input.id = "floor-level-slider";
+  input.min = 0;
+  input.max = 6;
+  input.step = 1;
+  input.value = floorLevel;
+  input.orient = "vertical";
+  input.style.cssText = `
+    writing-mode: vertical-lr;
+    direction: rtl;
+    appearance: slider-vertical;
+    width: 32px;
+    height: 180px;
+    cursor: pointer;
+  `;
+  input.oninput = () => {
+    const val = parseInt(input.value);
+    label.textContent = LEVEL_ORDER[val];
+    floorLevel = val;
+    manuallyExpanded.clear();
+    if (autoLevelEnabled && moduleViewer) {
+      const height = moduleViewer.camera.positionCartographic.height;
+      autoCurrentLevel = -1; // force update
+      applyAutoLevel(levelFromCameraHeight(height));
+    }
+  };
+  wrapper.appendChild(input);
+
+  const title = document.createElement("div");
+  title.style.cssText = `
+    color: rgba(255,255,255,0.5);
+    font-family: sans-serif;
+    font-size: 10px;
+    margin-top: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  `;
+  title.textContent = "floor";
+  wrapper.appendChild(title);
+
+  container.appendChild(wrapper);
+}
 
 function createHeatmapControls() {
   const container = document.getElementById("cesiumContainer");
@@ -1255,6 +1353,75 @@ function updateHeatmapLayer() {
   updateCesiumHeatmapLayer();
 }
 
+function levelFromCameraHeight(height) {
+  for (const t of LEVEL_THRESHOLDS) {
+    // Hysteresis: require 10% overshoot to change level
+    if (autoCurrentLevel > t.level) {
+      // zooming in — need to go 10% below threshold to drop
+      if (height > t.minHeight * 0.9) return t.level;
+    } else if (autoCurrentLevel < t.level) {
+      // zooming out — need to go 10% above threshold to rise
+      if (height > t.minHeight * 1.1) return t.level;
+    } else {
+      if (height >= t.minHeight) return t.level;
+    }
+  }
+  return 0;
+}
+
+function hasManuallyExpandedAncestor(node) {
+  let n = node.parent;
+  while (n) {
+    if (manuallyExpanded.has(n.id)) return true;
+    n = n.parent;
+  }
+  return false;
+}
+
+function clearDescendantOverrides(node) {
+  for (const child of node.children) {
+    manuallyExpanded.delete(child.id);
+    clearDescendantOverrides(child);
+  }
+}
+
+function applyAutoLevel(targetLevel) {
+  const effectiveLevel = Math.max(targetLevel, floorLevel);
+  if (effectiveLevel === autoCurrentLevel) return;
+  autoCurrentLevel = effectiveLevel;
+  currentLevel = effectiveLevel;
+
+  for (const node of allNodes) {
+    const nodeLevelIdx = LEVEL_ORDER.indexOf(node.type);
+    // Skip nodes with manual override or whose ancestor was manually expanded
+    if (manuallyExpanded.has(node.id) || hasManuallyExpandedAncestor(node)) continue;
+
+    const entity = entitiesById[node.id];
+    entity.show = militaryVisible && nodeLevelIdx >= effectiveLevel;
+    entity.position = node.homePosition;
+  }
+
+  // Commander/staff: visible for units whose children are also visible
+  hideAllCmdStaff();
+  if (militaryVisible) {
+    for (const node of allNodes) {
+      if (manuallyExpanded.has(node.id) || hasManuallyExpandedAncestor(node)) continue;
+      const nodeLevelIdx = LEVEL_ORDER.indexOf(node.type);
+      if (nodeLevelIdx > effectiveLevel) {
+        setCmdStaffShow(node, true);
+      }
+    }
+    // Re-show cmd/staff for manually expanded nodes
+    for (const nodeId of manuallyExpanded) {
+      const node = allNodes.find(n => n.id === nodeId);
+      if (node) setCmdStaffShow(node, true);
+    }
+  }
+
+  updateHeatmapLayer();
+  labelStates.clear();
+}
+
 function showLevel(levelIdx) {
   // Show all levels from brigade (top) down to the selected level
   for (const node of allNodes) {
@@ -1361,7 +1528,12 @@ export function handleRightClick(viewer, click) {
       }
     }
 
-    if (anims.length > 0) { playBeep(MERGE_BEEP_FREQ); startAnimations(anims); }
+    if (anims.length > 0) {
+      playBeep(MERGE_BEEP_FREQ);
+      startAnimations(anims);
+      manuallyExpanded.delete(parentNode.id);
+      clearDescendantOverrides(parentNode);
+    }
     return true;
   }
 
@@ -1414,7 +1586,12 @@ export function handleRightClick(viewer, click) {
     }
   }
 
-  if (anims.length > 0) { playBeep(MERGE_BEEP_FREQ); startAnimations(anims); }
+  if (anims.length > 0) {
+    playBeep(MERGE_BEEP_FREQ);
+    startAnimations(anims);
+    manuallyExpanded.delete(node.id);
+    clearDescendantOverrides(node);
+  }
   return true;
 }
 
@@ -1490,7 +1667,11 @@ export function handleLeftClick(viewer, click) {
     }
   }
 
-  if (anims.length > 0) { playBeep(UNMERGE_BEEP_FREQ); startAnimations(anims); }
+  if (anims.length > 0) {
+    playBeep(UNMERGE_BEEP_FREQ);
+    startAnimations(anims);
+    manuallyExpanded.add(node.id);
+  }
   return true;
 }
 
@@ -1607,7 +1788,13 @@ export function setupZoomListener(viewer) {
   viewer.camera.changed.addEventListener(() => {
     cameraMoving = true;
     if (cameraSettleTimer) clearTimeout(cameraSettleTimer);
-    cameraSettleTimer = setTimeout(() => { cameraMoving = false; }, LABEL_SETTLE_MS);
+    cameraSettleTimer = setTimeout(() => {
+      cameraMoving = false;
+      if (autoLevelEnabled) {
+        const height = viewer.camera.positionCartographic.height;
+        applyAutoLevel(levelFromCameraHeight(height));
+      }
+    }, LABEL_SETTLE_MS);
   });
   viewer.camera.percentageChanged = 0.1;
 }
@@ -1640,11 +1827,22 @@ export function handleKeydown(event, viewer) {
     return true;
   }
 
-  // Number keys 1-7: jump to level (1=individual, 2=squad, ..., 7=brigade)
+  // Number keys 1-7: set floor level (1=individual, 2=squad, ..., 7=brigade)
   const digit = parseInt(event.key, 10);
   if (digit >= 1 && digit <= LEVEL_ORDER.length) {
-    currentLevel = digit - 1;
-    showLevel(currentLevel);
+    floorLevel = digit - 1;
+    manuallyExpanded.clear();
+    // Update slider UI if it exists
+    const slider = document.getElementById("floor-level-slider");
+    if (slider) slider.value = floorLevel;
+    const label = document.getElementById("val-floor-level");
+    if (label) label.textContent = LEVEL_ORDER[floorLevel];
+    // Trigger auto level with current camera height
+    if (autoLevelEnabled && moduleViewer) {
+      const height = moduleViewer.camera.positionCartographic.height;
+      autoCurrentLevel = -1; // force update
+      applyAutoLevel(levelFromCameraHeight(height));
+    }
     return true;
   }
 
