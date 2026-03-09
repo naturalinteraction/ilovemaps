@@ -603,7 +603,8 @@ export async function loadMilitaryUnits(viewer) {
     const levelIdx = LEVEL_ORDER.indexOf(node.type);
     const image = getSymbolImage(node.type);
     const isIndividual = node.type === "individual";
-    const size = isIndividual ? 40 : SYMBOL_SIZE;
+    // const size = isIndividual ? 40 : SYMBOL_SIZE;
+    const size = SYMBOL_SIZE;
 
     const entity = viewer.entities.add({
       name: node.name,
@@ -681,8 +682,9 @@ export async function loadMilitaryUnits(viewer) {
           position: node.staffHomePositions[si],
           billboard: {
             image: staffImage,
-            width: 48,
-            height: 48,
+            // width: 48, height: 48,
+            width: SYMBOL_SIZE,
+            height: SYMBOL_SIZE,
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
     
           },
