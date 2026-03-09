@@ -1345,18 +1345,19 @@ function createOtherUnitsToolbar() {
   `;
   const nvgBtn = document.createElement("button");
   nvgBtn.id = "nvg-btn";
-  nvgBtn.textContent = "NIGHT";
+  nvgBtn.innerHTML = "NIGHT<br>VISION";
   nvgBtn.style.cssText = `
     background: ${BLUE};
     color: #fff;
     border: none;
     border-radius: 4px;
-    padding: 0;
+    padding: 0 10px;
     width: 70px;
     height: 40px;
     text-align: center;
     font-family: sans-serif;
-    font-size: 12px;
+    font-size: 11px;
+    line-height: 1.3;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     cursor: pointer;
@@ -1374,7 +1375,7 @@ function toggleNightMode() {
   // Update NVG button style and text
   const nvgBtn = document.getElementById("nvg-btn");
   if (nvgBtn) {
-    nvgBtn.textContent = nightMode ? "DAY" : "NIGHT";
+    nvgBtn.innerHTML = nightMode ? "DAY<br>LIGHT" : "NIGHT<br>VISION";
     nvgBtn.style.background = nightMode ? "#2a5a20" : BLUE;
     nvgBtn.style.color = nightMode ? "#000" : "#fff";
   }

@@ -13,14 +13,9 @@
 - artillery
 - threats  (rombo)  SGM > HGM > HTM/HPM 
 
-
-
-  - Lines connecting units to their parent in the hierarchy                                                                                   
-  - Range rings or threat envelopes around artillery/threats                                                 
-  - Day/night lighting toggle                                                                          
-    - Unit status indicators (color-coded health/readiness)                                                                                     
-
-
+  - Lines connecting units to their parent in the hierarchy
+  - Range rings or threat envelopes around artillery/threats
+  - Unit status indicators (color-coded health/readiness)                                                                                     
 
 DECLUTTER:          
                                          
@@ -32,4 +27,3 @@ DECLUTTER:
   - Off-screen indicators — small arrows at screen edges pointing to important units just outside the viewport
   - Auto-hide overlapping billboards — right now decluttering handles labels, but the billboard icons themselves can still pile up
   - Dynamic font sizing — label text size tied to zoom so it stays proportional to what you're looking at
-
