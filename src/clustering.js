@@ -429,7 +429,7 @@ let moduleViewer = null;          // viewer reference for dot updates
 
 // Auto-level state
 let autoLevelEnabled = true;
-let floorLevel = 0;              // 0=individual (allow all), 6=brigade (block all)
+let floorLevel = 3;              // 0=individual (allow all), 6=brigade (block all)
 let autoCurrentLevel = 6;        // current level determined by camera
 const manuallyExpanded = new Set(); // node IDs expanded manually via tap
 function updateResetButton() {
@@ -445,9 +445,9 @@ function updateResetButton() {
 const LEVEL_THRESHOLDS = [
   { level: 6, minHeight: 65000 }, // brigade
   { level: 5, minHeight: 30000 },  // regiment
-  { level: 4, minHeight: 11000 },  // battalion
-  { level: 3, minHeight: 7000 },   // company
-  { level: 2, minHeight: 2000 },   // platoon
+  { level: 4, minHeight: 13000 },  // battalion
+  { level: 3, minHeight: 6000 },   // company
+  { level: 2, minHeight: 1500 },   // platoon
   { level: 1, minHeight: 600 },   // squad
   { level: 0, minHeight: 0 },    // individual
 ];
