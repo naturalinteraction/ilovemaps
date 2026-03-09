@@ -447,9 +447,9 @@ const LEVEL_THRESHOLDS = [
   { level: 5, minHeight: 30000 },  // regiment
   { level: 4, minHeight: 11000 },  // battalion
   { level: 3, minHeight: 7000 },   // company
-  { level: 2, minHeight: 3000 },   // platoon
-  { level: 1, minHeight: 1700 },   // squad
-  { level: 0, minHeight: 1000 },    // individual
+  { level: 2, minHeight: 2000 },   // platoon
+  { level: 1, minHeight: 600 },   // squad
+  { level: 0, minHeight: 0 },    // individual
 ];
 
 // Heatmap state
@@ -1237,6 +1237,18 @@ function createFloorSlider() {
   resetBtn.style.cursor = "default";
   wrapper.appendChild(resetBtn);
 
+  const aglDisplay = document.createElement("div");
+  aglDisplay.id = "val-camera-agl";
+  aglDisplay.style.cssText = `
+    color: rgba(255,255,255,0.5);
+    font-family: sans-serif;
+    font-size: 10px;
+    margin-top: 8px;
+    text-align: center;
+  `;
+  aglDisplay.textContent = "";
+  wrapper.appendChild(aglDisplay);
+
   container.appendChild(wrapper);
 }
 
@@ -1601,6 +1613,16 @@ function updateHeatmapLayer() {
 }
 
 function levelFromCameraHeight(height) {
+  // Convert absolute height to height above ground level
+  if (moduleViewer) {
+    const carto = moduleViewer.camera.positionCartographic;
+    const terrainHeight = moduleViewer.scene.globe.getHeight(carto);
+    if (terrainHeight !== undefined) {
+      height = height - terrainHeight;
+    }
+  }
+  const el = document.getElementById("val-camera-agl");
+  if (el) el.textContent = Math.round(height) + "m";
   for (const t of LEVEL_THRESHOLDS) {
     // Hysteresis: require 10% overshoot to change level
     if (autoCurrentLevel > t.level) {
@@ -2034,6 +2056,8 @@ let cameraSettleTimer = null;
 export function setupZoomListener(viewer) {
   viewer.camera.changed.addEventListener(() => {
     cameraMoving = true;
+    // Update AGL display in real-time
+    levelFromCameraHeight(viewer.camera.positionCartographic.height);
     if (cameraSettleTimer) clearTimeout(cameraSettleTimer);
     cameraSettleTimer = setTimeout(() => {
       cameraMoving = false;
