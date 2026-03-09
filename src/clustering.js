@@ -42,8 +42,8 @@ function drawMilitarySymbol(type, hq) {
   // HQ staff line below rectangle (APP-6 HQ indicator)
   if (hq) {
     outlinedStroke(ctx, () => {
-      ctx.moveTo(cx, ry + rh);
-      ctx.lineTo(cx, ry + rh + 14);
+      ctx.moveTo(rx, ry + rh);
+      ctx.lineTo(rx, ry + rh + 14);
     });
   }
 
