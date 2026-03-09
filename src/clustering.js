@@ -512,6 +512,22 @@ export function playBeep(freq, duration = 0.08) {
 const UNMERGE_BEEP_FREQ = 880;   // A5 — higher pitch for unmerge
 const MERGE_BEEP_FREQ = 440;     // A4 — lower pitch for merge
 
+function playFloorClick(level) {
+  const ctx = getAudioCtx();
+  if (ctx.state === "suspended") ctx.resume();
+  const baseFreq = 780 - level * 80;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = "triangle";
+  osc.frequency.value = baseFreq;
+  gain.gain.setValueAtTime(0.12, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.06);
+}
+
 // Animation state
 const animations = []; // { entity, from, to, startTime, duration, fade, onComplete }
 let animating = false;
@@ -1143,6 +1159,7 @@ function createFloorSlider() {
     const val = 6 - parseInt(input.value);
     label.textContent = LEVEL_ORDER[val];
     floorLevel = val;
+    playFloorClick(val);
     updateThumbLabel();
     updateTrackFill();
     manuallyExpanded.clear();
@@ -1952,6 +1969,7 @@ export function handleKeydown(event, viewer) {
   const digit = parseInt(event.key, 10);
   if (digit >= 1 && digit <= LEVEL_ORDER.length) {
     floorLevel = digit - 1;
+    playFloorClick(floorLevel);
     manuallyExpanded.clear();
     // Update slider UI if it exists
     const slider = document.getElementById("floor-level-slider");
