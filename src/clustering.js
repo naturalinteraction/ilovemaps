@@ -4,6 +4,7 @@ import * as Cesium from "cesium";
 
 const SYMBOL_SIZE = 64;
 const BLUE = "#2040FF";
+const NIGHT_GREEN = "#202066";
 
 // Draw a path twice: first as thick white outline, then as blue foreground
 function outlinedStroke(ctx, drawPath) {
@@ -439,7 +440,7 @@ function updateResetButton() {
   if (!btn) return;
   const active = manuallyExpanded.size > 0;
   btn.disabled = !active;
-  const activeColor = nightMode ? "#2a5a20" : BLUE;
+  const activeColor = nightMode ? NIGHT_GREEN : BLUE;
   btn.style.background = active ? activeColor : "rgba(255,255,255,0.15)";
   btn.style.color = active ? (nightMode ? "#000" : "#fff") : "rgba(255,255,255,0.3)";
   btn.style.cursor = active ? "pointer" : "default";
@@ -553,7 +554,7 @@ function setEntityAlpha(entity, alpha) {
   // Use small epsilon for billboard to prevent Cesium from skipping fully-transparent billboards
   const a = Math.max(alpha, 0.005);
   entity.billboard.color = nightMode
-    ? new Cesium.Color(0.45, 0.42, 0.38, a)
+    ? new Cesium.Color(0.3, 0.3, 0.3, a)
     : new Cesium.Color(1, 1, 1, a);
 }
 
@@ -699,6 +700,7 @@ export async function loadMilitaryUnits(viewer) {
             font: "18px sans-serif",
             style: Cesium.LabelStyle.FILL_AND_OUTLINE,
             outlineWidth: 2,
+            fillColor: Cesium.Color.WHITE,
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
             pixelOffset: new Cesium.Cartesian2(0, -52),
             eyeOffset: new Cesium.Cartesian3(0, 0, -50),
@@ -1273,7 +1275,7 @@ function applyOtherUnitVisibility() {
     const btn = document.getElementById("other-unit-btn-" + type);
     if (!btn) continue;
     btn.style.borderBottom = (showAll && !otherUnitTypeVisible[type])
-      ? `6px solid ${nightMode ? "#2a5a20" : BLUE}` : "none";
+      ? `6px solid ${nightMode ? NIGHT_GREEN : BLUE}` : "none";
   }
 }
 
@@ -1321,7 +1323,7 @@ function createOtherUnitsToolbar() {
     btn.onclick = () => {
       otherUnitTypeVisible[type] = !otherUnitTypeVisible[type];
       playBeep(otherUnitTypeVisible[type] ? 500 : 300, 0.06);
-      btn.style.background = otherUnitTypeVisible[type] ? (nightMode ? "#2a5a20" : BLUE) : "rgba(255,255,255,0.15)";
+      btn.style.background = otherUnitTypeVisible[type] ? (nightMode ? NIGHT_GREEN : BLUE) : "rgba(255,255,255,0.15)";
       btn.style.color = otherUnitTypeVisible[type] ? (nightMode ? "#000" : "#fff") : "rgba(255,255,255,0.3)";
       applyOtherUnitVisibility();
     };
@@ -1375,8 +1377,8 @@ function toggleNightMode() {
   // Update NVG button style and text
   const nvgBtn = document.getElementById("nvg-btn");
   if (nvgBtn) {
-    nvgBtn.innerHTML = nightMode ? "DAY<br>LIGHT" : "NIGHT<br>VISION";
-    nvgBtn.style.background = nightMode ? "#2a5a20" : BLUE;
+    nvgBtn.innerHTML = nightMode ? "DAYLIGHT" : "NIGHT<br>VISION";
+    nvgBtn.style.background = nightMode ? NIGHT_GREEN : BLUE;
     nvgBtn.style.color = nightMode ? "#000" : "#fff";
   }
   const nvgWrap = document.getElementById("nvg-wrap");
@@ -1385,15 +1387,16 @@ function toggleNightMode() {
   // Imagery layer dimming
   const layer = viewer.imageryLayers.get(0);
   if (layer) {
-    layer.brightness = nightMode ? 0.5 : 1.0;
-    layer.contrast = nightMode ? 1.2 : 1.0;
-    layer.saturation = nightMode ? 0.3 : 1.0;
-    layer.hue = nightMode ? 1.2 : 0.0;
-    layer.gamma = nightMode ? 1.0 : 0.8;
+    layer.brightness = nightMode ? 0.3 : 1.0;
+    layer.contrast = nightMode ? 0.99 : 1.0;
+    layer.saturation = nightMode ? 0.0 : 1.0;
+    //layer.hue = nightMode ? 1.2 : 0.0;
+    //layer.gamma = nightMode ? 1.0 : 0.8;
   }
   if (heatmapLayer) {
-    heatmapLayer.brightness = nightMode ? 0.5 : 1.0;
-    heatmapLayer.saturation = nightMode ? 0.3 : 1.0;
+    heatmapLayer.brightness = nightMode ? 1.2 : 1.0;
+    heatmapLayer.saturation = 1.1;
+    updateHeatmapLayer();
   }
 
   // Scene atmosphere
@@ -1417,14 +1420,14 @@ function toggleNightMode() {
   }
 
   // Slider thumb, track fill, and active buttons → green in night mode
-  const accentColor = nightMode ? "#2a5a20" : BLUE;
-  const hoverColor = nightMode ? "#3a7a30" : "#4060FF";
-  const progressColor = nightMode ? "#2a5a20" : BLUE;
+  const accentColor = nightMode ? NIGHT_GREEN : BLUE;
+  const hoverColor = nightMode ? "#303077" : "#4060FF";
+  const progressColor = nightMode ? NIGHT_GREEN : BLUE;
   const sliderStyle = document.getElementById("floor-slider-style");
   if (sliderStyle) {
     sliderStyle.textContent = `
       #floor-level-slider::-webkit-slider-runnable-track {
-        width: 10px; background: rgba(255,255,255,0.2); border-radius: 3px;
+        width: 10px; background: rgba(255,255,255,0.1); border-radius: 0px;
       }
       #floor-level-slider::-webkit-slider-thumb {
         -webkit-appearance: none; width: 70px; height: 40px;
@@ -2799,7 +2802,7 @@ export function setupPreRender(viewer) {
         for (const lb of labelDrawList) {
           labelCtx.strokeStyle = "rgba(0,0,0,1)";
           labelCtx.strokeText(lb.text, lb.sx, lb.sy + lb.offsetY);
-          labelCtx.fillStyle = nightMode ? "rgba(140,125,110,0.7)" : "rgba(255,255,255,1)";
+          labelCtx.fillStyle = nightMode ? "rgb(140,140,140)" : "rgba(255,255,255,1)";
           labelCtx.fillText(lb.text, lb.sx, lb.sy + lb.offsetY);
         }
       }
