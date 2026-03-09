@@ -1389,6 +1389,7 @@ function toggleNightMode() {
     layer.contrast = nightMode ? 1.2 : 1.0;
     layer.saturation = nightMode ? 0.3 : 1.0;
     layer.hue = nightMode ? 1.2 : 0.0;
+    layer.gamma = nightMode ? 1.0 : 0.8;
   }
   if (heatmapLayer) {
     heatmapLayer.brightness = nightMode ? 0.5 : 1.0;
@@ -1457,6 +1458,7 @@ function toggleNightMode() {
       btn.style.color = activeTextColor;
     }
   }
+  applyOtherUnitVisibility();
 
   // Slider thumb label
   const thumbLabel = document.getElementById("val-floor-level");
