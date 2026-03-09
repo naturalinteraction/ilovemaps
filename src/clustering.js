@@ -431,7 +431,7 @@ let moduleViewer = null;          // viewer reference for dot updates
 
 // Auto-level state
 let autoLevelEnabled = true;
-let floorLevel = 0;              // 0=individual (allow all), 6=brigade (block all)
+let floorLevel = 3;              // 3=company at startup
 let autoCurrentLevel = 6;        // current level determined by camera
 const manuallyExpanded = new Set(); // node IDs expanded manually via tap
 function updateResetButton() {
@@ -498,7 +498,7 @@ const pickerPixel = (() => {
 // Terrain occlusion helpers
 const _occScratch = new Cesium.Cartesian3();
 const _occScratchCarto = new Cesium.Cartographic();
-const OCCLUSION_SAMPLES = 3;
+const OCCLUSION_SAMPLES = 6;
 let occlusionFrame = 0;
 
 function isOccludedByTerrain(scene, entityPos) {
@@ -920,7 +920,7 @@ function updateLabelDeclutter(viewer) {
   labelDrawList.length = 0;
   symbolDrawList.length = 0;
   labelDebugRects.length = 0;
-  occlusionFrame++;
+  if (!cameraMoving) occlusionFrame++;
 
   const scene = viewer.scene;
   const candidates = [];
@@ -932,15 +932,15 @@ function updateLabelDeclutter(viewer) {
     // Populate symbol draw list for all visible entities with a symbol image
     if (entity._symbolImage) {
       let occluded;
-      // Stagger: each entity checks on a different frame offset within a 10-frame window
-      if (entity._occStagger === undefined) entity._occStagger = Math.floor(Math.random() * 10);
-      const due = (occlusionFrame + entity._occStagger) % 10 === 0;
-      if (!due && entity._lastOccFrame) {
-        occluded = entity._lastOccResult;
-      } else {
+      // Only recompute when camera is still; use cached result while moving
+      if (cameraMoving) {
+        occluded = entity._lastOccResult ?? false;
+      } else if (entity._lastOccFrame !== occlusionFrame) {
         occluded = isOccludedByTerrain(scene, pos);
-        entity._lastOccFrame = occlusionFrame;
         entity._lastOccResult = occluded;
+        entity._lastOccFrame = occlusionFrame;
+      } else {
+        occluded = entity._lastOccResult;
       }
       symbolDrawList.push({
         image: entity._symbolImage,

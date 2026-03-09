@@ -45,7 +45,7 @@ sscc.enableLook = true;
 viewer.scene.canvas.setAttribute("touch-action", "none");
 
 // Limit camera pitch so it can't go too horizontal
-const MAX_PITCH = Cesium.Math.toRadians(-25);
+const MAX_PITCH = Cesium.Math.toRadians(-20);
 let _lastCamPos = new Cesium.Cartesian3();
 let _lastCamHeading = 0;
 let _lastCamPitch = 0;
