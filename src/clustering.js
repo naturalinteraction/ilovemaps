@@ -380,7 +380,9 @@ export async function loadOtherUnits(viewer) {
         show: false,
       },
     });
+    entity.show = false;
     entity._isOtherUnit = true;
+    entity._otherUnitType = unit.entity;
     entity._labelPixelOffsetY = -(SYMBOL_SIZE + 4);
     estimateLabelSize(entity);
     otherUnitEntities.push(entity);
@@ -407,6 +409,8 @@ let allNodes = [];
 // Root node
 let rootNode = null;
 const otherUnitEntities = [];
+const OTHER_UNIT_TYPES = ["uav", "ugv", "threat", "artillery", "human", "sensor"];
+const otherUnitTypeVisible = { uav: false, ugv: false, threat: false, artillery: false, human: false, sensor: false };
 
 // Cesium entities indexed by node id
 const entitiesById = {};
@@ -746,6 +750,7 @@ export async function loadMilitaryUnits(viewer) {
 
   createHeatmapControls();
   createFloorSlider();
+  createOtherUnitsToolbar();
   updateHeatmapLayer();
   return { entitiesById, nodesById, allNodes };
 }
@@ -1204,19 +1209,19 @@ function createFloorSlider() {
     background: ${BLUE};
     color: #fff;
     border: none;
-    border-radius: 6px;
-    width: 40px;
-    height: 40px;
+    border-radius: 4px;
     padding: 0;
+    width: 70px;
+    height: 70px;
     font-family: sans-serif;
-    font-size: 8px;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     cursor: pointer;
   `;
   resetBtn.onclick = () => {
     if (manuallyExpanded.size === 0) return;
-    playBeep(200, 0.12);
+    playBeep(270, 0.15);
     manuallyExpanded.clear(); updateResetButton();
     updateResetButton();
     if (moduleViewer) {
@@ -1233,6 +1238,66 @@ function createFloorSlider() {
   wrapper.appendChild(resetBtn);
 
   container.appendChild(wrapper);
+}
+
+function applyOtherUnitVisibility() {
+  for (const entity of otherUnitEntities) {
+    entity.show = otherUnitTypeVisible[entity._otherUnitType];
+  }
+}
+
+function createOtherUnitsToolbar() {
+  const container = document.getElementById("cesiumContainer");
+  if (!container) return;
+
+  const bar = document.createElement("div");
+  bar.id = "other-units-toolbar";
+  bar.style.cssText = `
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 14px;
+    background: rgba(20, 20, 20, 0.85);
+    padding: 10px;
+    border-radius: 8px;
+    z-index: 100;
+    user-select: none;
+  `;
+
+  const TYPE_LABELS = { uav: "UAV", ugv: "UGV", threat: "THREAT", artillery: "ARTY", human: "HUMAN", sensor: "SENSOR" };
+
+  for (const type of OTHER_UNIT_TYPES) {
+    const btn = document.createElement("button");
+    btn.id = "other-unit-btn-" + type;
+    btn.textContent = TYPE_LABELS[type];
+    btn.style.cssText = `
+      background: rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.3);
+      border: none;
+      border-radius: 4px;
+      padding: 0;
+      width: 70px;
+      height: 70px;
+      text-align: center;
+      font-family: sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+    `;
+    btn.onclick = () => {
+      otherUnitTypeVisible[type] = !otherUnitTypeVisible[type];
+      playBeep(otherUnitTypeVisible[type] ? 500 : 300, 0.06);
+      btn.style.background = otherUnitTypeVisible[type] ? BLUE : "rgba(255,255,255,0.15)";
+      btn.style.color = otherUnitTypeVisible[type] ? "#fff" : "rgba(255,255,255,0.3)";
+      applyOtherUnitVisibility();
+    };
+    bar.appendChild(btn);
+  }
+
+  container.appendChild(bar);
 }
 
 function createHeatmapControls() {
