@@ -13,23 +13,23 @@
 - artillery
 - threats  (rombo)  SGM > HGM > HTM/HPM 
 
-- gps puo' avere svarioni e mandare un commander in africa
-- assumiamo che tutti abbiano la radio+gps, se i commander non la avessero, in particolare, sarebbe un casino
-- come rappresento il fatto che una squadra ha 7 persone senza gps?
 
-Here are the most interesting options, roughly ranked:
 
-  plan_path — Claude chooses start + end coordinates (using get_entities to find unit positions or waypoints) and tells the client to run the
-  existing A* terrain pathfinder. The result is a terrain-hugging LIME route on the map. This is the most compelling because Claude's
-  reasoning drives a computationally heavy operation that already exists. Prompt: "Route 1 Plt to waypoint B3, avoid exposed terrain".
+  - Lines connecting units to their parent in the hierarchy                                                                                   
+  - Range rings or threat envelopes around artillery/threats                                                 
+  - Day/night lighting toggle                                                                          
+    - Unit status indicators (color-coded health/readiness)                                                                                     
 
-  draw_circle — Claude places a circle entity on the map: threat zones, LZ coverage, exclusion areas, observation post radii. Pure Cesium
-  primitive, no server side, very easy. Prompt: "Mark a 500m threat zone around the enemy position I'm looking at".
 
-  add_waypoints — Claude places a sequence of pins on the map forming a route. Less interesting than plan_path because it's just coordinates,
-  not terrain-aware movement.
 
-  set_level — Claude switches between squad/platoon/company/battalion display. Trivial (one function call), only useful as part of a compound
-  action.
+DECLUTTER:          
+                                         
+  - Adaptive label detail — show full names when few units visible, abbreviate when crowded (e.g., "2nd Infantry Battalion" → "2 INF BN" →    
+  just the icon)                                       
+  - Density-based icon scaling — shrink icons when many are packed together, enlarge when sparse                                              
+  - Same-type clustering for other units — when 5 UAVs overlap, show one icon with a count badge "×5" instead of 5 stacked icons
+  - Opacity by importance — lower-rank units fade slightly when higher-rank ones are nearby, so the hierarchy reads clearly
+  - Off-screen indicators — small arrows at screen edges pointing to important units just outside the viewport
+  - Auto-hide overlapping billboards — right now decluttering handles labels, but the billboard icons themselves can still pile up
+  - Dynamic font sizing — label text size tied to zoom so it stays proportional to what you're looking at
 
-  move_unit — Claude repositions a military unit. Most complex: requires mutating the JSON tree on disk and reloading client entities.
