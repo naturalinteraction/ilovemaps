@@ -343,7 +343,7 @@ export async function loadOtherUnits(viewer) {
   );
   await Cesium.sampleTerrainMostDetailed(terrainProvider, cartographics);
 
-  let needsSave = false;
+  // let needsSave = false;
   for (let i = 0; i < units.length; i++) {
     const unit = units[i];
     const groundAlt = cartographics[i].height || 0;
@@ -351,10 +351,10 @@ export async function loadOtherUnits(viewer) {
       ? 100 + Math.random() * 200
       : 2;
     const correctedAlt = Math.round(groundAlt + aboveGround);
-    if (unit.position.alt !== correctedAlt) {
-      unit.position.alt = correctedAlt;
-      needsSave = true;
-    }
+    // if (unit.position.alt !== correctedAlt) {
+    //   unit.position.alt = correctedAlt;
+    //   needsSave = true;
+    // }
     const image = getOtherSymbolImage(unit.entity, unit.identity, unit.threatType);
     const position = Cesium.Cartesian3.fromDegrees(
       unit.position.lon, unit.position.lat, correctedAlt
@@ -368,6 +368,7 @@ export async function loadOtherUnits(viewer) {
         width: SYMBOL_SIZE,
         height: SYMBOL_SIZE,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        disableDepthTestDistance: 5000,
       },
       label: {
         text: unit.name,
@@ -388,14 +389,14 @@ export async function loadOtherUnits(viewer) {
     otherUnitEntities.push(entity);
   }
 
-  if (needsSave) {
-    fetch("/api/save-other-units", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(units),
-    }).then(() => console.log("other-units.json altitudes updated from Cesium terrain"))
-      .catch(e => console.warn("Failed to save other-units.json:", e));
-  }
+  // if (needsSave) {
+  //   fetch("/api/save-other-units", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify(units),
+  //   }).then(() => console.log("other-units.json altitudes updated from Cesium terrain"))
+  //     .catch(e => console.warn("Failed to save other-units.json:", e));
+  // }
 }
 
 // --- Data structures ---
@@ -614,7 +615,7 @@ export async function loadMilitaryUnits(viewer) {
         width: size,
         height: size,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-
+        disableDepthTestDistance: 5000,
       },
       label: {
         text: node.name,
@@ -651,7 +652,7 @@ export async function loadMilitaryUnits(viewer) {
         width: SYMBOL_SIZE,
         height: SYMBOL_SIZE,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-
+        disableDepthTestDistance: 5000,
       },
       label: {
         text: cmdLabel,
@@ -686,7 +687,7 @@ export async function loadMilitaryUnits(viewer) {
             width: SYMBOL_SIZE,
             height: SYMBOL_SIZE,
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-    
+            disableDepthTestDistance: 5000,
           },
           label: {
             text: s.name,
