@@ -364,7 +364,8 @@ export async function loadOtherUnits(viewer) {
       name: unit.name,
       position,
       billboard: {
-        image,
+        image: pickerPixel,
+        color: new Cesium.Color(1, 1, 1, 0.004),
         width: SYMBOL_SIZE,
         height: SYMBOL_SIZE,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
@@ -380,6 +381,7 @@ export async function loadOtherUnits(viewer) {
         show: false,
       },
     });
+    entity._symbolImage = image;
     entity.show = false;
     entity._isOtherUnit = true;
     entity._otherUnitType = unit.entity;
@@ -481,6 +483,37 @@ let arrowCtx = null;
 let labelCanvas = null;
 let labelCtx = null;
 const labelDrawList = []; // rebuilt each frame by updateLabelDeclutter
+const symbolDrawList = []; // rebuilt each frame: { image, sx, sy, occluded, hudAlpha, hudScale }
+
+// Tiny opaque canvas for picker billboards (keeps entity pickable via drillPick)
+const pickerPixel = (() => {
+  const c = document.createElement("canvas");
+  c.width = SYMBOL_SIZE; c.height = SYMBOL_SIZE;
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, SYMBOL_SIZE, SYMBOL_SIZE);
+  return c;
+})();
+
+// Terrain occlusion helpers
+const _occScratch = new Cesium.Cartesian3();
+const _occScratchCarto = new Cesium.Cartographic();
+const OCCLUSION_SAMPLES = 6;
+let occlusionFrame = 0;
+
+function isOccludedByTerrain(scene, entityPos) {
+  const camPos = scene.camera.positionWC;
+  const globe = scene.globe;
+  for (let i = 1; i <= OCCLUSION_SAMPLES; i++) {
+    const t = i / (OCCLUSION_SAMPLES + 1);
+    Cesium.Cartesian3.lerp(camPos, entityPos, t, _occScratch);
+    Cesium.Cartographic.fromCartesian(_occScratch, Cesium.Ellipsoid.WGS84, _occScratchCarto);
+    const terrainH = globe.getHeight(_occScratchCarto);
+    if (terrainH != null && _occScratchCarto.height < terrainH - 5) return true;
+  }
+  return false;
+}
+
 // Each entry: { base: Cartesian3, tip: Cartesian3, color: string }
 export const canvasArrows = [];
 // Each entry: { lines: [[Cartesian3,Cartesian3],...], color: string, width: number }
@@ -547,13 +580,11 @@ let animating = false;
 const WHITE = Cesium.Color.WHITE;
 
 function setEntityAlpha(entity, alpha) {
-  // Use small epsilon for billboard to prevent Cesium from skipping fully-transparent billboards
-  entity.billboard.color = new Cesium.Color(1, 1, 1, Math.max(alpha, 0.005));
+  entity._hudAlpha = Math.max(alpha, 0.005);
 }
 
 function setEntityScale(entity, scale) {
-  entity.billboard.width = SYMBOL_SIZE * scale;
-  entity.billboard.height = SYMBOL_SIZE * scale;
+  entity._hudScale = scale;
 }
 
 
@@ -610,7 +641,8 @@ export async function loadMilitaryUnits(viewer) {
       name: node.name,
       position: node.homePosition,
       billboard: {
-        image,
+        image: pickerPixel,
+        color: new Cesium.Color(1, 1, 1, 0.004),
         width: size,
         height: size,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
@@ -630,6 +662,7 @@ export async function loadMilitaryUnits(viewer) {
       show: levelIdx === currentLevel,
     });
 
+    entity._symbolImage = image;
     entity._milNode = node;
     entity._labelPixelOffsetY = -(size + 4);
     estimateLabelSize(entity);
@@ -647,7 +680,8 @@ export async function loadMilitaryUnits(viewer) {
       name: cmdLabel,
       position: node.cmdHomePosition,
       billboard: {
-        image: cmdImage,
+        image: pickerPixel,
+        color: new Cesium.Color(1, 1, 1, 0.004),
         width: SYMBOL_SIZE,
         height: SYMBOL_SIZE,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
@@ -666,6 +700,7 @@ export async function loadMilitaryUnits(viewer) {
       },
       show: false,
     });
+    cmdEntity._symbolImage = cmdImage;
     cmdEntity._milCmdOf = node;
     cmdEntity._labelPixelOffsetY = -(SYMBOL_SIZE + 4);
     estimateLabelSize(cmdEntity);
@@ -681,12 +716,12 @@ export async function loadMilitaryUnits(viewer) {
           name: s.name,
           position: node.staffHomePositions[si],
           billboard: {
-            image: staffImage,
-            // width: 48, height: 48,
+            image: pickerPixel,
+            color: new Cesium.Color(1, 1, 1, 0.004),
             width: SYMBOL_SIZE,
             height: SYMBOL_SIZE,
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-    
+
           },
           label: {
             text: s.name,
@@ -701,6 +736,7 @@ export async function loadMilitaryUnits(viewer) {
               },
           show: false,
         });
+        staffEntity._symbolImage = staffImage;
         staffEntity._milStaffOf = node;
         staffEntity._labelPixelOffsetY = -52;
         estimateLabelSize(staffEntity);
@@ -882,25 +918,73 @@ function estimateLabelSize(entity) {
 
 function updateLabelDeclutter(viewer) {
   labelDrawList.length = 0;
+  symbolDrawList.length = 0;
   labelDebugRects.length = 0;
-  if (!labelsEnabled || animating) return;
+  occlusionFrame++;
 
   const scene = viewer.scene;
   const candidates = [];
+
+  function collectEntity(entity) {
+    const pos = entity.position.getValue ? entity.position.getValue(Cesium.JulianDate.now()) : entity.position;
+    const screen = scene.cartesianToCanvasCoordinates(pos);
+    if (!screen) return;
+    // Populate symbol draw list for all visible entities with a symbol image
+    if (entity._symbolImage) {
+      let occluded;
+      if (entity._lastOccFrame && (occlusionFrame - entity._lastOccFrame) < 10) {
+        occluded = entity._lastOccResult;
+      } else {
+        occluded = isOccludedByTerrain(scene, pos);
+        entity._lastOccFrame = occlusionFrame;
+        entity._lastOccResult = occluded;
+      }
+      symbolDrawList.push({
+        image: entity._symbolImage,
+        sx: screen.x,
+        sy: screen.y,
+        occluded,
+        hudAlpha: entity._hudAlpha ?? 1.0,
+        hudScale: entity._hudScale ?? 1.0,
+        rank: entityRank(entity),
+      });
+    }
+    return screen;
+  }
+
+  if (!labelsEnabled || animating) {
+    // Still collect symbols even when labels are disabled
+    if (militaryVisible) {
+      for (const node of allNodes) {
+        const entity = entitiesById[node.id];
+        if (entity && entity.show) collectEntity(entity);
+        const cmdE = cmdEntitiesById[node.id];
+        if (cmdE && cmdE.show) collectEntity(cmdE);
+        const staffEs = staffEntitiesById[node.id];
+        if (staffEs) for (const se of staffEs) if (se && se.show) collectEntity(se);
+      }
+      for (const entity of otherUnitEntities) {
+        if (entity.show) collectEntity(entity);
+      }
+    }
+    return;
+  }
 
   // Collect visible entities with labels
   for (const node of allNodes) {
     const entity = entitiesById[node.id];
     if (entity && entity.show && !entity._labelHidden) {
-      const screen = scene.cartesianToCanvasCoordinates(entity.position.getValue ? entity.position.getValue(Cesium.JulianDate.now()) : entity.position);
+      const screen = collectEntity(entity);
       if (screen) {
         if (!entity._labelEstW) estimateLabelSize(entity);
         candidates.push({ entity, sx: screen.x, sy: screen.y, rank: entityRank(entity), estW: entity._labelEstW || 60, estH: entity._labelEstH || 24 });
       }
+    } else if (entity && entity.show) {
+      collectEntity(entity);
     }
     const cmdE = cmdEntitiesById[node.id];
     if (cmdE && cmdE.show) {
-      const screen = scene.cartesianToCanvasCoordinates(cmdE.position.getValue ? cmdE.position.getValue(Cesium.JulianDate.now()) : cmdE.position);
+      const screen = collectEntity(cmdE);
       if (screen) {
         if (!cmdE._labelEstW) estimateLabelSize(cmdE);
         candidates.push({ entity: cmdE, sx: screen.x, sy: screen.y, rank: entityRank(cmdE), estW: cmdE._labelEstW || 60, estH: cmdE._labelEstH || 24 });
@@ -910,7 +994,7 @@ function updateLabelDeclutter(viewer) {
     if (staffEs) {
       for (const se of staffEs) {
         if (se && se.show) {
-          const screen = scene.cartesianToCanvasCoordinates(se.position.getValue ? se.position.getValue(Cesium.JulianDate.now()) : se.position);
+          const screen = collectEntity(se);
           if (screen) {
             if (!se._labelEstW) estimateLabelSize(se);
             candidates.push({ entity: se, sx: screen.x, sy: screen.y, rank: entityRank(se), estW: se._labelEstW || 60, estH: se._labelEstH || 24 });
@@ -923,12 +1007,13 @@ function updateLabelDeclutter(viewer) {
   // Collect other-unit entities
   for (const entity of otherUnitEntities) {
     if (entity.show && !entity._labelHidden) {
-      const pos = entity.position.getValue ? entity.position.getValue(Cesium.JulianDate.now()) : entity.position;
-      const screen = scene.cartesianToCanvasCoordinates(pos);
+      const screen = collectEntity(entity);
       if (screen) {
         if (!entity._labelEstW) estimateLabelSize(entity);
         candidates.push({ entity, sx: screen.x, sy: screen.y, rank: 0, estW: entity._labelEstW || 60, estH: entity._labelEstH || 24 });
       }
+    } else if (entity.show) {
+      collectEntity(entity);
     }
   }
 
@@ -1014,7 +1099,7 @@ function updateLabelDeclutter(viewer) {
         state.showing = show;
       }
 
-      if (state.showing) {
+      if (state.showing && !c.entity._lastOccResult) {
         const text = c.entity.label.text;
         const str = (text && text.getValue) ? text.getValue(Cesium.JulianDate.now()) : text;
         if (str) labelDrawList.push({ text: str, sx: c.sx, sy: labelSy, offsetY: 0 });
@@ -2510,9 +2595,11 @@ export function setupPreRender(viewer) {
   viewer.scene.preRender.addEventListener(() => {
     onPreRender();
     // Visual clustering update
-    // Label decluttering
-    if (!animating && labelsEnabled && militaryVisible) {
+    // Label decluttering + symbol draw list
+    if (militaryVisible) {
       updateLabelDeclutter(viewer);
+    } else {
+      symbolDrawList.length = 0;
     }
     // Draw drone arrows on full-opacity canvas
     if (arrowCanvas && arrowCtx) {
@@ -2608,6 +2695,26 @@ export function setupPreRender(viewer) {
         arrowCtx.arc(sp.x, sp.y, r, 0, Math.PI * 2);
         arrowCtx.fill();
       }
+      // Draw unit symbols on HUD (low rank first, high rank on top)
+      symbolDrawList.sort((a, b) => a.rank - b.rank);
+      for (const sym of symbolDrawList) {
+        const scale = sym.hudScale;
+        const size = SYMBOL_SIZE * scale;
+        if (sym.occluded) {
+          // Occluded: draw a small semi-transparent bullet
+          // arrowCtx.globalAlpha = sym.hudAlpha * 0.3;
+          // arrowCtx.drawImage(sym.image, sym.sx - size / 2, sym.sy - size, size, size);
+          // arrowCtx.globalAlpha = sym.hudAlpha * 0.35;
+          // arrowCtx.fillStyle = "white";
+          // arrowCtx.beginPath();
+          // arrowCtx.arc(sym.sx, sym.sy - size / 2, 5, 0, Math.PI * 2);
+          // arrowCtx.fill();
+        } else {
+          arrowCtx.globalAlpha = sym.hudAlpha;
+          arrowCtx.drawImage(sym.image, sym.sx - size / 2, sym.sy - size, size, size);
+        }
+      }
+      arrowCtx.globalAlpha = 1.0;
     }
     // Draw labels on canvas overlay (always on top of billboards)
     if (labelCanvas && labelCtx) {

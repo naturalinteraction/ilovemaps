@@ -44,6 +44,30 @@ sscc.enableTilt = true;
 sscc.enableLook = true;
 viewer.scene.canvas.setAttribute("touch-action", "none");
 
+// Limit camera pitch so it can't go too horizontal
+const MAX_PITCH = Cesium.Math.toRadians(-25);
+let _lastCamPos = new Cesium.Cartesian3();
+let _lastCamHeading = 0;
+let _lastCamPitch = 0;
+let _lastCamRoll = 0;
+viewer.scene.preRender.addEventListener(() => {
+  if (viewer.camera.pitch > MAX_PITCH) {
+    viewer.camera.setView({
+      destination: _lastCamPos,
+      orientation: {
+        heading: _lastCamHeading,
+        pitch: _lastCamPitch,
+        roll: _lastCamRoll,
+      },
+    });
+  } else {
+    Cesium.Cartesian3.clone(viewer.camera.positionWC, _lastCamPos);
+    _lastCamHeading = viewer.camera.heading;
+    _lastCamPitch = viewer.camera.pitch;
+    _lastCamRoll = viewer.camera.roll;
+  }
+});
+
 viewer.scene.globe.depthTestAgainstTerrain = true;
 // Higher terrain LOD for close-range drone draping (default is 2)
 viewer.scene.globe.maximumScreenSpaceError = 0.5;  // set it to 0.1 for higher precision. kills performance.
