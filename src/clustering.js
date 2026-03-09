@@ -498,7 +498,7 @@ const pickerPixel = (() => {
 // Terrain occlusion helpers
 const _occScratch = new Cesium.Cartesian3();
 const _occScratchCarto = new Cesium.Cartographic();
-const OCCLUSION_SAMPLES = 6;
+const OCCLUSION_SAMPLES = 3;
 let occlusionFrame = 0;
 
 function isOccludedByTerrain(scene, entityPos) {
@@ -932,7 +932,10 @@ function updateLabelDeclutter(viewer) {
     // Populate symbol draw list for all visible entities with a symbol image
     if (entity._symbolImage) {
       let occluded;
-      if (entity._lastOccFrame && (occlusionFrame - entity._lastOccFrame) < 10) {
+      // Stagger: each entity checks on a different frame offset within a 10-frame window
+      if (entity._occStagger === undefined) entity._occStagger = Math.floor(Math.random() * 10);
+      const due = (occlusionFrame + entity._occStagger) % 10 === 0;
+      if (!due && entity._lastOccFrame) {
         occluded = entity._lastOccResult;
       } else {
         occluded = isOccludedByTerrain(scene, pos);
