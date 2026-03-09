@@ -1261,6 +1261,13 @@ function applyOtherUnitVisibility() {
   for (const entity of otherUnitEntities) {
     entity.show = showAll || otherUnitTypeVisible[entity._otherUnitType];
   }
+  // Show blue underline on unselected buttons when showAll is active
+  for (const type of OTHER_UNIT_TYPES) {
+    const btn = document.getElementById("other-unit-btn-" + type);
+    if (!btn) continue;
+    btn.style.borderBottom = (showAll && !otherUnitTypeVisible[type])
+      ? `6px solid ${BLUE}` : "none";
+  }
 }
 
 function createOtherUnitsToolbar() {
