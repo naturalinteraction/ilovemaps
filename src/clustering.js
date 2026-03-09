@@ -360,7 +360,7 @@ export async function loadOtherUnits(viewer) {
       unit.position.lon, unit.position.lat, correctedAlt
     );
 
-    viewer.entities.add({
+    const entity = viewer.entities.add({
       name: unit.name,
       position,
       billboard: {
@@ -377,8 +377,13 @@ export async function loadOtherUnits(viewer) {
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
         pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE + 4)),
         eyeOffset: new Cesium.Cartesian3(0, 0, -50),
+        show: false,
       },
     });
+    entity._isOtherUnit = true;
+    entity._labelPixelOffsetY = -(SYMBOL_SIZE + 4);
+    estimateLabelSize(entity);
+    otherUnitEntities.push(entity);
   }
 
   if (needsSave) {
@@ -401,6 +406,7 @@ const nodesById = {};
 let allNodes = [];
 // Root node
 let rootNode = null;
+const otherUnitEntities = [];
 
 // Cesium entities indexed by node id
 const entitiesById = {};
@@ -821,6 +827,7 @@ function entityRank(entity) {
   if (entity._milNode) return LEVEL_ORDER.indexOf(entity._milNode.type);
   if (entity._milCmdOf) return LEVEL_ORDER.indexOf(entity._milCmdOf.type) + 0.5;
   if (entity._milStaffOf) return 0;
+  if (entity._isOtherUnit) return 0;
   return -1;
 }
 
@@ -877,6 +884,18 @@ function updateLabelDeclutter(viewer) {
             candidates.push({ entity: se, sx: screen.x, sy: screen.y, rank: entityRank(se), estW: se._labelEstW || 60, estH: se._labelEstH || 24 });
           }
         }
+      }
+    }
+  }
+
+  // Collect other-unit entities
+  for (const entity of otherUnitEntities) {
+    if (entity.show && !entity._labelHidden) {
+      const pos = entity.position.getValue ? entity.position.getValue(Cesium.JulianDate.now()) : entity.position;
+      const screen = scene.cartesianToCanvasCoordinates(pos);
+      if (screen) {
+        if (!entity._labelEstW) estimateLabelSize(entity);
+        candidates.push({ entity, sx: screen.x, sy: screen.y, rank: 0, estW: entity._labelEstW || 60, estH: entity._labelEstH || 24 });
       }
     }
   }
