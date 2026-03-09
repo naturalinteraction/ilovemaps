@@ -1670,20 +1670,58 @@ function applyAutoLevel(targetLevel) {
     entity.position = node.homePosition;
   }
 
-  // Commander/staff: visible for units whose children are also visible
+  // Commander/staff visibility
   hideAllCmdStaff();
   if (militaryVisible) {
     for (const node of allNodes) {
       if (manuallyExpanded.has(node.id) || hasManuallyExpandedAncestor(node)) continue;
       const nodeLevelIdx = LEVEL_ORDER.indexOf(node.type);
       if (nodeLevelIdx > effectiveLevel) {
-        setCmdStaffShow(node, true);
+        // Commanders always visible when expanded, staff only at squad level or below
+        const cmdE = cmdEntitiesById[node.id];
+        if (cmdE) {
+          cmdE.show = true;
+          cmdE.position = node.cmdHomePosition;
+          setEntityAlpha(cmdE, 1);
+          const unitE = entitiesById[node.id];
+          if (unitE) unitE._labelHidden = true;
+        }
+        if (effectiveLevel <= 1) {
+          const staffEs = staffEntitiesById[node.id];
+          if (staffEs) {
+            for (let i = 0; i < staffEs.length; i++) {
+              staffEs[i].show = true;
+              setEntityAlpha(staffEs[i], 1);
+              if (node.staffHomePositions) staffEs[i].position = node.staffHomePositions[i];
+            }
+          }
+        }
       }
     }
     // Re-show cmd/staff for manually expanded nodes
     for (const nodeId of manuallyExpanded) {
       const node = allNodes.find(n => n.id === nodeId);
-      if (node) setCmdStaffShow(node, true);
+      if (node) {
+        const cmdE = cmdEntitiesById[node.id];
+        if (cmdE) {
+          cmdE.show = true;
+          cmdE.position = node.cmdHomePosition;
+          setEntityAlpha(cmdE, 1);
+          const unitE = entitiesById[node.id];
+          if (unitE) unitE._labelHidden = true;
+        }
+        const childLevel = node.children && node.children[0] ? LEVEL_ORDER.indexOf(node.children[0].type) : 99;
+        if (childLevel <= 1 || effectiveLevel <= 1) {
+          const staffEs = staffEntitiesById[node.id];
+          if (staffEs) {
+            for (let i = 0; i < staffEs.length; i++) {
+              staffEs[i].show = true;
+              setEntityAlpha(staffEs[i], 1);
+              if (node.staffHomePositions) staffEs[i].position = node.staffHomePositions[i];
+            }
+          }
+        }
+      }
     }
   }
 
@@ -1921,7 +1959,8 @@ export function handleLeftClick(viewer, click) {
     });
   }
   const staffEs = staffEntitiesById[node.id];
-  if (staffEs && node.staffHomePositions) {
+  const childLevelIdx = LEVEL_ORDER.indexOf(childType);
+  if (staffEs && node.staffHomePositions && childLevelIdx <= 1) {
     for (let si = 0; si < staffEs.length; si++) {
       const se = staffEs[si];
       se.position = node.staffHomePositions[si];
