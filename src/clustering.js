@@ -428,6 +428,15 @@ let autoLevelEnabled = true;
 let floorLevel = 0;              // 0=individual (allow all), 6=brigade (block all)
 let autoCurrentLevel = 6;        // current level determined by camera
 const manuallyExpanded = new Set(); // node IDs expanded manually via tap
+function updateResetButton() {
+  const btn = document.getElementById("floor-reset-btn");
+  if (!btn) return;
+  const active = manuallyExpanded.size > 0;
+  btn.disabled = !active;
+  btn.style.background = active ? BLUE : "rgba(255,255,255,0.15)";
+  btn.style.color = active ? "#fff" : "rgba(255,255,255,0.3)";
+  btn.style.cursor = active ? "pointer" : "default";
+}
 
 const LEVEL_THRESHOLDS = [
   { level: 6, minHeight: 65000 }, // brigade
@@ -1162,7 +1171,7 @@ function createFloorSlider() {
     playFloorClick(val);
     updateThumbLabel();
     updateTrackFill();
-    manuallyExpanded.clear();
+    manuallyExpanded.clear(); updateResetButton();
     if (autoLevelEnabled && moduleViewer) {
       const height = moduleViewer.camera.positionCartographic.height;
       autoCurrentLevel = -1; // force update
@@ -1187,6 +1196,41 @@ function createFloorSlider() {
   title.textContent = "individual";
   wrapper.appendChild(title);
 
+  const resetBtn = document.createElement("button");
+  resetBtn.id = "floor-reset-btn";
+  resetBtn.textContent = "RESET";
+  resetBtn.style.cssText = `
+    margin-top: 12px;
+    background: ${BLUE};
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    font-family: sans-serif;
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+  `;
+  resetBtn.onclick = () => {
+    if (manuallyExpanded.size === 0) return;
+    playBeep(200, 0.12);
+    manuallyExpanded.clear(); updateResetButton();
+    updateResetButton();
+    if (moduleViewer) {
+      const height = moduleViewer.camera.positionCartographic.height;
+      autoCurrentLevel = -1;
+      applyAutoLevel(levelFromCameraHeight(height));
+    }
+  };
+  // Start inactive
+  resetBtn.disabled = true;
+  resetBtn.style.background = "rgba(255,255,255,0.15)";
+  resetBtn.style.color = "rgba(255,255,255,0.3)";
+  resetBtn.style.cursor = "default";
+  wrapper.appendChild(resetBtn);
 
   container.appendChild(wrapper);
 }
@@ -1197,7 +1241,7 @@ function createHeatmapControls() {
 
   const panel = document.createElement("div");
   panel.id = "heatmap-controls";
-  panel.style.cssText = "position:absolute;top:10px;right:10px;background:rgba(30,30,30,0.85);color:#fff;padding:12px;border-radius:6px;font-family:sans-serif;font-size:12px;z-index:100;";
+  panel.style.cssText = "position:absolute;top:10px;right:10px;background:rgba(30,30,30,0.85);color:#fff;padding:12px;border-radius:6px;font-family:sans-serif;font-size:12px;z-index:100;display:none;";
 
   function makeSlider(label, min, max, step, initial, onChange) {
     const row = document.createElement("div");
@@ -1516,7 +1560,7 @@ function hasManuallyExpandedAncestor(node) {
 
 function clearDescendantOverrides(node) {
   for (const child of node.children) {
-    manuallyExpanded.delete(child.id);
+    manuallyExpanded.delete(child.id); updateResetButton();
     clearDescendantOverrides(child);
   }
 }
@@ -1667,7 +1711,7 @@ export function handleRightClick(viewer, click) {
     if (anims.length > 0) {
       playBeep(MERGE_BEEP_FREQ);
       startAnimations(anims);
-      manuallyExpanded.delete(parentNode.id);
+      manuallyExpanded.delete(parentNode.id); updateResetButton();
       clearDescendantOverrides(parentNode);
     }
     return true;
@@ -1725,7 +1769,7 @@ export function handleRightClick(viewer, click) {
   if (anims.length > 0) {
     playBeep(MERGE_BEEP_FREQ);
     startAnimations(anims);
-    manuallyExpanded.delete(node.id);
+    manuallyExpanded.delete(node.id); updateResetButton();
     clearDescendantOverrides(node);
   }
   return true;
@@ -1806,7 +1850,7 @@ export function handleLeftClick(viewer, click) {
   if (anims.length > 0) {
     playBeep(UNMERGE_BEEP_FREQ);
     startAnimations(anims);
-    manuallyExpanded.add(node.id);
+    manuallyExpanded.add(node.id); updateResetButton();
   }
   return true;
 }
@@ -1970,7 +2014,7 @@ export function handleKeydown(event, viewer) {
   if (digit >= 1 && digit <= LEVEL_ORDER.length) {
     floorLevel = digit - 1;
     playFloorClick(floorLevel);
-    manuallyExpanded.clear();
+    manuallyExpanded.clear(); updateResetButton();
     // Update slider UI if it exists
     const slider = document.getElementById("floor-level-slider");
     if (slider) {
@@ -2014,6 +2058,12 @@ export function handleKeydown(event, viewer) {
   if (event.key === "d" || event.key === "D") {
     DEBUG_LABEL_DECLUTTER = !DEBUG_LABEL_DECLUTTER;
     console.log("DEBUG_LABEL_DECLUTTER:", DEBUG_LABEL_DECLUTTER);
+    return true;
+  }
+
+  if (event.key === "p" || event.key === "P") {
+    const panel = document.getElementById("heatmap-controls");
+    if (panel) panel.style.display = panel.style.display === "none" ? "" : "none";
     return true;
   }
 
