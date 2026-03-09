@@ -1,4 +1,6 @@
 
+- se entro con zoom fino a vedere individui e poi faccio merge di squadra? plotone? si vedono micro gradienti e non c'e' override persistente
+
 *Identity:
 - friendly (blue)
 - neutral  (green)
