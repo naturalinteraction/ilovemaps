@@ -325,39 +325,29 @@ export async function loadOtherUnits(viewer) {
   const response = await fetch("/data/other-units.json");
   const units = await response.json();
 
-  // Wait for terrain provider to be ready, then sample ground altitudes
-  let terrainProvider = viewer.terrainProvider;
-  if (!terrainProvider || terrainProvider instanceof Cesium.EllipsoidTerrainProvider) {
-    await new Promise(resolve => {
-      const remove = viewer.scene.terrainProviderChanged.addEventListener((tp) => {
-        if (!(tp instanceof Cesium.EllipsoidTerrainProvider)) {
-          remove();
-          terrainProvider = tp;
-          resolve();
-        }
-      });
-    });
-  }
-  const cartographics = units.map(u =>
-    Cesium.Cartographic.fromDegrees(u.position.lon, u.position.lat)
-  );
-  await Cesium.sampleTerrainMostDetailed(terrainProvider, cartographics);
+  // // Wait for terrain provider to be ready, then sample ground altitudes
+  // let terrainProvider = viewer.terrainProvider;
+  // if (!terrainProvider || terrainProvider instanceof Cesium.EllipsoidTerrainProvider) {
+  //   await new Promise(resolve => {
+  //     const remove = viewer.scene.terrainProviderChanged.addEventListener((tp) => {
+  //       if (!(tp instanceof Cesium.EllipsoidTerrainProvider)) {
+  //         remove();
+  //         terrainProvider = tp;
+  //         resolve();
+  //       }
+  //     });
+  //   });
+  // }
+  // const cartographics = units.map(u =>
+  //   Cesium.Cartographic.fromDegrees(u.position.lon, u.position.lat)
+  // );
+  // await Cesium.sampleTerrainMostDetailed(terrainProvider, cartographics);
 
-  let needsSave = false;
   for (let i = 0; i < units.length; i++) {
     const unit = units[i];
-    const groundAlt = cartographics[i].height || 0;
-    const aboveGround = unit.entity === "uav"
-      ? 100 + Math.random() * 200
-      : 2;
-    const correctedAlt = Math.round(groundAlt + aboveGround);
-    if (unit.position.alt !== correctedAlt) {
-      unit.position.alt = correctedAlt;
-      needsSave = true;
-    }
     const image = getOtherSymbolImage(unit.entity, unit.identity, unit.threatType);
     const position = Cesium.Cartesian3.fromDegrees(
-      unit.position.lon, unit.position.lat, correctedAlt
+      unit.position.lon, unit.position.lat, unit.position.alt
     );
 
     const entity = viewer.entities.add({
@@ -390,14 +380,14 @@ export async function loadOtherUnits(viewer) {
     otherUnitEntities.push(entity);
   }
 
-  if (needsSave) {
-    fetch("/api/save-other-units", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(units),
-    }).then(() => console.log("other-units.json altitudes updated from Cesium terrain"))
-      .catch(e => console.warn("Failed to save other-units.json:", e));
-  }
+  // if (needsSave) {
+  //   fetch("/api/save-other-units", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify(units),
+  //   }).then(() => console.log("other-units.json altitudes updated from Cesium terrain"))
+  //     .catch(e => console.warn("Failed to save other-units.json:", e));
+  // }
 }
 
 // --- Data structures ---
@@ -932,15 +922,16 @@ function updateLabelDeclutter(viewer) {
     // Populate symbol draw list for all visible entities with a symbol image
     if (entity._symbolImage) {
       let occluded;
-      // Only recompute when camera is still; use cached result while moving
+      // Only recompute when camera is still; stagger across 20-frame window
+      if (entity._occStagger === undefined) entity._occStagger = Math.floor(Math.random() * 20);
       if (cameraMoving) {
         occluded = entity._lastOccResult ?? false;
-      } else if (entity._lastOccFrame !== occlusionFrame) {
+      } else if ((occlusionFrame + entity._occStagger) % 20 === 0) {
         occluded = isOccludedByTerrain(scene, pos);
         entity._lastOccResult = occluded;
         entity._lastOccFrame = occlusionFrame;
       } else {
-        occluded = entity._lastOccResult;
+        occluded = entity._lastOccResult ?? false;
       }
       symbolDrawList.push({
         image: entity._symbolImage,
