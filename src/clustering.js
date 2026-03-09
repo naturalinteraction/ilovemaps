@@ -1001,34 +1001,35 @@ function createFloorSlider() {
   wrapper.id = "floor-slider-widget";
   wrapper.style.cssText = `
     position: absolute;
-    left: 16px;
+    left: 1px;
     top: 50%;
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
     background: rgba(20, 20, 20, 0.85);
-    padding: 14px 10px;
+    width: 100px;
+    padding: 14px 40px 14px 0px;
     border-radius: 8px;
     z-index: 100;
     user-select: none;
   `;
 
-  const label = document.createElement("div");
-  label.id = "val-floor-level";
-  label.style.cssText = `
-    color: #fff;
+  const topLabel = document.createElement("div");
+  topLabel.style.cssText = `
+    color: rgba(255,255,255,0.5);
     font-family: sans-serif;
-    font-size: 16px;
-    font-weight: bold;
+    font-size: 10px;
+    margin-bottom: 8px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
-    text-align: center;
-    white-space: nowrap;
+    letter-spacing: 1px;
   `;
-  label.textContent = LEVEL_ORDER[floorLevel];
-  wrapper.appendChild(label);
+  topLabel.textContent = "brigade";
+  wrapper.appendChild(topLabel);
+
+  // Slider + floating label container
+  const sliderWrap = document.createElement("div");
+  sliderWrap.style.cssText = `position: relative; display: flex; align-items: center; height: 180px;`;
 
   const input = document.createElement("input");
   input.type = "range";
@@ -1036,21 +1037,114 @@ function createFloorSlider() {
   input.min = 0;
   input.max = 6;
   input.step = 1;
-  input.value = floorLevel;
+  input.value = 6 - floorLevel;
   input.orient = "vertical";
   input.style.cssText = `
     writing-mode: vertical-lr;
-    direction: rtl;
-    appearance: slider-vertical;
+    appearance: none;
+    -webkit-appearance: none;
     width: 32px;
     height: 180px;
     cursor: pointer;
+    background: transparent;
+    position: relative;
+    z-index: 1;
   `;
+
+  // Thumb and track styling
+  const thumbStyle = document.createElement("style");
+  thumbStyle.textContent = `
+    #floor-level-slider::-webkit-slider-runnable-track {
+      width: 6px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 3px;
+    }
+    #floor-level-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 28px;
+      height: 28px;
+      background: ${BLUE};
+      border: 2px solid rgba(255,255,255,0.5);
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: -11px;
+    }
+    #floor-level-slider::-webkit-slider-thumb:hover {
+      background: #4060FF;
+    }
+    #floor-level-slider::-moz-range-track {
+      width: 6px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 3px;
+      border: none;
+    }
+    #floor-level-slider::-moz-range-progress {
+      background: ${BLUE};
+      border-radius: 3px;
+    }
+    #floor-level-slider::-moz-range-thumb {
+      width: 28px;
+      height: 28px;
+      background: ${BLUE};
+      border: 2px solid rgba(255,255,255,0.5);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #floor-level-slider::-moz-range-thumb:hover {
+      background: #4060FF;
+    }
+  `;
+  document.head.appendChild(thumbStyle);
+
+  // Thin fill bar behind the slider
+  const trackFill = document.createElement("div");
+  trackFill.style.cssText = `
+    position: absolute;
+    width: 6px;
+    left: 13px;
+    top: 0;
+    border-radius: 3px;
+    background: ${BLUE};
+    pointer-events: none;
+  `;
+  function updateTrackFill() {
+    const pct = (parseInt(input.value) / 6) * 100;
+    trackFill.style.height = pct + "%";
+  }
+  updateTrackFill();
+
+  const label = document.createElement("div");
+  label.id = "val-floor-level";
+  label.style.cssText = `
+    position: absolute;
+    left: 40px;
+    color: #fff;
+    font-family: sans-serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    pointer-events: none;
+  `;
+  label.textContent = LEVEL_ORDER[floorLevel];
+
+  const trackHeight = 180;
+  const thumbH = 28;
+  function updateThumbLabel() {
+    const raw = parseInt(input.value);
+    const frac = raw / 6; // 0 = top, 1 = bottom (due to direction: rtl)
+    const top = frac * (trackHeight - thumbH) + thumbH / 2;
+    label.style.top = top + "px";
+    label.style.transform = "translateY(-50%)";
+  }
+  updateThumbLabel();
+
   input.oninput = () => {
-    const val = parseInt(input.value);
+    const val = 6 - parseInt(input.value);
     label.textContent = LEVEL_ORDER[val];
     floorLevel = val;
-    document.getElementById("val-floor-min-height").textContent = "(" + moduleViewer.camera.positionCartographic.height.toFixed(0) + ")";
+    updateThumbLabel();
+    updateTrackFill();
     manuallyExpanded.clear();
     if (autoLevelEnabled && moduleViewer) {
       const height = moduleViewer.camera.positionCartographic.height;
@@ -1058,7 +1152,11 @@ function createFloorSlider() {
       applyAutoLevel(levelFromCameraHeight(height));
     }
   };
-  wrapper.appendChild(input);
+
+  sliderWrap.appendChild(trackFill);
+  sliderWrap.appendChild(input);
+  sliderWrap.appendChild(label);
+  wrapper.appendChild(sliderWrap);
 
   const title = document.createElement("div");
   title.style.cssText = `
@@ -1069,19 +1167,9 @@ function createFloorSlider() {
     text-transform: uppercase;
     letter-spacing: 1px;
   `;
-  title.textContent = "floor";
+  title.textContent = "individual";
   wrapper.appendChild(title);
 
-  const floorMinHeight = document.createElement("div");
-  floorMinHeight.id = "val-floor-min-height";
-  floorMinHeight.style.cssText = `
-    color: rgba(255,255,255,0.35);
-    font-family: sans-serif;
-    font-size: 9px;
-    margin-top: 2px;
-  `;
-  floorMinHeight.textContent = "(?)";
-  wrapper.appendChild(floorMinHeight);
 
   container.appendChild(wrapper);
 }
@@ -1828,8 +1916,6 @@ export function setupZoomListener(viewer) {
     }, LABEL_SETTLE_MS);
     // Update camera height display
     const h = viewer.camera.positionCartographic.height;
-    const el = document.getElementById("val-floor-min-height");
-    if (el) el.textContent = "(" + h.toFixed(0) + ")";
   });
   viewer.camera.percentageChanged = 0.1;
 }
@@ -1869,11 +1955,16 @@ export function handleKeydown(event, viewer) {
     manuallyExpanded.clear();
     // Update slider UI if it exists
     const slider = document.getElementById("floor-level-slider");
-    if (slider) slider.value = floorLevel;
-    const label = document.getElementById("val-floor-level");
-    if (label) label.textContent = LEVEL_ORDER[floorLevel];
-    const minHeightEl = document.getElementById("val-floor-min-height");
-    if (minHeightEl) minHeightEl.textContent = "(" + moduleViewer.camera.positionCartographic.height.toFixed(0) + ")";
+    if (slider) {
+      slider.value = 6 - floorLevel;
+      // Reposition thumb label
+      const frac = (6 - floorLevel) / 6;
+      const lbl = document.getElementById("val-floor-level");
+      if (lbl) {
+        lbl.textContent = LEVEL_ORDER[floorLevel];
+        lbl.style.top = (frac * (180 - 28) + 14) + "px";
+      }
+    }
     // Trigger auto level with current camera height
     if (autoLevelEnabled && moduleViewer) {
       const height = moduleViewer.camera.positionCartographic.height;
