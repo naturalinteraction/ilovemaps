@@ -1621,8 +1621,8 @@ function levelFromCameraHeight(height) {
       height = height - terrainHeight;
     }
   }
-  const el = document.getElementById("val-camera-agl");
-  if (el) el.textContent = Math.round(height) + "m";
+  // const el = document.getElementById("val-camera-agl");
+  // if (el) el.textContent = Math.round(height) + "m";
   for (const t of LEVEL_THRESHOLDS) {
     // Hysteresis: require 10% overshoot to change level
     if (autoCurrentLevel > t.level) {
