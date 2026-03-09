@@ -426,6 +426,7 @@ const GEOID_UNDULATION = 0; // terrain heights now from Cesium
 let currentLevel = 6; // start at brigade level
 let militaryVisible = true;
 let labelsEnabled = true; // when true, text labels are shown on military entities
+let nightMode = false;
 let moduleViewer = null;          // viewer reference for dot updates
 
 // Auto-level state
@@ -438,8 +439,9 @@ function updateResetButton() {
   if (!btn) return;
   const active = manuallyExpanded.size > 0;
   btn.disabled = !active;
-  btn.style.background = active ? BLUE : "rgba(255,255,255,0.15)";
-  btn.style.color = active ? "#fff" : "rgba(255,255,255,0.3)";
+  const activeColor = nightMode ? "#2a5a20" : BLUE;
+  btn.style.background = active ? activeColor : "rgba(255,255,255,0.15)";
+  btn.style.color = active ? (nightMode ? "#000" : "#fff") : "rgba(255,255,255,0.3)";
   btn.style.cursor = active ? "pointer" : "default";
 }
 
@@ -549,7 +551,10 @@ const WHITE = Cesium.Color.WHITE;
 
 function setEntityAlpha(entity, alpha) {
   // Use small epsilon for billboard to prevent Cesium from skipping fully-transparent billboards
-  entity.billboard.color = new Cesium.Color(1, 1, 1, Math.max(alpha, 0.005));
+  const a = Math.max(alpha, 0.005);
+  entity.billboard.color = nightMode
+    ? new Cesium.Color(0.45, 0.42, 0.38, a)
+    : new Cesium.Color(1, 1, 1, a);
 }
 
 function setEntityScale(entity, scale) {
@@ -1086,6 +1091,7 @@ function createFloorSlider() {
 
   // Thumb and track styling
   const thumbStyle = document.createElement("style");
+  thumbStyle.id = "floor-slider-style";
   thumbStyle.textContent = `
     #floor-level-slider::-webkit-slider-runnable-track {
       width: 10px;
@@ -1131,6 +1137,7 @@ function createFloorSlider() {
 
   // Thin fill bar behind the slider
   const trackFill = document.createElement("div");
+  trackFill.id = "floor-slider-fill";
   trackFill.style.cssText = `
     position: absolute;
     width: 10px;
@@ -1266,7 +1273,7 @@ function applyOtherUnitVisibility() {
     const btn = document.getElementById("other-unit-btn-" + type);
     if (!btn) continue;
     btn.style.borderBottom = (showAll && !otherUnitTypeVisible[type])
-      ? `6px solid ${BLUE}` : "none";
+      ? `6px solid ${nightMode ? "#2a5a20" : BLUE}` : "none";
   }
 }
 
@@ -1314,14 +1321,163 @@ function createOtherUnitsToolbar() {
     btn.onclick = () => {
       otherUnitTypeVisible[type] = !otherUnitTypeVisible[type];
       playBeep(otherUnitTypeVisible[type] ? 500 : 300, 0.06);
-      btn.style.background = otherUnitTypeVisible[type] ? BLUE : "rgba(255,255,255,0.15)";
-      btn.style.color = otherUnitTypeVisible[type] ? "#fff" : "rgba(255,255,255,0.3)";
+      btn.style.background = otherUnitTypeVisible[type] ? (nightMode ? "#2a5a20" : BLUE) : "rgba(255,255,255,0.15)";
+      btn.style.color = otherUnitTypeVisible[type] ? (nightMode ? "#000" : "#fff") : "rgba(255,255,255,0.3)";
       applyOtherUnitVisibility();
     };
     bar.appendChild(btn);
   }
 
   container.appendChild(bar);
+
+  // Standalone NVG button — bottom-left, aligned with slider
+  const nvgWrap = document.createElement("div");
+  nvgWrap.id = "nvg-wrap";
+  nvgWrap.style.cssText = `
+    position: absolute;
+    bottom: 16px;
+    left: 1px;
+    background: rgba(20, 20, 20, 0.85);
+    padding: 10px;
+    border-radius: 8px;
+    z-index: 100;
+    user-select: none;
+  `;
+  const nvgBtn = document.createElement("button");
+  nvgBtn.id = "nvg-btn";
+  nvgBtn.textContent = "NIGHT";
+  nvgBtn.style.cssText = `
+    background: ${BLUE};
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 0;
+    width: 70px;
+    height: 40px;
+    text-align: center;
+    font-family: sans-serif;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+  `;
+  nvgBtn.onclick = () => toggleNightMode();
+  nvgWrap.appendChild(nvgBtn);
+  container.appendChild(nvgWrap);
+}
+
+function toggleNightMode() {
+  nightMode = !nightMode;
+  const viewer = moduleViewer;
+  if (!viewer) return;
+
+  // Update NVG button style and text
+  const nvgBtn = document.getElementById("nvg-btn");
+  if (nvgBtn) {
+    nvgBtn.textContent = nightMode ? "DAY" : "NIGHT";
+    nvgBtn.style.background = nightMode ? "#2a5a20" : BLUE;
+    nvgBtn.style.color = nightMode ? "#000" : "#fff";
+  }
+  const nvgWrap = document.getElementById("nvg-wrap");
+  if (nvgWrap) nvgWrap.style.background = nightMode ? "rgba(5,5,5,0.95)" : "rgba(20,20,20,0.85)";
+
+  // Imagery layer dimming
+  const layer = viewer.imageryLayers.get(0);
+  if (layer) {
+    layer.brightness = nightMode ? 0.5 : 1.0;
+    layer.contrast = nightMode ? 1.2 : 1.0;
+    layer.saturation = nightMode ? 0.3 : 1.0;
+    layer.hue = nightMode ? 1.2 : 0.0;
+  }
+  if (heatmapLayer) {
+    heatmapLayer.brightness = nightMode ? 0.5 : 1.0;
+    heatmapLayer.saturation = nightMode ? 0.3 : 1.0;
+  }
+
+  // Scene atmosphere
+  const scene = viewer.scene;
+  scene.skyAtmosphere.show = !nightMode;
+  scene.sun.show = !nightMode;
+  scene.moon.show = !nightMode;
+  scene.backgroundColor = nightMode ? Cesium.Color.BLACK : new Cesium.Color(0, 0, 0, 1);
+
+  // UI panel styling
+  const darkBg = "rgba(5,5,5,0.95)";
+  const normalBg = "rgba(20,20,20,0.85)";
+  for (const id of ["other-units-toolbar", "floor-slider-widget", "heatmap-controls"]) {
+    const el = document.getElementById(id);
+    if (el) el.style.background = nightMode ? darkBg : normalBg;
+  }
+  const claude = document.getElementById("claude-panel");
+  if (claude) {
+    claude.style.background = nightMode ? "rgba(0,0,0,0.88)" : "";
+    claude.style.borderColor = nightMode ? "rgba(180,160,140,0.4)" : "";
+  }
+
+  // Slider thumb, track fill, and active buttons → green in night mode
+  const accentColor = nightMode ? "#2a5a20" : BLUE;
+  const hoverColor = nightMode ? "#3a7a30" : "#4060FF";
+  const progressColor = nightMode ? "#2a5a20" : BLUE;
+  const sliderStyle = document.getElementById("floor-slider-style");
+  if (sliderStyle) {
+    sliderStyle.textContent = `
+      #floor-level-slider::-webkit-slider-runnable-track {
+        width: 10px; background: rgba(255,255,255,0.2); border-radius: 3px;
+      }
+      #floor-level-slider::-webkit-slider-thumb {
+        -webkit-appearance: none; width: 70px; height: 40px;
+        background: ${accentColor}; border: none; border-radius: 6px;
+        cursor: pointer; margin-left: -32px;
+      }
+      #floor-level-slider::-webkit-slider-thumb:hover { background: ${hoverColor}; }
+      #floor-level-slider::-moz-range-track {
+        width: 10px; background: rgba(255,255,255,0.2); border-radius: 3px; border: none;
+      }
+      #floor-level-slider::-moz-range-progress { background: ${progressColor}; border-radius: 3px; }
+      #floor-level-slider::-moz-range-thumb {
+        width: 70px; height: 40px; background: ${accentColor};
+        border: none; border-radius: 6px; cursor: pointer;
+      }
+      #floor-level-slider::-moz-range-thumb:hover { background: ${hoverColor}; }
+    `;
+  }
+  const trackFill = document.getElementById("floor-slider-fill");
+  if (trackFill) trackFill.style.background = accentColor;
+
+  // Update reset button colors
+  updateResetButton();
+
+  // Update other-unit buttons that are active
+  const activeTextColor = nightMode ? "#000" : "#fff";
+  for (const type of OTHER_UNIT_TYPES) {
+    const btn = document.getElementById("other-unit-btn-" + type);
+    if (btn && otherUnitTypeVisible[type]) {
+      btn.style.background = accentColor;
+      btn.style.color = activeTextColor;
+    }
+  }
+
+  // Slider thumb label
+  const thumbLabel = document.getElementById("val-floor-level");
+  if (thumbLabel) thumbLabel.style.color = nightMode ? "rgba(255,255,255,0.4)" : "#fff";
+
+  // Re-tint all visible billboards
+  function retintEntity(entity) {
+    if (!entity || !entity.billboard) return;
+    const cp = entity.billboard.color;
+    if (!cp) { setEntityAlpha(entity, 1); return; }
+    const c = cp.getValue ? cp.getValue(Cesium.JulianDate.now()) : cp;
+    setEntityAlpha(entity, c ? c.alpha : 1);
+  }
+  for (const node of allNodes) {
+    retintEntity(entitiesById[node.id]);
+    retintEntity(cmdEntitiesById[node.id]);
+    const staffEs = staffEntitiesById[node.id];
+    if (staffEs) for (const se of staffEs) retintEntity(se);
+  }
+  for (const entity of otherUnitEntities) retintEntity(entity);
+
+  playBeep(nightMode ? 300 : 500, 0.06);
 }
 
 function createHeatmapControls() {
@@ -1611,6 +1767,10 @@ function updateCesiumHeatmapLayer() {
 
   heatmapLayer = viewer.imageryLayers.addImageryProvider(provider);
   heatmapLayer.alpha = 0.0;
+  if (nightMode) {
+    heatmapLayer.brightness = 0.5;
+    heatmapLayer.saturation = 0.3;
+  }
 
   heatmapSwapTimer = setTimeout(swapHeatmaps, 500);
 }
@@ -2636,7 +2796,7 @@ export function setupPreRender(viewer) {
         for (const lb of labelDrawList) {
           labelCtx.strokeStyle = "rgba(0,0,0,1)";
           labelCtx.strokeText(lb.text, lb.sx, lb.sy + lb.offsetY);
-          labelCtx.fillStyle = "rgba(255,255,255,1)";
+          labelCtx.fillStyle = nightMode ? "rgba(140,125,110,0.7)" : "rgba(255,255,255,1)";
           labelCtx.fillText(lb.text, lb.sx, lb.sy + lb.offsetY);
         }
       }
