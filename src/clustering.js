@@ -587,22 +587,13 @@ function flattenTree(node, parent) {
   node.parent = parent;
   nodesById[node.id] = node;
   allNodes.push(node);
-  // Units (squad+) have no position — always track commander position
-  if (!node.position && node.commander) {
-    node.position = node.commander.position;
-  }
-  const pos = node.position;
-  node.homePosition = Cesium.Cartesian3.fromDegrees(
-    pos.lon, pos.lat, pos.alt + GEOID_UNDULATION + HEIGHT_ABOVE_TERRAIN
-  );
-  // Commander position (own position if available, otherwise same as unit)
+
+  // Commander position
   if (node.commander && node.commander.position) {
     node.cmdHomePosition = Cesium.Cartesian3.fromDegrees(
       node.commander.position.lon, node.commander.position.lat,
       node.commander.position.alt + GEOID_UNDULATION + HEIGHT_ABOVE_TERRAIN
     );
-  } else {
-    node.cmdHomePosition = node.homePosition;
   }
   // Staff positions from JSON data
   if (node.staff && node.staff.length >= 2) {
@@ -610,8 +601,41 @@ function flattenTree(node, parent) {
       Cesium.Cartesian3.fromDegrees(s.position.lon, s.position.lat, s.position.alt + GEOID_UNDULATION + HEIGHT_ABOVE_TERRAIN)
     );
   }
+
+  // Recurse children first so their positions are available for centroid
   for (const child of node.children) {
     flattenTree(child, node);
+  }
+
+  // Compute unit position: centroid of all children + commander + staff
+  if (node.children.length > 0) {
+    const pts = [];
+    for (const child of node.children) {
+      pts.push(child.position);
+    }
+    if (node.commander && node.commander.position) {
+      pts.push(node.commander.position);
+    }
+    if (node.staff) {
+      for (const s of node.staff) {
+        if (s.position) pts.push(s.position);
+      }
+    }
+    node.position = {
+      lon: pts.reduce((s, p) => s + p.lon, 0) / pts.length,
+      lat: pts.reduce((s, p) => s + p.lat, 0) / pts.length,
+      alt: pts.reduce((s, p) => s + p.alt, 0) / pts.length,
+    };
+  } else if (!node.position && node.commander) {
+    node.position = node.commander.position;
+  }
+
+  const pos = node.position;
+  node.homePosition = Cesium.Cartesian3.fromDegrees(
+    pos.lon, pos.lat, pos.alt + GEOID_UNDULATION + HEIGHT_ABOVE_TERRAIN
+  );
+  if (!node.cmdHomePosition) {
+    node.cmdHomePosition = node.homePosition;
   }
 }
 
