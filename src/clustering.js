@@ -545,6 +545,23 @@ function playFloorClick(level) {
   osc.stop(ctx.currentTime + 0.06);
 }
 
+function playLevelTick(level, direction) {
+  const ctx = getAudioCtx();
+  if (ctx.state === "suspended") ctx.resume();
+  // Subtle soft tick — higher pitch zooming in, lower zooming out
+  const freq = direction > 0 ? 1200 - level * 60 : 400 + level * 60;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = "sine";
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.015, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.05);
+}
+
 // Animation state
 const animations = []; // { entity, from, to, startTime, duration, fade, onComplete }
 let animating = false;
@@ -1833,8 +1850,10 @@ function clearDescendantOverrides(node) {
 function applyAutoLevel(targetLevel) {
   const effectiveLevel = Math.max(targetLevel, floorLevel);
   if (effectiveLevel === autoCurrentLevel) return;
+  const direction = effectiveLevel < autoCurrentLevel ? 1 : -1; // 1 = zooming in (lower level), -1 = zooming out
   autoCurrentLevel = effectiveLevel;
   currentLevel = effectiveLevel;
+  playLevelTick(effectiveLevel, direction);
 
   for (const node of allNodes) {
     const nodeLevelIdx = LEVEL_ORDER.indexOf(node.type);
