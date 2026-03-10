@@ -350,7 +350,7 @@ export async function loadOtherUnits(viewer) {
     const groundAlt = cartographics[i].height || 0;
     const aboveGround = unit.entity === "uav"
       ? 100 + Math.random() * 200
-      : 2;
+      : 0;
     const correctedAlt = Math.round(groundAlt + aboveGround);
     // if (unit.position.alt !== correctedAlt) {
     //   unit.position.alt = correctedAlt;
@@ -369,7 +369,7 @@ export async function loadOtherUnits(viewer) {
         width: SYMBOL_SIZE,
         height: SYMBOL_SIZE,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-        disableDepthTestDistance: 5000,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
       label: {
         text: unit.name,
@@ -424,7 +424,7 @@ const cmdEntitiesById = {};
 const staffEntitiesById = {};
 // Staff entities indexed by staff's own id → entity (for link lookups)
 const staffEntityByOwnId = {};
-const HEIGHT_ABOVE_TERRAIN = 2; // meters above terrain surface
+const HEIGHT_ABOVE_TERRAIN = 0; // meters above terrain surface
 const GEOID_UNDULATION = 0; // terrain heights now from Cesium
 
 // Current visible level index (0=squad, 3=battalion)
@@ -2838,22 +2838,46 @@ export function setupPreRender(viewer) {
         if (!otherEnt.show || !otherEnt._linkedToId || otherEnt._otherUnitIdentity !== "friendly") continue;
         const linkedId = otherEnt._linkedToId;
         // Resolve linked entity: check individuals first, then staff
-        const linkedEnt = entitiesById[linkedId] || staffEntityByOwnId[linkedId];
-        if (!linkedEnt || !linkedEnt.show) continue;
+        const directEnt = entitiesById[linkedId] || staffEntityByOwnId[linkedId];
+        if (!directEnt) continue;
+        // Find the visible target: direct entity, or walk up to lowest visible ancestor
+        let targetEnt = null;
+        if (directEnt.show) {
+          targetEnt = directEnt;
+        } else {
+          // Get the node to walk up from
+          let node = directEnt._milNode          // individual
+            || directEnt._milStaffOf;            // staff → parent node
+          while (node) {
+            const e = entitiesById[node.id];
+            if (e && e.show) { targetEnt = e; break; }
+            // Also check if this node's commander entity is visible
+            const cmdE = cmdEntitiesById[node.id];
+            if (cmdE && cmdE.show) { targetEnt = cmdE; break; }
+            node = node.parent;
+          }
+        }
+        if (!targetEnt) continue;
         const posA = otherEnt.position.getValue ? otherEnt.position.getValue(Cesium.JulianDate.now()) : otherEnt.position;
-        const posB = linkedEnt.position.getValue ? linkedEnt.position.getValue(Cesium.JulianDate.now()) : linkedEnt.position;
+        const posB = targetEnt.position.getValue ? targetEnt.position.getValue(Cesium.JulianDate.now()) : targetEnt.position;
         if (!isValid(posA) || !isValid(posB)) continue;
         const sA = scene.cartesianToCanvasCoordinates(posA);
         const sB = scene.cartesianToCanvasCoordinates(posB);
         if (!sA || !sB) continue;
-        arrowCtx.strokeStyle = "rgba(32, 64, 255, 0.6)";
+        // Offset endpoints to nearest corner of the unit rectangle
+        const oyA = -(SYMBOL_SIZE - 14) + 14; // other units: ry=14, rh=28, midpoint
+        const oyB = -(SYMBOL_SIZE - 16) + 12; // military units: ry=16, rh=24, midpoint
+        // Horizontal offset to nearest corner (canvas center=32)
+        // Other: rx=8, rw=48 → left=8, right=56 → offsets -24/+24
+        // Military: rx=10, rw=44 → left=10, right=54 → offsets -22/+22
+        const oxA = (sB.x > sA.x) ? (56 - 32) : (8 - 32);  // other unit corner toward target
+        const oxB = (sA.x > sB.x) ? (54 - 32) : (10 - 32); // military corner toward source
+        arrowCtx.strokeStyle = "rgba(255, 255, 255, 0.4)";
         arrowCtx.lineWidth = 2;
-        arrowCtx.setLineDash([6, 4]);
         arrowCtx.beginPath();
-        arrowCtx.moveTo(sA.x, sA.y);
-        arrowCtx.lineTo(sB.x, sB.y);
+        arrowCtx.moveTo(sA.x + oxA, sA.y + oyA);
+        arrowCtx.lineTo(sB.x + oxB, sB.y + oyB);
         arrowCtx.stroke();
-        arrowCtx.setLineDash([]);
       }
       // Draw indicator dots on top of arrows and frustum lines
       for (let i = 0; i < canvasDots.length; i++) {

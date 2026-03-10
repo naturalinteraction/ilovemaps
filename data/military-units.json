@@ -4058,7 +4058,10 @@
                             "lon": 8.066285,
                             "alt": 3027
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "sen_f_28"
+                          ]
                         },
                         {
                           "id": "ind389",
@@ -4131,7 +4134,10 @@
                     "lat": 46.49736,
                     "lon": 8.069888,
                     "alt": 3215
-                  }
+                  },
+                  "linkedOtherUnits": [
+                    "art_f_44"
+                  ]
                 },
                 {
                   "id": "staff399",
@@ -4140,7 +4146,10 @@
                     "lat": 46.497408,
                     "lon": 8.069556,
                     "alt": 3211
-                  }
+                  },
+                  "linkedOtherUnits": [
+                    "sen_f_24"
+                  ]
                 }
               ]
             }
@@ -5024,7 +5033,10 @@
                             "lon": 8.058307,
                             "alt": 2915
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "art_f_42"
+                          ]
                         },
                         {
                           "id": "ind483",
@@ -5035,7 +5047,10 @@
                             "lon": 8.058315,
                             "alt": 2921
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "art_f_40"
+                          ]
                         }
                       ],
                       "commander": {
@@ -5235,7 +5250,10 @@
                             "lon": 8.056729,
                             "alt": 2923
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "ugv_f_14"
+                          ]
                         },
                         {
                           "id": "ind504",
@@ -5522,7 +5540,10 @@
                         "lat": 46.505858,
                         "lon": 8.052817,
                         "alt": 2818
-                      }
+                      },
+                      "linkedOtherUnits": [
+                        "ugv_f_17"
+                      ]
                     }
                   ]
                 }
@@ -5691,7 +5712,10 @@
                             "lon": 8.054036,
                             "alt": 2820
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "uav_f_2"
+                          ]
                         }
                       ],
                       "commander": {
@@ -10741,7 +10765,10 @@
                             "lon": 8.024641,
                             "alt": 2825
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "uav_f_5"
+                          ]
                         },
                         {
                           "id": "ind1036",
@@ -10916,7 +10943,10 @@
                             "lon": 8.022291,
                             "alt": 2846
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "ugv_f_20"
+                          ]
                         },
                         {
                           "id": "ind1053",
@@ -10960,7 +10990,10 @@
                             "lon": 8.021996,
                             "alt": 2847
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "sen_f_26"
+                          ]
                         },
                         {
                           "id": "ind1057",
@@ -10982,7 +11015,10 @@
                             "lon": 8.021772,
                             "alt": 2847
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "art_f_35"
+                          ]
                         },
                         {
                           "id": "ind1059",
@@ -11015,7 +11051,10 @@
                             "lon": 8.021622,
                             "alt": 2849
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "sen_f_30"
+                          ]
                         },
                         {
                           "id": "ind1062",
@@ -11026,7 +11065,10 @@
                             "lon": 8.02148,
                             "alt": 2849
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "sen_f_33"
+                          ]
                         }
                       ],
                       "commander": {
@@ -13306,7 +13348,10 @@
                             "lon": 8.000102,
                             "alt": 3363
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "uav_f_9"
+                          ]
                         },
                         {
                           "id": "ind1285",
@@ -16595,10 +16640,7 @@
                             "lon": 7.97578,
                             "alt": 3575
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "uav_f_1"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind1602",
@@ -18919,7 +18961,10 @@
                             "lon": 7.974313,
                             "alt": 3541
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "art_f_41"
+                          ]
                         },
                         {
                           "id": "ind1827",
@@ -18930,7 +18975,10 @@
                             "lon": 7.974322,
                             "alt": 3539
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "ugv_f_22"
+                          ]
                         },
                         {
                           "id": "ind1828",
@@ -18952,7 +19000,10 @@
                             "lon": 7.974244,
                             "alt": 3538
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "uav_f_11"
+                          ]
                         }
                       ],
                       "commander": {
@@ -19081,10 +19132,7 @@
                             "lon": 7.97294,
                             "alt": 3565
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "art_f_42"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind1843",
@@ -19786,7 +19834,10 @@
                             "lon": 7.966985,
                             "alt": 3366
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "uav_f_6"
+                          ]
                         },
                         {
                           "id": "ind1911",
@@ -19808,7 +19859,10 @@
                             "lon": 7.966839,
                             "alt": 3366
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "sen_f_29"
+                          ]
                         },
                         {
                           "id": "ind1913",
@@ -19841,7 +19895,10 @@
                             "lon": 7.966698,
                             "alt": 3352
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "sen_f_25"
+                          ]
                         },
                         {
                           "id": "ind1916",
@@ -19852,7 +19909,10 @@
                             "lon": 7.966598,
                             "alt": 3358
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "art_f_36"
+                          ]
                         },
                         {
                           "id": "ind1917",
@@ -19863,7 +19923,10 @@
                             "lon": 7.96653,
                             "alt": 3357
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "art_f_38"
+                          ]
                         },
                         {
                           "id": "ind1918",
@@ -19885,7 +19948,10 @@
                             "lon": 7.966412,
                             "alt": 3352
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "sen_f_27"
+                          ]
                         }
                       ],
                       "commander": {
@@ -19916,10 +19982,7 @@
                         "lat": 46.545181,
                         "lon": 7.964409,
                         "alt": 3454
-                      },
-                      "linkedOtherUnits": [
-                        "art_f_44"
-                      ]
+                      }
                     },
                     {
                       "id": "staff1925",
@@ -20236,7 +20299,10 @@
                             "lon": 7.961812,
                             "alt": 3382
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "uav_f_4"
+                          ]
                         },
                         {
                           "id": "ind1954",
@@ -21027,10 +21093,7 @@
                             "lon": 7.954144,
                             "alt": 3185
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "sen_f_27"
-                          ]
+                          "children": []
                         }
                       ],
                       "commander": {
@@ -21902,10 +21965,7 @@
                             "lon": 7.945497,
                             "alt": 2760
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "sen_f_34"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind2115",
@@ -22596,10 +22656,7 @@
                             "lon": 7.937337,
                             "alt": 2372
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "art_f_43"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind2182",
@@ -22676,10 +22733,7 @@
                             "lon": 7.936883,
                             "alt": 2353
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "art_f_41"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind2189",
@@ -25645,10 +25699,7 @@
                             "lon": 7.926599,
                             "alt": 1842
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "sen_f_25"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind2477",
@@ -25997,10 +26048,7 @@
                         "lat": 46.573769,
                         "lon": 7.924107,
                         "alt": 1753
-                      },
-                      "linkedOtherUnits": [
-                        "art_f_35"
-                      ]
+                      }
                     },
                     {
                       "id": "staff2512",
@@ -26751,7 +26799,10 @@
                             "lon": 7.929938,
                             "alt": 1717
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "sen_f_32"
+                          ]
                         },
                         {
                           "id": "ind2583",
@@ -26789,7 +26840,10 @@
                             "lon": 7.930008,
                             "alt": 1696
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "art_f_37"
+                          ]
                         },
                         {
                           "id": "ind2587",
@@ -26800,7 +26854,10 @@
                             "lon": 7.930071,
                             "alt": 1695
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "ugv_f_15"
+                          ]
                         },
                         {
                           "id": "ind2588",
@@ -26888,7 +26945,10 @@
                             "lon": 7.930068,
                             "alt": 1680
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "uav_f_10"
+                          ]
                         },
                         {
                           "id": "ind2596",
@@ -27132,7 +27192,10 @@
                             "lon": 7.929447,
                             "alt": 1592
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "uav_f_3"
+                          ]
                         },
                         {
                           "id": "ind2620",
@@ -27154,7 +27217,10 @@
                             "lon": 7.929338,
                             "alt": 1586
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "ugv_f_19"
+                          ]
                         },
                         {
                           "id": "ind2622",
@@ -27601,10 +27667,7 @@
                             "lon": 7.924679,
                             "alt": 1488
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "art_f_36"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind2665",
@@ -28268,7 +28331,10 @@
                             "lon": 7.927515,
                             "alt": 1425
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "uav_f_8"
+                          ]
                         },
                         {
                           "id": "ind2729",
@@ -28452,10 +28518,7 @@
                             "lon": 7.925423,
                             "alt": 1378
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "art_f_37"
-                          ]
+                          "children": []
                         }
                       ],
                       "commander": {
@@ -28515,10 +28578,7 @@
                             "lon": 7.924383,
                             "alt": 1346
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "ugv_f_22"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind2753",
@@ -28655,7 +28715,10 @@
                             "lon": 7.924829,
                             "alt": 1378
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "ugv_f_16"
+                          ]
                         },
                         {
                           "id": "ind2766",
@@ -28666,7 +28729,10 @@
                             "lon": 7.924912,
                             "alt": 1381
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "uav_f_12"
+                          ]
                         },
                         {
                           "id": "ind2767",
@@ -28699,7 +28765,10 @@
                             "lon": 7.924686,
                             "alt": 1375
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "sen_f_23"
+                          ]
                         },
                         {
                           "id": "ind2770",
@@ -29621,10 +29690,7 @@
                             "lon": 7.918358,
                             "alt": 1214
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "sen_f_32"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind2860",
@@ -29690,7 +29756,10 @@
                             "lon": 7.918229,
                             "alt": 1213
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "uav_f_1"
+                          ]
                         },
                         {
                           "id": "ind2866",
@@ -30060,10 +30129,7 @@
                             "lon": 7.915268,
                             "alt": 1186
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "sen_f_24"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind2902",
@@ -30129,7 +30195,10 @@
                             "lon": 7.915123,
                             "alt": 1189
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "art_f_39"
+                          ]
                         },
                         {
                           "id": "ind2908",
@@ -30236,10 +30305,7 @@
                             "lon": 7.913184,
                             "alt": 1102
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "ugv_f_20"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind2919",
@@ -30546,7 +30612,10 @@
                             "lon": 7.91167,
                             "alt": 1131
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "uav_f_7"
+                          ]
                         },
                         {
                           "id": "ind2948",
@@ -30601,7 +30670,10 @@
                             "lon": 7.911278,
                             "alt": 1126
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "ugv_f_18"
+                          ]
                         }
                       ],
                       "commander": {
@@ -30641,7 +30713,10 @@
                         "lat": 46.605858,
                         "lon": 7.90916,
                         "alt": 881
-                      }
+                      },
+                      "linkedOtherUnits": [
+                        "art_f_43"
+                      ]
                     }
                   ]
                 }
@@ -30892,10 +30967,7 @@
                             "lon": 7.908235,
                             "alt": 1051
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "sen_f_29"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind2982",
@@ -30917,10 +30989,7 @@
                             "lon": 7.908022,
                             "alt": 1026
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "uav_f_2"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind2984",
@@ -31002,7 +31071,10 @@
                             "lon": 7.908252,
                             "alt": 1206
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "ugv_f_21"
+                          ]
                         },
                         {
                           "id": "ind2992",
@@ -31367,7 +31439,10 @@
                             "lon": 7.905803,
                             "alt": 1061
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "sen_f_34"
+                          ]
                         },
                         {
                           "id": "ind3027",
@@ -31781,7 +31856,10 @@
                             "lon": 7.901145,
                             "alt": 799
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "ugv_f_13"
+                          ]
                         },
                         {
                           "id": "ind3067",
@@ -31896,7 +31974,10 @@
                             "lon": 7.900399,
                             "alt": 824
                           },
-                          "children": []
+                          "children": [],
+                          "linkedOtherUnits": [
+                            "sen_f_31"
+                          ]
                         },
                         {
                           "id": "ind3078",
@@ -32105,10 +32186,7 @@
                             "lon": 7.898538,
                             "alt": 906
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "sen_f_33"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3099",
@@ -32333,10 +32411,7 @@
                             "lon": 7.896534,
                             "alt": 1089
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "ugv_f_21"
-                          ]
+                          "children": []
                         }
                       ],
                       "commander": {
@@ -32569,10 +32644,7 @@
                             "lon": 7.89404,
                             "alt": 1204
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "art_f_40"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3143",
@@ -32901,10 +32973,7 @@
                             "lon": 7.889789,
                             "alt": 1339
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "sen_f_30"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3174",
@@ -33203,10 +33272,7 @@
                             "lon": 7.88696,
                             "alt": 1440
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "uav_f_12"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3203",
@@ -33299,10 +33365,7 @@
                             "lon": 7.886191,
                             "alt": 1496
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "uav_f_9"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3212",
@@ -33324,10 +33387,7 @@
                             "lon": 7.885926,
                             "alt": 1504
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "ugv_f_18"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3214",
@@ -33349,10 +33409,7 @@
                             "lon": 7.885731,
                             "alt": 1511
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "sen_f_31"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3216",
@@ -33520,10 +33577,7 @@
                             "lon": 7.883753,
                             "alt": 1573
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "sen_f_23"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3234",
@@ -33622,10 +33676,7 @@
                             "lon": 7.882964,
                             "alt": 1608
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "ugv_f_13"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3243",
@@ -33696,10 +33747,7 @@
                             "lon": 7.883568,
                             "alt": 1624
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "ugv_f_17"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3250",
@@ -33721,10 +33769,7 @@
                             "lon": 7.883454,
                             "alt": 1629
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "ugv_f_14"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3252",
@@ -33861,10 +33906,7 @@
                             "lon": 7.8826,
                             "alt": 1674
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "art_f_38"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3265",
@@ -34462,10 +34504,7 @@
                             "lon": 7.880627,
                             "alt": 1800
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "uav_f_8"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3323",
@@ -34569,10 +34608,7 @@
                             "lon": 7.881009,
                             "alt": 1720
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "sen_f_26"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3333",
@@ -34594,10 +34630,7 @@
                             "lon": 7.881273,
                             "alt": 1702
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "uav_f_10"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3335",
@@ -34608,10 +34641,7 @@
                             "lon": 7.881056,
                             "alt": 1707
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "uav_f_11"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3336",
@@ -34655,10 +34685,7 @@
                             "lon": 7.880995,
                             "alt": 1693
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "uav_f_6"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3340",
@@ -34680,10 +34707,7 @@
                             "lon": 7.881201,
                             "alt": 1675
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "sen_f_28"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3342",
@@ -34732,10 +34756,7 @@
                             "lon": 7.881141,
                             "alt": 1644
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "uav_f_5"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3347",
@@ -34801,10 +34822,7 @@
                             "lon": 7.881028,
                             "alt": 1637
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "ugv_f_15"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3353",
@@ -34826,10 +34844,7 @@
                             "lon": 7.881316,
                             "alt": 1621
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "art_f_39"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3355",
@@ -34911,10 +34926,7 @@
                     "lat": 46.620204,
                     "lon": 7.878291,
                     "alt": 1766
-                  },
-                  "linkedOtherUnits": [
-                    "ugv_f_19"
-                  ]
+                  }
                 }
               ]
             },
@@ -34953,10 +34965,7 @@
                             "lon": 7.879377,
                             "alt": 1579
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "uav_f_7"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3368",
@@ -35425,10 +35434,7 @@
                             "lon": 7.878276,
                             "alt": 1258
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "uav_f_3"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3413",
@@ -36288,10 +36294,7 @@
                     "lat": 46.629907,
                     "lon": 7.876675,
                     "alt": 1492
-                  },
-                  "linkedOtherUnits": [
-                    "ugv_f_16"
-                  ]
+                  }
                 },
                 {
                   "id": "staff3498",
@@ -37507,10 +37510,7 @@
                             "lon": 7.880867,
                             "alt": 803
                           },
-                          "children": [],
-                          "linkedOtherUnits": [
-                            "uav_f_4"
-                          ]
+                          "children": []
                         },
                         {
                           "id": "ind3613",

@@ -9,7 +9,7 @@
       "lon": 7.922621,
       "alt": 1441
     },
-    "linkedTo": "ind1601"
+    "linkedTo": "ind2865"
   },
   {
     "id": "uav_f_2",
@@ -21,7 +21,7 @@
       "lon": 8.053366,
       "alt": 3038
     },
-    "linkedTo": "ind2983"
+    "linkedTo": "ind547"
   },
   {
     "id": "uav_f_3",
@@ -33,7 +33,7 @@
       "lon": 7.940839,
       "alt": 2324
     },
-    "linkedTo": "ind3412"
+    "linkedTo": "ind2619"
   },
   {
     "id": "uav_f_4",
@@ -45,7 +45,7 @@
       "lon": 7.962526,
       "alt": 2315
     },
-    "linkedTo": "ind3612"
+    "linkedTo": "ind1953"
   },
   {
     "id": "uav_f_5",
@@ -57,7 +57,7 @@
       "lon": 8.039856,
       "alt": 3349
     },
-    "linkedTo": "ind3346"
+    "linkedTo": "ind1035"
   },
   {
     "id": "uav_f_6",
@@ -69,7 +69,7 @@
       "lon": 7.987144,
       "alt": 3106
     },
-    "linkedTo": "ind3339"
+    "linkedTo": "ind1910"
   },
   {
     "id": "uav_f_7",
@@ -81,7 +81,7 @@
       "lon": 7.927119,
       "alt": 2000
     },
-    "linkedTo": "ind3367"
+    "linkedTo": "ind2947"
   },
   {
     "id": "uav_f_8",
@@ -93,7 +93,7 @@
       "lon": 7.956305,
       "alt": 2267
     },
-    "linkedTo": "ind3322"
+    "linkedTo": "ind2728"
   },
   {
     "id": "uav_f_9",
@@ -105,7 +105,7 @@
       "lon": 8.012646,
       "alt": 3382
     },
-    "linkedTo": "ind3211"
+    "linkedTo": "ind1284"
   },
   {
     "id": "uav_f_10",
@@ -117,7 +117,7 @@
       "lon": 7.965327,
       "alt": 2179
     },
-    "linkedTo": "ind3334"
+    "linkedTo": "ind2595"
   },
   {
     "id": "uav_f_11",
@@ -129,7 +129,7 @@
       "lon": 7.987273,
       "alt": 3699
     },
-    "linkedTo": "ind3335"
+    "linkedTo": "ind1829"
   },
   {
     "id": "uav_f_12",
@@ -141,7 +141,7 @@
       "lon": 7.948788,
       "alt": 2445
     },
-    "linkedTo": "ind3202"
+    "linkedTo": "ind2766"
   },
   {
     "id": "ugv_f_13",
@@ -153,7 +153,7 @@
       "lon": 7.904452,
       "alt": 829
     },
-    "linkedTo": "ind3242"
+    "linkedTo": "ind3066"
   },
   {
     "id": "ugv_f_14",
@@ -165,7 +165,7 @@
       "lon": 8.049815,
       "alt": 3107
     },
-    "linkedTo": "ind3251"
+    "linkedTo": "ind503"
   },
   {
     "id": "ugv_f_15",
@@ -177,7 +177,7 @@
       "lon": 7.968824,
       "alt": 1970
     },
-    "linkedTo": "ind3352"
+    "linkedTo": "ind2587"
   },
   {
     "id": "ugv_f_16",
@@ -189,7 +189,7 @@
       "lon": 7.929743,
       "alt": 1452
     },
-    "linkedTo": "staff3497"
+    "linkedTo": "ind2765"
   },
   {
     "id": "ugv_f_17",
@@ -201,7 +201,7 @@
       "lon": 8.047395,
       "alt": 2790
     },
-    "linkedTo": "ind3249"
+    "linkedTo": "staff532"
   },
   {
     "id": "ugv_f_18",
@@ -213,7 +213,7 @@
       "lon": 7.916623,
       "alt": 1379
     },
-    "linkedTo": "ind3213"
+    "linkedTo": "ind2952"
   },
   {
     "id": "ugv_f_19",
@@ -225,7 +225,7 @@
       "lon": 7.93887,
       "alt": 1926
     },
-    "linkedTo": "staff3365"
+    "linkedTo": "ind2621"
   },
   {
     "id": "ugv_f_20",
@@ -237,7 +237,7 @@
       "lon": 8.034907,
       "alt": 3353
     },
-    "linkedTo": "ind2918"
+    "linkedTo": "ind1052"
   },
   {
     "id": "ugv_f_21",
@@ -249,7 +249,7 @@
       "lon": 7.922105,
       "alt": 1815
     },
-    "linkedTo": "ind3119"
+    "linkedTo": "ind2991"
   },
   {
     "id": "ugv_f_22",
@@ -261,7 +261,7 @@
       "lon": 7.990222,
       "alt": 3520
     },
-    "linkedTo": "ind2752"
+    "linkedTo": "ind1827"
   },
   {
     "id": "sen_f_23",
@@ -273,7 +273,7 @@
       "lon": 7.944553,
       "alt": 2261
     },
-    "linkedTo": "ind3233"
+    "linkedTo": "ind2769"
   },
   {
     "id": "sen_f_24",
@@ -285,7 +285,7 @@
       "lon": 8.065158,
       "alt": 2843
     },
-    "linkedTo": "ind2901"
+    "linkedTo": "staff399"
   },
   {
     "id": "sen_f_25",
@@ -297,7 +297,7 @@
       "lon": 7.97638,
       "alt": 2335
     },
-    "linkedTo": "ind2476"
+    "linkedTo": "ind1915"
   },
   {
     "id": "sen_f_26",
@@ -309,7 +309,7 @@
       "lon": 8.03886,
       "alt": 3279
     },
-    "linkedTo": "ind3332"
+    "linkedTo": "ind1056"
   },
   {
     "id": "sen_f_27",
@@ -321,7 +321,7 @@
       "lon": 7.97872,
       "alt": 2441
     },
-    "linkedTo": "ind2030"
+    "linkedTo": "ind1919"
   },
   {
     "id": "sen_f_28",
@@ -333,7 +333,7 @@
       "lon": 8.065869,
       "alt": 2944
     },
-    "linkedTo": "ind3341"
+    "linkedTo": "ind388"
   },
   {
     "id": "sen_f_29",
@@ -345,7 +345,7 @@
       "lon": 7.983908,
       "alt": 2770
     },
-    "linkedTo": "ind2981"
+    "linkedTo": "ind1912"
   },
   {
     "id": "sen_f_30",
@@ -357,7 +357,7 @@
       "lon": 8.031214,
       "alt": 3443
     },
-    "linkedTo": "ind3173"
+    "linkedTo": "ind1061"
   },
   {
     "id": "sen_f_31",
@@ -369,7 +369,7 @@
       "lon": 7.904518,
       "alt": 784
     },
-    "linkedTo": "ind3215"
+    "linkedTo": "ind3077"
   },
   {
     "id": "sen_f_32",
@@ -381,7 +381,7 @@
       "lon": 7.95832,
       "alt": 2060
     },
-    "linkedTo": "ind2859"
+    "linkedTo": "ind2582"
   },
   {
     "id": "sen_f_33",
@@ -393,7 +393,7 @@
       "lon": 8.029123,
       "alt": 3240
     },
-    "linkedTo": "ind3098"
+    "linkedTo": "ind1062"
   },
   {
     "id": "sen_f_34",
@@ -405,7 +405,7 @@
       "lon": 7.919378,
       "alt": 1369
     },
-    "linkedTo": "ind2114"
+    "linkedTo": "ind3026"
   },
   {
     "id": "art_f_35",
@@ -417,7 +417,7 @@
       "lon": 8.030287,
       "alt": 3492
     },
-    "linkedTo": "staff2511"
+    "linkedTo": "ind1058"
   },
   {
     "id": "art_f_36",
@@ -429,7 +429,7 @@
       "lon": 7.968956,
       "alt": 2484
     },
-    "linkedTo": "ind2664"
+    "linkedTo": "ind1916"
   },
   {
     "id": "art_f_37",
@@ -441,7 +441,7 @@
       "lon": 7.971803,
       "alt": 1978
     },
-    "linkedTo": "ind2746"
+    "linkedTo": "ind2586"
   },
   {
     "id": "art_f_38",
@@ -453,7 +453,7 @@
       "lon": 7.973112,
       "alt": 2453
     },
-    "linkedTo": "ind3264"
+    "linkedTo": "ind1917"
   },
   {
     "id": "art_f_39",
@@ -465,7 +465,7 @@
       "lon": 7.91924,
       "alt": 1330
     },
-    "linkedTo": "ind3354"
+    "linkedTo": "ind2907"
   },
   {
     "id": "art_f_40",
@@ -477,7 +477,7 @@
       "lon": 8.063981,
       "alt": 3452
     },
-    "linkedTo": "ind3142"
+    "linkedTo": "ind483"
   },
   {
     "id": "art_f_41",
@@ -489,7 +489,7 @@
       "lon": 7.989809,
       "alt": 3615
     },
-    "linkedTo": "ind2188"
+    "linkedTo": "ind1826"
   },
   {
     "id": "art_f_42",
@@ -501,7 +501,7 @@
       "lon": 8.061391,
       "alt": 3387
     },
-    "linkedTo": "ind1842"
+    "linkedTo": "ind482"
   },
   {
     "id": "art_f_43",
@@ -513,7 +513,7 @@
       "lon": 7.907668,
       "alt": 843
     },
-    "linkedTo": "ind2181"
+    "linkedTo": "staff2958"
   },
   {
     "id": "art_f_44",
@@ -525,7 +525,7 @@
       "lon": 8.06674,
       "alt": 3102
     },
-    "linkedTo": "staff1924"
+    "linkedTo": "staff398"
   },
   {
     "id": "hum_h_45",
