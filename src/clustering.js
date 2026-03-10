@@ -412,7 +412,7 @@ let allNodes = [];
 let rootNode = null;
 const otherUnitEntities = [];
 const OTHER_UNIT_TYPES = ["uav", "ugv", "threat", "artillery", "human", "sensor"];
-const otherUnitTypeVisible = { uav: false, ugv: false, threat: false, artillery: false, human: false, sensor: false };
+const otherUnitTypeVisible = { uav: true, ugv: false, threat: false, artillery: false, human: true, sensor: false };
 
 // Cesium entities indexed by node id
 const entitiesById = {};
@@ -1337,6 +1337,10 @@ function createOtherUnitsToolbar() {
       letter-spacing: 0.5px;
       cursor: pointer;
     `;
+    if (otherUnitTypeVisible[type]) {
+      btn.style.background = BLUE;
+      btn.style.color = "#fff";
+    }
     btn.onclick = () => {
       otherUnitTypeVisible[type] = !otherUnitTypeVisible[type];
       playBeep(otherUnitTypeVisible[type] ? 500 : 300, 0.06);
@@ -2305,6 +2309,8 @@ export function setupZoomListener(viewer) {
     const h = viewer.camera.positionCartographic.height;
   });
   viewer.camera.percentageChanged = 0.1;
+  // Apply initial visibility for unit types that default to on
+  applyOtherUnitVisibility();
 }
 
 export function swapHeatmaps()
