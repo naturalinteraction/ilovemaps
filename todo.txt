@@ -1,18 +1,13 @@
-- tutte le unita' blu devono essere legate a gerarchia. MA COME?
+
+POSTPONED
 
 - staking
 
 - linee di gerarchia opzionali
 
-- plotone sta sul centroide del plotone, non dove sta il suo comandante
-
-- poche unita' devono comunque fare heatmap visibile... ma comunque deve dare idea della densita'
-
-- se entro con zoom fino a vedere individui e poi faccio merge di squadra? plotone? si vedono micro gradienti e non c'e' override persistente
+- bottone "vedi tutto"
 
 - esiste un ordine in cui vanno visualizzate le identita': 
-
-- bottone "vedi tutto"
 
 *Identity:
 - friendly (blue)                 3    
