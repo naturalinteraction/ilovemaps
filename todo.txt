@@ -1,3 +1,7 @@
+- tutte le unita' blu devono essere legate a gerarchia. MA COME?
+
+- staking
+
 - linee di gerarchia opzionali
 
 - plotone sta sul centroide del plotone, non dove sta il suo comandante
