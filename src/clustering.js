@@ -387,19 +387,24 @@ export async function loadOtherUnits(viewer) {
     entity._otherUnitType = unit.entity;
     entity._otherUnitIdentity = unit.identity;
     entity._linkedToId = unit.linkedTo || null;
+    entity._geoPosition = { lon: unit.position.lon, lat: unit.position.lat, alt: unit.position.alt };
     entity._labelPixelOffsetY = -(SYMBOL_SIZE + 4);
     estimateLabelSize(entity);
     otherUnitEntities.push(entity);
   }
 
-  // if (needsSave) {
-  //   fetch("/api/save-other-units", {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify(units),
-  //   }).then(() => console.log("other-units.json altitudes updated from Cesium terrain"))
-  //     .catch(e => console.warn("Failed to save other-units.json:", e));
-  // }
+  // Expand heatmap fixed bounds to include friendly other-unit positions
+  if (heatmapFixedBounds) {
+    for (const ent of otherUnitEntities) {
+      if (ent._otherUnitIdentity !== "friendly") continue;
+      const p = ent._geoPosition;
+      if (p.lat < heatmapFixedBounds.minLat) heatmapFixedBounds.minLat = p.lat;
+      if (p.lat > heatmapFixedBounds.maxLat) heatmapFixedBounds.maxLat = p.lat;
+      if (p.lon < heatmapFixedBounds.minLon) heatmapFixedBounds.minLon = p.lon;
+      if (p.lon > heatmapFixedBounds.maxLon) heatmapFixedBounds.maxLon = p.lon;
+    }
+  }
+  updateHeatmapLayer();
 }
 
 // --- Data structures ---
@@ -1355,6 +1360,7 @@ function applyOtherUnitVisibility() {
     btn.style.borderBottom = (showAll && !otherUnitTypeVisible[type])
       ? `6px solid ${nightMode ? NIGHT_GREEN : BLUE}` : "none";
   }
+  updateHeatmapLayer();
 }
 
 function createOtherUnitsToolbar() {
@@ -1693,6 +1699,13 @@ function getHeatmapPositions() {
           results.push({ position: node.staff[i].position });
         }
       }
+    }
+  }
+  // Friendly other-units that are not visible
+  for (const ent of otherUnitEntities) {
+    if (ent._otherUnitIdentity !== "friendly") continue;
+    if (!ent.show) {
+      results.push({ position: ent._geoPosition });
     }
   }
   return results;
