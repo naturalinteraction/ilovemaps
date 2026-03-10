@@ -1,11 +1,20 @@
+- linee di gerarchia opzionali
+
+- plotone sta sul centroide del plotone, non dove sta il suo comandante
+
+- poche unita' devono comunque fare heatmap visibile... ma comunque deve dare idea della densita'
 
 - se entro con zoom fino a vedere individui e poi faccio merge di squadra? plotone? si vedono micro gradienti e non c'e' override persistente
 
+- esiste un ordine in cui vanno visualizzate le identita': 
+
+- bottone "vedi tutto"
+
 *Identity:
-- friendly (blue)
-- neutral  (green)
-- unknown  (yellow)
-- hostile (red)
+- friendly (blue)                 3    
+- neutral  (green)                4    
+- unknown  (yellow)               2    
+- hostile (red)                   1    
 
 *Entity:
 - UAV (i droni sono in parte associati a una squadra e in parte sparsi a giro per gli staff o squadre)
