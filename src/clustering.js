@@ -812,6 +812,10 @@ export async function loadMilitaryUnits(viewer) {
 
 
 
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
 function startAnimations(anims) {
   stopMoveUnits();
   const now = performance.now();
@@ -823,12 +827,14 @@ function startAnimations(anims) {
     } else if (a.fade === "out") {
       setEntityAlpha(a.entity, 1);
     }
-    // Set position immediately since there's no movement animation
-    a.entity.position = a.to;
+    // Set initial position
+    a.entity.position = a.from;
     animations.push(a);
   }
   animating = true;
 }
+
+const _scratchLerp = new Cesium.Cartesian3();
 
 function onPreRender() {
   if (!animating) return;
@@ -838,15 +844,19 @@ function onPreRender() {
 
   for (let i = animations.length - 1; i >= 0; i--) {
     const a = animations[i];
-    const t = (now - a.startTime) / a.duration;
+    const t = Math.min(1, (now - a.startTime) / a.duration);
     if (t >= 1) {
-      // Animation complete — reset alpha, run callback
+      // Animation complete — final position, reset alpha, run callback
+      a.entity.position = a.to;
       if (a.fade) setEntityAlpha(a.entity, 1);
       if (a.onComplete) a.onComplete();
       animations.splice(i, 1);
     } else {
+      const e = easeInOutCubic(t);
+      // Interpolate position
+      Cesium.Cartesian3.lerp(a.from, a.to, e, _scratchLerp);
+      a.entity.position = Cesium.Cartesian3.clone(_scratchLerp);
       if (a.fade) {
-        // Linear fade
         const alpha = a.fade === "in" ? t : 1 - t;
         setEntityAlpha(a.entity, alpha);
       }
@@ -2037,7 +2047,7 @@ export function handleRightClick(viewer, click) {
       anims.push({
         entity: cmdE,
         from: parentNode.cmdHomePosition,
-        to: parentNode.cmdHomePosition,
+        to: parentNode.homePosition,
         duration: 400,
         fade: "out",
         onComplete: () => { cmdE.show = false; parentEntity._labelHidden = false; },
@@ -2051,7 +2061,7 @@ export function handleRightClick(viewer, click) {
           anims.push({
             entity: se,
             from: parentNode.staffHomePositions[si],
-            to: parentNode.staffHomePositions[si],
+            to: parentNode.homePosition,
             duration: 400,
             fade: "out",
             onComplete: () => { se.show = false; },
@@ -2095,7 +2105,7 @@ export function handleRightClick(viewer, click) {
     anims.push({
       entity: cmdE,
       from: node.cmdHomePosition,
-      to: node.cmdHomePosition,
+      to: node.homePosition,
       duration: 400,
       fade: "out",
       onComplete: () => { cmdE.show = false; unitEntity._labelHidden = false; },
@@ -2109,7 +2119,7 @@ export function handleRightClick(viewer, click) {
         anims.push({
           entity: se,
           from: node.staffHomePositions[si],
-          to: node.staffHomePositions[si],
+          to: node.homePosition,
           duration: 400,
           fade: "out",
           onComplete: () => { se.show = false; },
@@ -2160,7 +2170,7 @@ export function handleLeftClick(viewer, click) {
     const e = entitiesById[desc.id];
     anims.push({
       entity: e,
-      from: desc.homePosition,
+      from: node.homePosition,
       to: desc.homePosition,
       duration: 400,
       fade: "in",
@@ -2173,10 +2183,9 @@ export function handleLeftClick(viewer, click) {
   // Fade IN commander/staff for this node (commander replaces unit symbol)
   const cmdE = cmdEntitiesById[node.id];
   if (cmdE) {
-    cmdE.position = node.cmdHomePosition;
     anims.push({
       entity: cmdE,
-      from: node.cmdHomePosition,
+      from: node.homePosition,
       to: node.cmdHomePosition,
       duration: 400,
       fade: "in",
@@ -2188,10 +2197,9 @@ export function handleLeftClick(viewer, click) {
   if (staffEs && node.staffHomePositions && childLevelIdx <= 1) {
     for (let si = 0; si < staffEs.length; si++) {
       const se = staffEs[si];
-      se.position = node.staffHomePositions[si];
       anims.push({
         entity: se,
-        from: node.staffHomePositions[si],
+        from: node.homePosition,
         to: node.staffHomePositions[si],
         duration: 400,
         fade: "in",
@@ -2271,7 +2279,7 @@ function animateMergeAllDescendants(node, targetPos, anims) {
       anims.push({
         entity: e,
         from: child.homePosition,
-        to: child.homePosition,
+        to: targetPos,
         duration: 400,
         fade: "out",
         onComplete: () => {
@@ -2286,7 +2294,7 @@ function animateMergeAllDescendants(node, targetPos, anims) {
       anims.push({
         entity: cmdE,
         from: child.cmdHomePosition,
-        to: child.cmdHomePosition,
+        to: targetPos,
         duration: 400,
         fade: "out",
         onComplete: () => { cmdE.show = false; },
@@ -2300,7 +2308,7 @@ function animateMergeAllDescendants(node, targetPos, anims) {
           anims.push({
             entity: se,
             from: child.staffHomePositions[si],
-            to: child.staffHomePositions[si],
+            to: targetPos,
             duration: 400,
             fade: "out",
             onComplete: () => { se.show = false; },
