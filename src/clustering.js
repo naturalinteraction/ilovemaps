@@ -607,25 +607,27 @@ function flattenTree(node, parent) {
     flattenTree(child, node);
   }
 
-  // Compute unit position: centroid of all children + commander + staff
+  // Compute unit position: weighted centroid (each child weighted by its population)
   if (node.children.length > 0) {
-    const pts = [];
+    const pts = []; // { lon, lat, alt, weight }
     for (const child of node.children) {
-      pts.push(child.position);
+      pts.push({ ...child.position, weight: child._population || 1 });
     }
     if (node.commander && node.commander.position) {
-      pts.push(node.commander.position);
+      pts.push({ ...node.commander.position, weight: 1 });
     }
     if (node.staff) {
       for (const s of node.staff) {
-        if (s.position) pts.push(s.position);
+        if (s.position) pts.push({ ...s.position, weight: 1 });
       }
     }
+    const totalWeight = pts.reduce((s, p) => s + p.weight, 0);
     node.position = {
-      lon: pts.reduce((s, p) => s + p.lon, 0) / pts.length,
-      lat: pts.reduce((s, p) => s + p.lat, 0) / pts.length,
-      alt: pts.reduce((s, p) => s + p.alt, 0) / pts.length,
+      lon: pts.reduce((s, p) => s + p.lon * p.weight, 0) / totalWeight,
+      lat: pts.reduce((s, p) => s + p.lat * p.weight, 0) / totalWeight,
+      alt: pts.reduce((s, p) => s + p.alt * p.weight, 0) / totalWeight,
     };
+    node._population = totalWeight;
   } else if (!node.position && node.commander) {
     node.position = node.commander.position;
   }
