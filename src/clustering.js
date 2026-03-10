@@ -368,7 +368,7 @@ export async function loadOtherUnits(viewer) {
         image,
         width: SYMBOL_SIZE,
         height: SYMBOL_SIZE,
-        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        verticalOrigin: Cesium.VerticalOrigin.CENTER,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
       label: {
@@ -377,7 +377,7 @@ export async function loadOtherUnits(viewer) {
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         outlineWidth: 2,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-        pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE + 4)),
+        pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE / 2 + 4)),
         eyeOffset: new Cesium.Cartesian3(0, 0, -50),
         show: false,
       },
@@ -388,7 +388,7 @@ export async function loadOtherUnits(viewer) {
     entity._otherUnitIdentity = unit.identity;
     entity._linkedToId = unit.linkedTo || null;
     entity._geoPosition = { lon: unit.position.lon, lat: unit.position.lat, alt: unit.position.alt };
-    entity._labelPixelOffsetY = -(SYMBOL_SIZE + 4);
+    entity._labelPixelOffsetY = -(SYMBOL_SIZE / 2 + 4);
     estimateLabelSize(entity);
     otherUnitEntities.push(entity);
   }
@@ -476,12 +476,12 @@ let heatmapSwapTimer = null;      // pending swapHeatmaps timeout
 
 // Heatmap adjustable parameters
 let heatmapMinRadius = 8;
-let heatmapMaxRadius = 20;
+let heatmapMaxRadius = 40;
 let heatmapMinAlpha = 0.11;
-let heatmapMaxAlpha = 0.6;
+let heatmapMaxAlpha = 0.85;
 let heatmapGradientMid = 0.3;
 let heatmapGridSize = 32;
-let heatmapBlendMode = "color";
+let heatmapBlendMode = "color-dodge";
 let heatmapHue = 220;
 let heatmapSaturation = 100;
 let heatmapLightness = 50;
@@ -692,7 +692,7 @@ export async function loadMilitaryUnits(viewer) {
         image,
         width: size,
         height: size,
-        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        verticalOrigin: Cesium.VerticalOrigin.CENTER,
         disableDepthTestDistance: 5000,
       },
       label: {
@@ -701,7 +701,7 @@ export async function loadMilitaryUnits(viewer) {
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         outlineWidth: 2,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-        pixelOffset: new Cesium.Cartesian2(0, -(size + 4)),
+        pixelOffset: new Cesium.Cartesian2(0, -(size / 2 + 4)),
         eyeOffset: new Cesium.Cartesian3(0, 0, -50),
         show: false,
 
@@ -710,7 +710,7 @@ export async function loadMilitaryUnits(viewer) {
     });
 
     entity._milNode = node;
-    entity._labelPixelOffsetY = -(size + 4);
+    entity._labelPixelOffsetY = -(size / 2 + 4);
     estimateLabelSize(entity);
     entitiesById[node.id] = entity;
   }
@@ -729,7 +729,7 @@ export async function loadMilitaryUnits(viewer) {
         image: cmdImage,
         width: SYMBOL_SIZE,
         height: SYMBOL_SIZE,
-        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        verticalOrigin: Cesium.VerticalOrigin.CENTER,
         disableDepthTestDistance: 5000,
       },
       label: {
@@ -738,7 +738,7 @@ export async function loadMilitaryUnits(viewer) {
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         outlineWidth: 2,
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-        pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE + 4)),
+        pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE / 2 + 4)),
         eyeOffset: new Cesium.Cartesian3(0, 0, -50),
         show: false,
 
@@ -746,7 +746,7 @@ export async function loadMilitaryUnits(viewer) {
       show: false,
     });
     cmdEntity._milCmdOf = node;
-    cmdEntity._labelPixelOffsetY = -(SYMBOL_SIZE + 4);
+    cmdEntity._labelPixelOffsetY = -(SYMBOL_SIZE / 2 + 4);
     estimateLabelSize(cmdEntity);
     cmdEntitiesById[node.id] = cmdEntity;
 
@@ -761,10 +761,9 @@ export async function loadMilitaryUnits(viewer) {
           position: node.staffHomePositions[si],
           billboard: {
             image: staffImage,
-            // width: 48, height: 48,
             width: SYMBOL_SIZE,
             height: SYMBOL_SIZE,
-            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            verticalOrigin: Cesium.VerticalOrigin.CENTER,
             disableDepthTestDistance: 5000,
           },
           label: {
@@ -774,7 +773,7 @@ export async function loadMilitaryUnits(viewer) {
             outlineWidth: 2,
             fillColor: Cesium.Color.WHITE,
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-            pixelOffset: new Cesium.Cartesian2(0, -52),
+            pixelOffset: new Cesium.Cartesian2(0, -(SYMBOL_SIZE / 2 + 4)),
             eyeOffset: new Cesium.Cartesian3(0, 0, -50),
             show: false,
 
@@ -782,7 +781,7 @@ export async function loadMilitaryUnits(viewer) {
           show: false,
         });
         staffEntity._milStaffOf = node;
-        staffEntity._labelPixelOffsetY = -52;
+        staffEntity._labelPixelOffsetY = -(SYMBOL_SIZE / 2 + 4);
         estimateLabelSize(staffEntity);
         staffEnts.push(staffEntity);
         if (s.id) staffEntityByOwnId[s.id] = staffEntity;
@@ -2878,8 +2877,11 @@ export function setupPreRender(viewer) {
         const sB = scene.cartesianToCanvasCoordinates(posB);
         if (!sA || !sB) continue;
         // Offset endpoints to nearest corner of the unit rectangle
-        const oyA = -(SYMBOL_SIZE - 14) + 14; // other units: ry=14, rh=28, midpoint
-        const oyB = -(SYMBOL_SIZE - 16) + 12; // military units: ry=16, rh=24, midpoint
+        // With CENTER vertical origin, screen pos = canvas center (y=32)
+        // Other: ry=14, rh=28 → midY=28, offset=28-32=-4
+        // Military: ry=16, rh=24 → midY=28, offset=28-32=-4
+        const oyA = -4;
+        const oyB = -4;
         // Horizontal offset to nearest corner (canvas center=32)
         // Other: rx=8, rw=48 → left=8, right=56 → offsets -24/+24
         // Military: rx=10, rw=44 → left=10, right=54 → offsets -22/+22
