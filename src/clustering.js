@@ -461,6 +461,7 @@ let oldHeatmap = null;
 let heatmapLayer = null;          // Cesium.ImageryLayer
 let heatmapCanvas = null;         // offscreen canvas (reused)
 const HEATMAP_CANVAS_SIZE = 1024;
+let heatmapFixedBounds = null;    // fixed lat/lon bounds computed once from all positions
 let heatmapUrlCounter = 0;        // cache-busting counter
 let heatmapSwapTimer = null;      // pending swapHeatmaps timeout
 
@@ -648,6 +649,23 @@ export async function loadMilitaryUnits(viewer) {
   allNodes = [];
   rootNode = tree;
   flattenTree(tree, null);
+
+  // Compute fixed heatmap bounds from ALL positions (individuals + commanders + staff)
+  {
+    let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
+    const addPos = (p) => {
+      if (p.lat < minLat) minLat = p.lat;
+      if (p.lat > maxLat) maxLat = p.lat;
+      if (p.lon < minLon) minLon = p.lon;
+      if (p.lon > maxLon) maxLon = p.lon;
+    };
+    for (const node of allNodes) {
+      if (node.type === "individual") addPos(node.position);
+      if (node.commander && node.commander.position) addPos(node.commander.position);
+      if (node.staff) for (const s of node.staff) if (s.position) addPos(s.position);
+    }
+    heatmapFixedBounds = { minLat, maxLat, minLon, maxLon };
+  }
 
   for (const node of allNodes) {
     const levelIdx = LEVEL_ORDER.indexOf(node.type);
@@ -1683,21 +1701,15 @@ function renderHeatmapCanvas(positions) {
   const ctx = heatmapCanvas.getContext("2d");
   const W = HEATMAP_CANVAS_SIZE;
 
-  // Compute lat/lon bounds with padding
-  let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
-  for (const p of positions) {
-    if (p.lat < minLat) minLat = p.lat;
-    if (p.lat > maxLat) maxLat = p.lat;
-    if (p.lon < minLon) minLon = p.lon;
-    if (p.lon > maxLon) maxLon = p.lon;
-  }
-  const latSpan = maxLat - minLat || 0.01;
-  const lonSpan = maxLon - minLon || 0.01;
+  // Use fixed global bounds so gradients are always the same size
   const pad = 0.15;
-  minLat -= latSpan * pad;
-  maxLat += latSpan * pad;
-  minLon -= lonSpan * pad;
-  maxLon += lonSpan * pad;
+  const b = heatmapFixedBounds;
+  const latSpan = (b.maxLat - b.minLat) || 0.01;
+  const lonSpan = (b.maxLon - b.minLon) || 0.01;
+  const minLat = b.minLat - latSpan * pad;
+  const maxLat = b.maxLat + latSpan * pad;
+  const minLon = b.minLon - lonSpan * pad;
+  const maxLon = b.maxLon + lonSpan * pad;
 
   ctx.clearRect(0, 0, W, W);
   ctx.globalCompositeOperation = heatmapBlendMode;
@@ -1793,21 +1805,15 @@ function updateCesiumHeatmapLayer() {
     return;
   }
 
-  // Compute bounds
-  let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
-  for (const p of positions) {
-    if (p.lat < minLat) minLat = p.lat;
-    if (p.lat > maxLat) maxLat = p.lat;
-    if (p.lon < minLon) minLon = p.lon;
-    if (p.lon > maxLon) maxLon = p.lon;
-  }
-  const latSpan = maxLat - minLat || 0.01;
-  const lonSpan = maxLon - minLon || 0.01;
+  // Use fixed global bounds so the heatmap always covers the same area
+  const b = heatmapFixedBounds;
+  const latSpan = (b.maxLat - b.minLat) || 0.01;
+  const lonSpan = (b.maxLon - b.minLon) || 0.01;
   const pad = 0.15;
-  minLat -= latSpan * pad;
-  maxLat += latSpan * pad;
-  minLon -= lonSpan * pad;
-  maxLon += lonSpan * pad;
+  let minLat = b.minLat - latSpan * pad;
+  let maxLat = b.maxLat + latSpan * pad;
+  let minLon = b.minLon - lonSpan * pad;
+  let maxLon = b.maxLon + lonSpan * pad;
 
   // Render canvas
   renderHeatmapCanvas(positions);
