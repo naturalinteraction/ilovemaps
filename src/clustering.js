@@ -2874,9 +2874,18 @@ export function setupPreRender(viewer) {
         const oxB = (sA.x > sB.x) ? (54 - 32) : (10 - 32); // military corner toward source
         arrowCtx.strokeStyle = "rgba(255, 255, 255, 0.4)";
         arrowCtx.lineWidth = 2;
+        const ax = sA.x + oxA, ay = sA.y + oyA;
+        const bx = sB.x + oxB, by = sB.y + oyB;
+        // Slight arc: control point offset perpendicular to the line
+        const mx = (ax + bx) / 2, my = (ay + by) / 2;
+        const dx = bx - ax, dy = by - ay;
+        const len = Math.sqrt(dx * dx + dy * dy) || 1;
+        const bulge = len * 0.12;
+        const cx = mx + (-dy / len) * bulge;
+        const cy = my + (dx / len) * bulge;
         arrowCtx.beginPath();
-        arrowCtx.moveTo(sA.x + oxA, sA.y + oyA);
-        arrowCtx.lineTo(sB.x + oxB, sB.y + oyB);
+        arrowCtx.moveTo(ax, ay);
+        arrowCtx.quadraticCurveTo(cx, cy, bx, by);
         arrowCtx.stroke();
       }
       // Draw indicator dots on top of arrows and frustum lines
