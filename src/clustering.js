@@ -385,6 +385,8 @@ export async function loadOtherUnits(viewer) {
     entity.show = false;
     entity._isOtherUnit = true;
     entity._otherUnitType = unit.entity;
+    entity._otherUnitIdentity = unit.identity;
+    entity._linkedToId = unit.linkedTo || null;
     entity._labelPixelOffsetY = -(SYMBOL_SIZE + 4);
     estimateLabelSize(entity);
     otherUnitEntities.push(entity);
@@ -420,6 +422,8 @@ const entitiesById = {};
 const cmdEntitiesById = {};
 // Staff entities indexed by node id → [staff1, staff2]
 const staffEntitiesById = {};
+// Staff entities indexed by staff's own id → entity (for link lookups)
+const staffEntityByOwnId = {};
 const HEIGHT_ABOVE_TERRAIN = 2; // meters above terrain surface
 const GEOID_UNDULATION = 0; // terrain heights now from Cesium
 
@@ -492,6 +496,8 @@ export const canvasArrows = [];
 export const canvasFrustumLines = [];
 // Each entry: { position: Cartesian3, color: string, outlineColor: string, pixelSize: number, outlineWidth: number }
 export const canvasDots = [];
+// Link lines between friendly other-units and their linked military entities
+export const canvasLinkLines = [];
 
 // Label declutter constants
 let LABEL_CELL_W = 8;
@@ -774,6 +780,7 @@ export async function loadMilitaryUnits(viewer) {
         staffEntity._labelPixelOffsetY = -52;
         estimateLabelSize(staffEntity);
         staffEnts.push(staffEntity);
+        if (s.id) staffEntityByOwnId[s.id] = staffEntity;
       }
       staffEntitiesById[node.id] = staffEnts;
     }
@@ -2825,6 +2832,28 @@ export function setupPreRender(viewer) {
             prevAbove = above;
           }
         }
+      }
+      // Draw link lines between friendly other-units and their linked military entities
+      for (const otherEnt of otherUnitEntities) {
+        if (!otherEnt.show || !otherEnt._linkedToId || otherEnt._otherUnitIdentity !== "friendly") continue;
+        const linkedId = otherEnt._linkedToId;
+        // Resolve linked entity: check individuals first, then staff
+        const linkedEnt = entitiesById[linkedId] || staffEntityByOwnId[linkedId];
+        if (!linkedEnt || !linkedEnt.show) continue;
+        const posA = otherEnt.position.getValue ? otherEnt.position.getValue(Cesium.JulianDate.now()) : otherEnt.position;
+        const posB = linkedEnt.position.getValue ? linkedEnt.position.getValue(Cesium.JulianDate.now()) : linkedEnt.position;
+        if (!isValid(posA) || !isValid(posB)) continue;
+        const sA = scene.cartesianToCanvasCoordinates(posA);
+        const sB = scene.cartesianToCanvasCoordinates(posB);
+        if (!sA || !sB) continue;
+        arrowCtx.strokeStyle = "rgba(32, 64, 255, 0.6)";
+        arrowCtx.lineWidth = 2;
+        arrowCtx.setLineDash([6, 4]);
+        arrowCtx.beginPath();
+        arrowCtx.moveTo(sA.x, sA.y);
+        arrowCtx.lineTo(sB.x, sB.y);
+        arrowCtx.stroke();
+        arrowCtx.setLineDash([]);
       }
       // Draw indicator dots on top of arrows and frustum lines
       for (let i = 0; i < canvasDots.length; i++) {
