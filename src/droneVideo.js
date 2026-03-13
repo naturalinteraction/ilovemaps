@@ -7,10 +7,23 @@ import { createDSMTerrainProvider } from "./dsmTerrain.js";
 // Hardcoded 6-DOF pose 
 // ---------------------------------------------------------------------------
 
-// Extracted from DJI_0001.MOV via extract_drone_meta.sh (Mavic Pro, FC220-Se)
+// Extracted from DJI_0006.MOV via extract_drone_meta.sh (Mavic Pro, FC220-Se)
 // DJI camera angles converted: heading = camera_yaw normalized to 0..360,
 // pitch = -camera_pitch (DJI negative-down → positive-down),
 // altitude = MSL + ~47m geoid undulation for Florence area
+const DRONE_POSE_DJI_0006 = {
+  lat: 43.84552778,    // degrees
+  lon: 11.26208889,    // degrees
+  alt: 449.0,          // metres above ellipsoid (60m AGL + ~389m ellipsoidal terrain)
+  heading: 183.2,      // degrees, 0 = North, clockwise (camera_yaw 183.2)
+  pitch: 89.9,         // degrees, 0 = horizontal, positive = looking down (camera_pitch was -89.9)
+  roll: 0.0,           // degrees
+  hFovDeg: 71.2,       // horizontal field of view (Mavic Pro 78.8 diag)
+  aspectRatio: 16 / 9, // 3840x2160
+  heightAboveGround: 60.0, // DJI reported altitude above takeoff
+};
+
+// Extracted from DJI_0001.MOV via extract_drone_meta.sh (Mavic Pro, FC220-Se)
 const DRONE_POSE_DJI_0001 = {
   lat: 43.797764,     // degrees
   lon: 11.238763,     // degrees
@@ -92,8 +105,9 @@ const DRONE_POSE_1 = {
 };
 
 const DRONE_FRAMES = [
-  { pose: DRONE_POSE_DJI_0001, url: "/data/DJI_0001_frame.png" },
-  { pose: DRONE_POSE_DJI_0002, url: "/data/DJI_0002_frame.png" },
+  { pose: DRONE_POSE_DJI_0006, url: "/data/DJI_0006_frame.jpg" },
+  //{ pose: DRONE_POSE_DJI_0001, url: "/data/DJI_0001_frame.png" },
+  //{ pose: DRONE_POSE_DJI_0002, url: "/data/DJI_0002_frame.png" },
   //{ pose: DRONE_POSE_1, url: "/data/drone_frame_1b.png" },
   //{ pose: DRONE_POSE_2, url: "/data/drone_frame_2b.png" },
   //{ pose: DRONE_POSE_3, url: "/data/drone_frame_3b.png" },
@@ -277,14 +291,9 @@ export async function setupDroneVideoLayer(viewer) {
   let droneAlpha = 1.0;
   let droneVisible = false; // toggled by 'v' key
 
-  // Load DSM terrain provider (optional — gracefully degrades if missing)
+  // DSM terrain disabled — using default elevation data (Google/Cesium world terrain)
   let dsmTerrain = null;
   let savedTerrainProvider = null;
-  try {
-    dsmTerrain = await createDSMTerrainProvider();
-  } catch (e) {
-    console.warn("DSM terrain not loaded:", e.message);
-  }
 
   // One post-process stage per drone frame, all visible simultaneously
   const droneStates = DRONE_FRAMES.map((frame, i) => {
